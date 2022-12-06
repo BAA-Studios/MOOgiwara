@@ -3,6 +3,13 @@ MOOgiwara is a multiplayer online browser ONE PIECE TCG game simulator, written 
 
 Given how new the ONE PIECE TCG is, there aren't many options for players to train and prepare for tournaments online, and MOOgiwara aims to serve the TCG community in this regard.
 
+## Installation
+1. ``git clone https://github.com/BAA-Studios/MOOgiwara.git``
+2. Change directories to ``./MOOgiwara``
+3. ``npm install``
+4. ``npm run start``
+5. Visit link: http://localhost:8000
+
 ## Tech Stack
 | Software Tool | Target Version |
 | --- | --- |
