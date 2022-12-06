@@ -14,6 +14,6 @@ Insert a brief explanation here
 More technical/specific discussion here
 
 ## Tasks
-- [  ] Lorem Ipsum
-- [  ] Lorem Ipsum
-- [  ] Lorem Ipsum
+- [ ] Lorem Ipsum
+- [ ] Lorem Ipsum
+- [ ] Lorem Ipsum
