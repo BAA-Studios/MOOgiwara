@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import GameBoard from './scenes/game_board'
 
 import MainMenu from './scenes/main_menu'
 
@@ -7,7 +8,11 @@ const game = {
 	width: 1280, // TODO: Figure out how big this game should be
 	height: 720,
 	parent: 'moogiwara',
-	scene: [MainMenu]
+	scene: [
+		MainMenu, 
+		GameBoard
+	]
 }
 
-export default new Phaser.Game(game)
+const scene = new Phaser.Game(game)
+scene.scene.start('game-board')
