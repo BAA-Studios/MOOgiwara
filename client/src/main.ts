@@ -1,18 +1,12 @@
 import Phaser from 'phaser'
 
-import HelloWorldScene from './scenes/HelloWorldScene'
+import MainMenu from './scenes/main_menu'
 
 const config = {
 	type: Phaser.AUTO,
-	width: 800,
-	height: 600,
-	physics: {
-		default: 'arcade',
-		arcade: {
-			gravity: { y: 200 }
-		}
-	},
-	scene: [HelloWorldScene]
+	width: 1280,
+	height: 720,
+	scene: [MainMenu]
 }
 
 export default new Phaser.Game(config)
