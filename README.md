@@ -5,10 +5,14 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 
 ## Installation
 1. ``git clone https://github.com/BAA-Studios/MOOgiwara.git``
-2. Change directories to ``./MOOgiwara``
+2. Change directories to ``./MOOgiwara/client``
 3. ``npm install``
 4. ``npm run start``
 5. Visit link: http://localhost:8000
+
+## Running Server
+1. cd to ``./MOOgiwara/server``
+2. Run command: ``node src/index.js``
 
 ## Tech Stack
 | Software Tool | Target Version |
