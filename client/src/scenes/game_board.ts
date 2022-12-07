@@ -19,7 +19,7 @@ export default class GameBoard extends Phaser.Scene
 
         backButton.setInteractive();
         backButton.on('pointerdown', () => {
-            this.scene.start('hello-world');
+            this.scene.start('main-menu');
         });
 
         // Makes the button turn red when hovered over
