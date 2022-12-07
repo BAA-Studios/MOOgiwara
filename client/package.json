@@ -20,8 +20,9 @@
 	},
 	"homepage": "https://github.com/BAA-Studios/MOOgiwara",
 	"devDependencies": {
-		"gts": "^3.1.1",
+		"gts": "^4.0.0",
 		"typescript": "^4.9.3",
+		"@types/node": "^16.0.0",
 		"vite": "^3.2.5"
 	},
 	"dependencies": {
