@@ -1,32 +1,24 @@
 {
-	"extends": "../node_modules/gts/tsconfig-google.json",
+	"extends": "./node_modules/gts/tsconfig-google.json",
 	"compilerOptions": {
-		"target": "es2016",
+		"target": "es2022",
+		"useDefineForClassFields": true,
 		"module": "es6",
+		"lib": ["ES2022", "DOM", "ScriptHost"],
+		"moduleResolution": "node",
 		"strict": true,
 		"noImplicitAny": false,
 		"noEmit": true,
-		"allowJs": true,
-		"jsx": "preserve",
-		"importHelpers": true,
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
+		"noUnusedLocals": true,
+    	"noUnusedParameters": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
 		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
 		"sourceMap": true,
-		"baseUrl": "client/src",
-		"paths": {
-		  "~/*": ["./*"]
-		},
-		"typeRoots": [
-			"node_modules/@types",
-			"node_module/phaser/types"
-		],
-		"types": [
-			"phaser"
-		]
+		"noImplicitReturns": true,
+    	"skipLibCheck": true,
 	},
 	"include": [
-		"client/src/**/*"
+		"src"
 	]
 }

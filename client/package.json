@@ -1,42 +1,31 @@
 {
-	"name": "MOOgiwara",
-	"version": "1.0.0",
-	"description": "An online ONE PIECE TCG simulator",
-	"scripts": {
-		"lint": "gts lint",
-		"clean": "gts clean",
-		"compile": "tsc",
-		"fix": "gts fix",
-		"start": "parcel src/index.html -p 8000",
-		"build": "parcel build src/index.html --out-dir dist",
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"author": "BAA Studios",
-	"license": "AGPL v3",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/BAA-Studios/MOOgiwara.git"
-	},
-	"homepage": "https://github.com/BAA-Studios/MOOgiwara",
-	"devDependencies": {
-		"@babel/core": "^7.10.5",
-		"@babel/plugin-proposal-class-properties": "^7.10.4",
-		"babel-eslint": "^10.1.0",
-		"eslint": "^6.8.0",
-		"gts": "^3.1.1",
-		"minimist": ">=1.2.2",
-		"parcel-plugin-clean-easy": "^1.0.2",
-		"parcel-plugin-static-files-copy": "^2.4.3",
-		"typescript": "^4.9.3"
-	},
-	"dependencies": {
-		"phaser": "^3.55.2"
-	},
-	"parcelCleanPaths": [
-		"dist"
-	],
-	"staticFiles": {
-		"staticPath": "public",
-		"watcherGlob": "**"
-	}
+  "name": "moogiwara",
+  "private": true,
+  "version": "1.0.0",
+  "description": "An online ONE PIECE TCG simulator",
+  "type": "module",
+  "scripts": {
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "fix": "gts fix",
+    "start": "vite",
+    "build": "tsc && vite build",
+		"preview": "vite preview"
+  },
+  "author": "BAA Studios",
+  "license": "AGPL v3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BAA-Studios/MOOgiwara.git"
+  },
+  "homepage": "https://github.com/BAA-Studios/MOOgiwara",
+  "devDependencies": {
+    "gts": "^4.0.0",
+    "typescript": "^4.9.3",
+    "@types/node": "^16.0.0",
+    "vite": "^3.2.5"
+  },
+  "dependencies": {
+    "phaser": "^3.60.0-beta.15"
+  }
 }

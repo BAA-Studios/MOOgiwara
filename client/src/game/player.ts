@@ -1,21 +1,21 @@
 import Card from "./card";
 
 export default class Player {
-    username: string;
-    hand: Card[];
-    deck: Card[];
-    trash: Card[];
-    field: Card[];
-    donDeck: Card[];
-    lifeCards: Card[];
+  username: string;
+  hand: Card[];
+  deck: Card[];
+  trash: Card[];
+  field: Card[];
+  donDeck: Card[];
+  lifeCards: Card[];
 
-    constructor() {
-        this.username = "Player";
-        this.hand = [];
-        this.deck = [];
-        this.trash = [];
-        this.field = [];
-        this.donDeck = [];
-        this.lifeCards = [];
-    }
+  constructor() {
+    this.username = 'Player';
+    this.hand = [];
+    this.deck = [];
+    this.trash = [];
+    this.field = [];
+    this.donDeck = [];
+    this.lifeCards = [];
+  }
 }
