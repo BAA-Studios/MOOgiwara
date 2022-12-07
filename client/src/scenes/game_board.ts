@@ -7,7 +7,7 @@ export default class GameBoard extends Phaser.Scene
 	}
 
 	preload() {
-        this.load.image('background', './assets/moogiwara_game_board.png');
+        this.load.image('background', './images/moogiwara_game_board.png');
     }
 
     create() {
@@ -51,9 +51,9 @@ export default class GameBoard extends Phaser.Scene
         });
     }
 
-    update(time: number, delta: number): void {
+    // update(time: number, delta: number): void {
         
-    }
+    // }
 
     // Called when the player clicks end turn button
     onEndTurn = () => {

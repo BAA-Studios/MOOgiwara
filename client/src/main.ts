@@ -7,7 +7,7 @@ const game = {
 	type: Phaser.AUTO,
 	width: 1280, // TODO: Figure out how big this game should be
 	height: 720,
-	parent: 'moogiwara',
+	parent: 'MOOgiwara',
 	scene: [
 		MainMenu, 
 		GameBoard
