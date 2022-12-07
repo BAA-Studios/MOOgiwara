@@ -1,24 +1,29 @@
 {
-	"name": "phaser3-parcel-template",
+	"name": "MOOgiwara",
 	"version": "1.0.0",
-	"description": "A template project for Phaser 3 using Parceljs",
+	"description": "An online ONE PIECE TCG simulator",
 	"scripts": {
+		"lint": "gts lint",
+		"clean": "gts clean",
+		"compile": "tsc",
+		"fix": "gts fix",
 		"start": "parcel src/index.html -p 8000",
 		"build": "parcel build src/index.html --out-dir dist",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "supertommy",
-	"license": "MIT",
+	"author": "BAA Studios",
+	"license": "AGPL v3",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/ourcade/phaser3-parcel-template.git"
+		"url": "https://github.com/BAA-Studios/MOOgiwara.git"
 	},
-	"homepage": "https://github.com/ourcade/phaser3-parcel-template",
+	"homepage": "https://github.com/BAA-Studios/MOOgiwara",
 	"devDependencies": {
 		"@babel/core": "^7.10.5",
 		"@babel/plugin-proposal-class-properties": "^7.10.4",
 		"babel-eslint": "^10.1.0",
 		"eslint": "^6.8.0",
+		"gts": "^3.1.1",
 		"minimist": ">=1.2.2",
 		"parcel-plugin-clean-easy": "^1.0.2",
 		"parcel-plugin-static-files-copy": "^2.4.3",
