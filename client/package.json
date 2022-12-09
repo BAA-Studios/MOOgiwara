@@ -10,7 +10,7 @@
     "fix": "gts fix",
     "start": "vite",
     "build": "tsc && vite build",
-		"preview": "vite preview"
+    "preview": "vite preview"
   },
   "author": "BAA Studios",
   "license": "AGPL v3",
@@ -20,12 +20,13 @@
   },
   "homepage": "https://github.com/BAA-Studios/MOOgiwara",
   "devDependencies": {
+    "@types/node": "^16.0.0",
     "gts": "^4.0.0",
     "typescript": "^4.9.3",
-    "@types/node": "^16.0.0",
     "vite": "^3.2.5"
   },
   "dependencies": {
+    "socket.io": "^2.3.0",
     "phaser": "^3.60.0-beta.15"
   }
 }

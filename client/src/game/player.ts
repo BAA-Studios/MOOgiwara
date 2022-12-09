@@ -1,6 +1,7 @@
 import Card from "./card";
 
 export default class Player {
+  client: any
   username: string;
   hand: Card[];
   deck: Card[];

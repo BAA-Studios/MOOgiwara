@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 
 import PlayButton from '../game/menu/buttons/play_button';
 import HollowShortButton from '../game/menu/buttons/hollow_short_button';
+import LoadingButton from '../game/menu/buttons/loading_button';
+import { connectToServer, waitForGame } from '../network/connection';
 
 export default class MainMenu extends Phaser.Scene {
   constructor() {
@@ -12,6 +14,7 @@ export default class MainMenu extends Phaser.Scene {
   preload() {
     this.load.image('tallButton', './buttons/Tall Button.png');
     this.load.image('hollowShortButton', './buttons/Hollow Short Button.png')
+    this.load.image('loading', './images/mugiwara_logo_temp.png')
   }
 
   // TODO: Groupings + dynamic relative coordinate resolution
@@ -47,14 +50,30 @@ export default class MainMenu extends Phaser.Scene {
     );
 
     // Buttons -------------------------------------------------------
-    this.add.existing(new PlayButton(
+    const playButton = new PlayButton(
       this,
       360,
       900,
       () => {
         console.log('Play button clicked!');
-      }
-    ));
+        // TODO: Add Lobby ID option
+
+        // Make the play button show a Loading animation
+        // TODO: While loading, the other buttoons should be disabled (Create Deck, Options)
+        playButton.disableInteractive();
+        // Create a loading button over the original play button to show the loading animation
+        connectToServer();
+        waitForGame();
+        this.add.existing(
+          new LoadingButton(
+            this,
+            360,
+            900
+          )
+        );
+      });
+
+    this.add.existing(playButton);
     
     this.add.existing(new HollowShortButton(
       this,

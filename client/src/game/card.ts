@@ -9,6 +9,7 @@ export default class Card {
   image: string;
   scene: Phaser.Scene;
   owner: Player;
+  is_resting: boolean;
 
   constructor(scene: Phaser.Scene, owner: Player) {
     this.name = 'Luffy';
@@ -17,6 +18,7 @@ export default class Card {
     this.attack = 0;
     this.attribute = 'Strike';
     this.image = 'assets/card.png';
+    this.is_resting = false;
     this.scene = scene;
 
     this.owner = owner;
