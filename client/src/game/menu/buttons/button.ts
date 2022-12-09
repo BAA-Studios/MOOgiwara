@@ -10,6 +10,7 @@ import Phaser, { Scene } from 'phaser';
 export default class Button extends Phaser.GameObjects.Container {
   buttonImage: Phaser.GameObjects.Image;
   buttonText: Phaser.GameObjects.Text;
+  tintColor: number;
 
   constructor(
     scene: Scene,
@@ -18,11 +19,13 @@ export default class Button extends Phaser.GameObjects.Container {
     buttonImageName: string,
     text: string,
     textStyle: any,
-    onClickAction: Function
+    onClickAction: Function,
+    tintColor=0xD4D4D4
   ) {
     super(scene, x, y);
     this.buttonImage = scene.add.image(x, y, buttonImageName);
     this.buttonText = scene.add.text(0, 0, text, textStyle).setOrigin(0.5);
+    this.tintColor = tintColor;
     Phaser.Display.Align.In.Center(this.buttonText, this.buttonImage);
     this.setSize(this.buttonImage.width, this.buttonImage.height);
 
@@ -44,6 +47,6 @@ export default class Button extends Phaser.GameObjects.Container {
   }
 
   enterButtonActiveState() {
-    this.buttonImage.setTint(0xD4D4D4); // slight grey tint, whilst button is held down
+    this.buttonImage.setTint(this.tintColor); // slight grey tint, whilst button is held down
   }
 }

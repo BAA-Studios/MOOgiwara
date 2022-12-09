@@ -1,12 +1,12 @@
 import { Scene } from 'phaser';
 
-import Button from "./button";
+import HollowButton from './hollow_button';
 
 /**
  * Other buttons button for main menu.
  * Please pre-load the desired button image as 'hollowShortButton'.
  */
-export default class HollowShortButton extends Button {
+export default class HollowShortButton extends HollowButton {
     constructor(
         scene: Scene,
         x: number,
