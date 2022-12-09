@@ -12,6 +12,7 @@ const game = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_HORIZONTALLY
   },
+  transparent: true,
   scene: [MainMenu, GameBoard],
 };
 
