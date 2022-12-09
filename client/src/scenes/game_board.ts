@@ -25,6 +25,7 @@ export default class GameBoard extends Phaser.Scene {
 
   preload() {
     this.load.image('background', './images/moogiwara_game_board.png');
+    this.load.html('chatbox', './game/chat/chat.html');
   }
 
   create() {
@@ -32,8 +33,10 @@ export default class GameBoard extends Phaser.Scene {
     // Initialize any UI Here
     this.uiHandler = new UiHandler(this);
     this.uiHandler.initUi();
+
     // Initialize Chat Box Here
     this.chatHandler = new ChatHandler(this);
+    this.chatHandler.initChat();
 
     // Initialize Game Handler Here
     // Start game here

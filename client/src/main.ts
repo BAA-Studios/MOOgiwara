@@ -8,6 +8,9 @@ const game = {
   width: 1920, // TODO: Figure out how big this game should be
   height: 1080,
   parent: 'game-container',
+  dom: {
+    createContainer: true
+  },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_HORIZONTALLY
@@ -18,4 +21,3 @@ const game = {
 
 const scene = new Phaser.Game(game);
 scene.scene.start('main-menu');
-// scene.scene.start('game-board');

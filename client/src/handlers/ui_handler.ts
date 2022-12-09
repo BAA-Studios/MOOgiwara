@@ -26,23 +26,7 @@ export default class UiHandler {
       backButton.setStyle({ fill: '#000000' });
     });
 
-    // Create a button to go back to end turn in the middle of the screen
-    // TODO: Add an actual button image
-    const endTurn = this.scene.add.text(1000, 360, 'End Turn');
-    endTurn.setStyle({ fontSize: '16px', fill: '#000000' });
-
-    endTurn.setInteractive();
-    endTurn.on('pointerdown', this.onEndTurn);
-
-    // Makes the button turn red when hovered over
-    endTurn.on('pointerover', () => {
-      endTurn.setStyle({ fill: '#ff0000' });
-    });
-
-    // Turn the button back to normal color after the mouse leaves
-    endTurn.on('pointerout', () => {
-      endTurn.setStyle({ fill: '#000000' });
-    });
+    // TODO: Create a button to go back to end turn in the middle of the screen
   };
 
   onEndTurn = () => {

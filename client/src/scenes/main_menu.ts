@@ -127,8 +127,4 @@ export default class MainMenu extends Phaser.Scene {
       { fontFamily: 'Georgia', fontSize: '18px', color: '#222' }
     );
   }
-
-  // update(time: number, delta: number): void {
-
-  // }
 }
