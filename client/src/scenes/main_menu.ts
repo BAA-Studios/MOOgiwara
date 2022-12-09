@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import Button from '../game/menu/buttons/button';
+import PlayButton from '../game/menu/buttons/play_button';
 
 export default class MainMenu extends Phaser.Scene {
   constructor() {
@@ -13,13 +13,10 @@ export default class MainMenu extends Phaser.Scene {
   }
 
   create() {
-    this.add.existing(new Button(
+    this.add.existing(new PlayButton(
       this,
-      640,
       360,
-      'tallButton',
-      'PLAY!',
-      { fontFamily: 'Impact', fontSize: '48px', color: '#FFF'},  // https://newdocs.phaser.io/docs/3.55.2/Phaser.Types.GameObjects.Text.TextStyle
+      900,
       () => {
         console.log('Play button clicked!');
       }

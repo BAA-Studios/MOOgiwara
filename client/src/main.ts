@@ -5,9 +5,13 @@ import MainMenu from './scenes/main_menu';
 
 const game = {
   type: Phaser.AUTO,
-  width: 1280, // TODO: Figure out how big this game should be
-  height: 720,
+  width: 1920, // TODO: Figure out how big this game should be
+  height: 1080,
   parent: 'game-container',
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_HORIZONTALLY
+  },
   scene: [MainMenu, GameBoard],
 };
 
