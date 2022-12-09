@@ -62,8 +62,8 @@ export default class MainMenu extends Phaser.Scene {
         // TODO: While loading, the other buttoons should be disabled (Create Deck, Options)
         playButton.disableInteractive();
         // Create a loading button over the original play button to show the loading animation
-        connectToServer();
-        waitForGame();
+        connectToServer(this);
+        waitForGame(this);
         this.add.existing(
           new LoadingButton(
             this,

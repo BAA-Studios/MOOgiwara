@@ -10,8 +10,8 @@ export default class Player {
   donDeck: Card[];
   lifeCards: Card[];
 
-  constructor() {
-    this.username = 'Player';
+  constructor(username: string) {
+    this.username = username;
     this.hand = [];
     this.deck = [];
     this.trash = [];
