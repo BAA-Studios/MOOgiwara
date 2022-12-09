@@ -1,5 +1,7 @@
 import Phaser, { Scene } from 'phaser';
 
+import { defaultActiveTintColor, defaultHoverTintColor } from './default_tints';
+
 /**
  * Generic button class for other buttons to extend
  * Do note that images like the button image need to be pre-loaded in the scene first.
@@ -10,7 +12,8 @@ import Phaser, { Scene } from 'phaser';
 export default class Button extends Phaser.GameObjects.Container {
   buttonImage: Phaser.GameObjects.Image;
   buttonText: Phaser.GameObjects.Text;
-  tintColor: number;
+  activeTintColor: number;
+  hoverTintColor: number;
 
   constructor(
     scene: Scene,
@@ -20,16 +23,21 @@ export default class Button extends Phaser.GameObjects.Container {
     text: string,
     textStyle: any,
     onClickAction: Function,
-    tintColor=0xD4D4D4
+    activeTintColor=defaultActiveTintColor,
+    hoverTintColor=defaultHoverTintColor
   ) {
     super(scene, x, y);
     this.buttonImage = scene.add.image(x, y, buttonImageName);
     this.buttonText = scene.add.text(0, 0, text, textStyle).setOrigin(0.5);
-    this.tintColor = tintColor;
+    this.activeTintColor = activeTintColor;
+    this.hoverTintColor = hoverTintColor;
     Phaser.Display.Align.In.Center(this.buttonText, this.buttonImage);
     this.setSize(this.buttonImage.width, this.buttonImage.height);
 
     this.setInteractive({ useHandCursor: true })
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OVER, () =>
+        this.enterButtonHoverState()
+      )
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () =>
         this.enterButtonRestState()
       )
@@ -37,16 +45,21 @@ export default class Button extends Phaser.GameObjects.Container {
         this.enterButtonActiveState()
       )
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-        this.enterButtonRestState();
+        this.enterButtonHoverState();
         onClickAction();
       });
   }
 
+  enterButtonHoverState() {
+    this.buttonImage.setTint(this.hoverTintColor);
+  }
+
   enterButtonRestState() {
     this.buttonImage.clearTint();
+    this.buttonText.clearTint();
   }
 
   enterButtonActiveState() {
-    this.buttonImage.setTint(this.tintColor); // slight grey tint, whilst button is held down
+    this.buttonImage.setTint(this.activeTintColor); // slight grey tint, whilst button is held down
   }
 }
