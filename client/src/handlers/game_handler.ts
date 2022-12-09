@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import Player from "../game/player";
 
 export default class GameHandler {
@@ -34,33 +35,34 @@ export default class GameHandler {
     this.player = player;
     this.opponent = opponent;
     this.scene = scene;
-
     // Each retangle represents an area on the board, we can use to render cards and other game objects
     // TODO: separate all coordinates to a constant file
-    // this.playerCharacterArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentCharacterArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerCharacterArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.opponentCharacterArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
 
-    // this.playerHandArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentHandArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerHandArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.opponentHandArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
 
-    // this.playerDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.opponentDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
 
-    // this.playerTrashArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentTrashArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerTrashArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.opponentTrashArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
 
-    // this.playerLeaderArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentLeaderArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerLeaderArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.opponentLeaderArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
 
-    // this.playerDonArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentDonArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerDonArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.opponentDonArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
 
-    // this.playerDonDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentDonDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerDonDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.opponentDonDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
 
-    // this.playerLifeArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentLifeArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerLifeArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.opponentLifeArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
   }
 
-  startGame() {}
+  startGame() {
+
+  }
 }

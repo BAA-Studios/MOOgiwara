@@ -9,8 +9,6 @@ export default class GameBoard extends Phaser.Scene {
 
   constructor() {
     super('game-board');
-    this.gameHandler = new GameHandler(this, new Player(), new Player());
-    this.uiHandler = new UiHandler(this);
   }
 
   preload() {
@@ -20,8 +18,10 @@ export default class GameBoard extends Phaser.Scene {
   create() {
     this.add.image(0, 0, 'background').setOrigin(0, 0);
     // Initialize any UI Here
+    this.uiHandler = new UiHandler(this);
     this.uiHandler.initUi();
     // Start game here
+    this.gameHandler = new GameHandler(this, new Player(), new Player());
     this.gameHandler.startGame();
   }
 

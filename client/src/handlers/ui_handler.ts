@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 export default class UiHandler {
   scene: Phaser.Scene;
   constructor(scene: Phaser.Scene) {
