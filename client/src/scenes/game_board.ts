@@ -4,7 +4,6 @@ import GameHandler from '../handlers/game_handler';
 import UiHandler from '../handlers/ui_handler';
 
 export default class GameBoard extends Phaser.Scene {
-
   gameHandler: GameHandler;
   uiHandler: UiHandler;
 

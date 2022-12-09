@@ -12,4 +12,5 @@ const game = {
 };
 
 const scene = new Phaser.Game(game);
-scene.scene.start('game-board');
+scene.scene.start('main-menu');
+// scene.scene.start('game-board');

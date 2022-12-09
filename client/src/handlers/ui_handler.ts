@@ -1,7 +1,7 @@
 export default class UiHandler {
   scene: Phaser.Scene;
   constructor(scene: Phaser.Scene) {
-    this.scene = scene
+    this.scene = scene;
   }
 
   initUi = () => {
@@ -11,17 +11,17 @@ export default class UiHandler {
 
     backButton.setInteractive();
     backButton.on('pointerdown', () => {
-        this.scene.scene.start('main-menu');
+      this.scene.scene.start('main-menu');
     });
 
     // Makes the button turn red when hovered over
     backButton.on('pointerover', () => {
-        backButton.setStyle({ fill: '#ff0000' });
+      backButton.setStyle({ fill: '#ff0000' });
     });
 
     // Turn the button back to normal color after the mouse leaves
     backButton.on('pointerout', () => {
-        backButton.setStyle({ fill: '#000000' });
+      backButton.setStyle({ fill: '#000000' });
     });
 
     // Create a button to go back to end turn in the middle of the screen
@@ -34,17 +34,16 @@ export default class UiHandler {
 
     // Makes the button turn red when hovered over
     endTurn.on('pointerover', () => {
-        endTurn.setStyle({ fill: '#ff0000' });
+      endTurn.setStyle({ fill: '#ff0000' });
     });
 
     // Turn the button back to normal color after the mouse leaves
     endTurn.on('pointerout', () => {
-        endTurn.setStyle({ fill: '#000000' });
+      endTurn.setStyle({ fill: '#000000' });
     });
-  }
-
+  };
 
   onEndTurn = () => {
-    console.log('End this player\'s turn');
-  }
+    console.log("End this player's turn");
+  };
 }
