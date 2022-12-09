@@ -6,7 +6,7 @@ import Button from "./button";
  * Play button for main menu.
  * Please pre-load the desired button image as 'tallButton'.
  */
-export default class PlayButton extends Button {
+export default class LoadingButton extends Button {
     constructor(
         scene: Scene,
         x: number,

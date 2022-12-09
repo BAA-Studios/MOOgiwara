@@ -63,7 +63,6 @@ export default class MainMenu extends Phaser.Scene {
         playButton.disableInteractive();
         // Create a loading button over the original play button to show the loading animation
         connectToServer(this);
-        waitForGame(this);
         this.add.existing(
           new LoadingButton(
             this,
