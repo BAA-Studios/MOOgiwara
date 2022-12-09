@@ -2,10 +2,18 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.2",
+    "shuffle-array": "^1.0.1",
+    "socket.io": "^2.3.0"
   },
   "author": "Brandon P. Nguyen",
   "license": "AGPL 2.0"

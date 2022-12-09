@@ -1,6 +1,7 @@
 import Card from "./card";
 
 export default class Player {
+  client: any
   username: string;
   hand: Card[];
   deck: Card[];
@@ -9,8 +10,8 @@ export default class Player {
   donDeck: Card[];
   lifeCards: Card[];
 
-  constructor() {
-    this.username = 'Player';
+  constructor(username: string) {
+    this.username = username;
     this.hand = [];
     this.deck = [];
     this.trash = [];
