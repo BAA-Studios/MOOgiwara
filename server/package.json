@@ -1,20 +1,30 @@
 {
-  "name": "server",
+  "name": "moogiwara-server",
+  "private": true,
   "version": "1.0.0",
-  "description": "",
-  "type": "commonjs",
-  "main": "index.js",
+  "description": "Backend server that handles game logic",
+  "type": "module",
+  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js"
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "fix": "gts fix",
+    "start": "nodemon src/index.ts"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.14",
+    "@types/node": "^16.0.0",
+    "gts": "^4.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "nodemon": "^2.0.2",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20",
     "shuffle-array": "^1.0.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^4.5.4"
   },
-  "author": "Brandon P. Nguyen",
-  "license": "AGPL 2.0"
+  "author": "BAA Studios",
+  "license": "AGPL v3"
 }
