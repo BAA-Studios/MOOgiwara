@@ -1,6 +1,7 @@
 # MOOgiwara
 
 [![Code Style: Google](https://img.shields.io/badge/code%20style-google-blueviolet.svg)](https://github.com/google/gts)
+![MVP](https://progress-bar.dev/5/?title=Minimum%20Viable%20Product)
 
 MOOgiwara is a multiplayer online browser ONE PIECE TCG game simulator, written in TypeScript, that relies on [`Phaser`](https://github.com/photonstorm/phaser) and `Node.js`.
 
