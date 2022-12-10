@@ -1,7 +1,7 @@
 import Card from "./card";
 
 export default class Player {
-  client: any
+  client: any;
   username: string;
   lobbyId: number;
 

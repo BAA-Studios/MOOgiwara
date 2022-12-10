@@ -3,17 +3,17 @@ const express = require('express')();
 const server = require('http').createServer(express);
 const io = require('socket.io')(server);
 
-var users = [];
-var games = {};
-var lobbyId = 0;
+const users = [];
+const games = {};
+let lobbyId = 0;
 
 io.on('connection', (socket) => {
   console.log('User: ' + socket.id + ' connected');
   users.push(socket.id);
 
   // Check if there is a game with an empty slot
-  var game = null;
-  for (var i = 0; i < lobbyId; i++) {
+  let game = null;
+  for (let i = 0; i < lobbyId; i++) {
     if (!games[i].isFull()) {
       game = games[i];
       break;
@@ -41,7 +41,7 @@ io.on('connection', (socket) => {
   socket.on('chatMessage', (data) => {
     console.log('Chat message received: ' + data.message);
     // Find the lobby that the players are in
-    const game = games[data.lobbyId]
+    const game = games[data.lobbyId];
     // Send both players the message
     game.playerOneClient.emit('chatMessage', { message: data.message });
     game.playerTwoClient.emit('chatMessage', { message: data.message });

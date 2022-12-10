@@ -23,8 +23,8 @@ export default class Button extends Phaser.GameObjects.Container {
     text: string,
     textStyle: any,
     onClickAction: Function,
-    activeTintColor=defaultActiveTintColor,
-    hoverTintColor=defaultHoverTintColor
+    activeTintColor = defaultActiveTintColor,
+    hoverTintColor = defaultHoverTintColor
   ) {
     super(scene, x, y);
     this.buttonImage = scene.add.image(x, y, buttonImageName);

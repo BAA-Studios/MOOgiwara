@@ -8,11 +8,11 @@ const app: Express = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    "origin": "*",
-    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "preflightContinue": false,
-    "optionsSuccessStatus": 204
-  }
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  },
 });
 
 const users: string[] = [];
@@ -24,10 +24,10 @@ const games: Game[] = [];
  * @returns     Number, representing lobby ID
  */
 function getUnusedLobbyId(games: Game[]): number {
-  let listOfIds: number[] = games.map(element => element.lobbyId);
+  const listOfIds: number[] = games.map((element) => element.lobbyId);
   listOfIds.sort();
   let counter = 0;
-  for (var i = 0; i <= listOfIds[-1]; i++) {
+  for (let i = 0; i <= listOfIds[-1]; i++) {
     if (counter < listOfIds[i]) {
       return counter;
     }
@@ -44,7 +44,7 @@ function getUnusedLobbyId(games: Game[]): number {
 function findOpenGame(games: Game[]): Game | null {
   for (const game of games) {
     if (!game.isFull()) {
-      return game;  // Short-circuit if found
+      return game; // Short-circuit if found
     }
   }
   return null;
@@ -54,8 +54,8 @@ function findOpenGame(games: Game[]): Game | null {
  * Creates a new game, and adds it to the global list of games
  */
 function createNewGame(): Game {
-  let newId = getUnusedLobbyId(games);
-  let newGame = new Game(newId);
+  const newId = getUnusedLobbyId(games);
+  const newGame = new Game(newId);
   games.push(newGame);
   return newGame;
 }
@@ -66,7 +66,7 @@ function createNewGame(): Game {
  * @returns Game instance with one open player slot
  */
 function findMatch(): Game {
-  let openGame = findOpenGame(games);
+  const openGame = findOpenGame(games);
   return !openGame ? createNewGame() : openGame;
 }
 
@@ -74,7 +74,7 @@ io.on('connection', (socket: Socket) => {
   console.log('User: ' + socket.id + ' connected');
   users.push(socket.id);
 
-  let game = findMatch();
+  const game = findMatch();
   console.log('[LOG] USER: ' + socket.id + ' joined game: ' + game.lobbyId);
   game.push(socket);
   if (game.isFull()) {

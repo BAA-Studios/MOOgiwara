@@ -9,11 +9,11 @@ const game = {
   height: 1080,
   parent: 'game-container',
   dom: {
-    createContainer: true
+    createContainer: true,
   },
   scale: {
     mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_HORIZONTALLY
+    autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
   },
   transparent: true,
   scene: [MainMenu, GameBoard],

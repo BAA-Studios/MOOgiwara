@@ -42,7 +42,12 @@ export default class GameBoard extends Phaser.Scene {
 
     // Initialize Game Handler Here
     // Start game here
-    this.gameHandler = new GameHandler(this, this.player, this.opponent, this.client);
+    this.gameHandler = new GameHandler(
+      this,
+      this.player,
+      this.opponent,
+      this.client
+    );
     this.gameHandler.startGame();
   }
 }

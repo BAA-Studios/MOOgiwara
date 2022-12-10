@@ -32,7 +32,12 @@ export default class GameHandler {
   playerDonDeckArea: Phaser.GameObjects.Rectangle;
   opponentDonDeckArea: Phaser.GameObjects.Rectangle;
 
-  constructor(scene: Phaser.Scene, player: Player, opponent: Player, client: any) {
+  constructor(
+    scene: Phaser.Scene,
+    player: Player,
+    opponent: Player,
+    client: any
+  ) {
     this.player = player;
     this.opponent = opponent;
     this.scene = scene;
@@ -64,7 +69,5 @@ export default class GameHandler {
     // this.opponentLifeArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
   }
 
-  startGame() {
-
-  }
+  startGame() {}
 }
