@@ -11,6 +11,7 @@ export default class GameBoard extends Phaser.Scene {
   opponent: Player;
   chatHandler: ChatHandler;
   client: any; // socket.io, putting 'any' because the defining the type throw errors
+  lobbyId: number;
 
   constructor() {
     super('game-board');
@@ -21,11 +22,12 @@ export default class GameBoard extends Phaser.Scene {
     this.player = data.player;
     this.opponent = data.opponent;
     this.client = data.client;
+    this.lobbyId = this.player.lobbyId;
   }
 
   preload() {
     this.load.image('background', './images/moogiwara_game_board.png');
-    this.load.html('chatbox', './game/chat/chat.html');
+    this.load.html('chatbox', './src/game/chat/chat.html');
   }
 
   create() {
