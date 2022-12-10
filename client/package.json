@@ -26,7 +26,7 @@
     "vite": "^3.2.5"
   },
   "dependencies": {
-    "socket.io": "^2.3.0",
+    "socket.io-client": "^4.5.4",
     "phaser": "^3.60.0-beta.15"
   }
 }

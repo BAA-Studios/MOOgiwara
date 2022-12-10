@@ -6,7 +6,14 @@ import Game from './game/game';
 
 const app: Express = express();
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    "origin": "*",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+  }
+});
 
 const users: string[] = [];
 const games: Game[] = [];
