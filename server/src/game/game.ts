@@ -1,18 +1,28 @@
 import { Socket } from 'socket.io';
 
 export default class Game {
-  lobbyId: number;
   playerOneClient: Socket | undefined;
   playerTwoClient: Socket | undefined;
 
-  constructor(lobbyId: number, playerOne?: Socket, playerTwo?: Socket) {
-    this.lobbyId = lobbyId;
+  constructor(playerOne?: Socket, playerTwo?: Socket) {
     this.playerOneClient = playerOne;
     this.playerTwoClient = playerTwo;
   }
 
   isFull() {
     return this.playerOneClient && this.playerTwoClient;
+  }
+
+  isEmpty() {
+    if (!this.playerTwoClient) {
+      return this.playerOneClient?.disconnected
+    }
+    return this.playerOneClient?.disconnected && this.playerTwoClient?.disconnected;
+  }
+
+  clearPlayers() {
+    this.playerOneClient = undefined;
+    this.playerTwoClient = undefined;
   }
 
   push(client: Socket) {

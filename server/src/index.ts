@@ -17,35 +17,20 @@ const io = new Server(server, {
 
 const PORT: number = 3000;
 const users: string[] = [];
-const games: Game[] = [];
-
-/**
- * This function returns the smallest available lobby ID that is not in use
- * @param games Array of Game objects
- * @returns     Number, representing lobby ID
- */
-function getUnusedLobbyId(games: Game[]): number {
-  const listOfIds: number[] = games.map((element) => element.lobbyId);
-  listOfIds.sort();
-  let counter = 0;
-  for (let i = 0; i <= listOfIds[-1]; i++) {
-    if (counter < listOfIds[i]) {
-      return counter;
-    }
-    counter++;
-  }
-  return counter;
-}
+const games = new Map<string, Game>();
 
 /**
  * Find a game that has an open player slot
  * @param games list of open games
- * @returns     Game instance, if a match has been found; else null
+ * @returns     Lobby ID of game instance, if a match has been found; else null
  */
-function findOpenGame(games: Game[]): Game | null {
-  for (const game of games) {
+function findOpenGame(games: Map<string, Game>): string | null {
+  console.log("LOOKING FOR OPEN GAMES")
+  for (let [lobbyId, game] of games) {
+    console.log('ID: ' + lobbyId)
     if (!game.isFull()) {
-      return game; // Short-circuit if found
+      console.log("FOUND!")
+      return lobbyId; // Short-circuit if found
     }
   }
   return null;
@@ -54,49 +39,54 @@ function findOpenGame(games: Game[]): Game | null {
 /**
  * Creates a new game, and adds it to the global list of games
  */
-function createNewGame(): Game {
-  const newId = getUnusedLobbyId(games);
-  const newGame = new Game(newId);
-  games.push(newGame);
-  return newGame;
+function createNewGame(socketId: string): void {
+  let newGame = new Game();
+  games.set(socketId, newGame);
 }
 
 /**
  * Returns the first game in the global list with an open player slot.
  * If all games are filled, create a new Game instance.
- * @returns Game instance with one open player slot
+ * @returns Lobby ID of game instance with one open player slot
  */
-function findMatch(): Game {
-  const openGame = findOpenGame(games);
-  return !openGame ? createNewGame() : openGame;
+function findMatch(socketId: string): string {
+  let openGame = findOpenGame(games);
+  if (!openGame) {
+    createNewGame(socketId);
+    return socketId;
+  }
+  return openGame;
 }
 
 io.on('connection', (socket: Socket) => {
   console.log('User: ' + socket.id + ' connected');
-  users.push(socket.id);
+  users.push(socket.id);  // TODO: Remove on disconnect - might need to use Set instead of Array?
 
-  const game = findMatch();
-  console.log('[LOG] USER: ' + socket.id + ' joined game: ' + game.lobbyId);
-  game.push(socket);
-  if (game.isFull()) {
+  let userId = socket.id;  // temporary - to convert this to database PK if not guest
+  let lobbyId = findMatch(socket.id);
+  let game = games.get(lobbyId);
+  console.log('[LOG] USER: ' + socket.id + ' joined game: ' + lobbyId);
+  game?.push(socket);
+  if (game?.isFull()) {
     // Start the game
-    game.playerOneClient?.emit('start', { lobbyId: game.lobbyId });
-    game.playerTwoClient?.emit('start', { lobbyId: game.lobbyId });
-    console.log("[LOG] Game started: " + game.lobbyId);
+    game.playerOneClient?.emit('start', { lobbyId: lobbyId });
+    game.playerTwoClient?.emit('start', { lobbyId: lobbyId });
+    console.log("[LOG] Game started: " + lobbyId);
   }
 
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    console.log('User ' + userId + ' disconnected');
+    if (game?.isEmpty()) {
+      game?.clearPlayers();
+      console.log("Game instance cleared: " + games.delete(lobbyId));
+    }
   });
 
   socket.on('chatMessage', (data) => {
     console.log('Chat message received: ' + data.message);
     // Find the lobby that the players are in
-    const game = games.find((element) => element.lobbyId == data.lobbyId);
+    let game = games.get(data.lobbyId);
     // Send both players the message
-    console.log("Chat message received from game with id: " + String(data.lobbyId));
-    let gameID = game != undefined ? game?.lobbyId : -1;
-    console.log("Matched with game with ID: " + String(gameID) + " with players: ");
     console.log(game?.playerOneClient?.id);
     console.log(game?.playerTwoClient?.id);
     console.log("Socket ID: " + socket.id);

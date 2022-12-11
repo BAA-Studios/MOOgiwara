@@ -3,6 +3,7 @@ import Player from '../game/player';
 import GameHandler from '../handlers/game_handler';
 import UiHandler from '../handlers/ui_handler';
 import ChatHandler from '../handlers/chat_handler';
+import { Socket } from 'socket.io-client';
 
 export default class GameBoard extends Phaser.Scene {
   gameHandler: GameHandler;
@@ -33,7 +34,7 @@ export default class GameBoard extends Phaser.Scene {
     this.add.image(0, 0, 'background').setOrigin(0, 0);
     // Initialize any UI Here
     this.uiHandler = new UiHandler(this);
-    this.uiHandler.initUi();
+    this.uiHandler.initUi(this.client.disconnect);
 
     // Initialize Chat Handler Here
     this.chatHandler = new ChatHandler(this);

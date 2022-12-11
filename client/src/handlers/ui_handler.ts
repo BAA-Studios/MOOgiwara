@@ -6,13 +6,14 @@ export default class UiHandler {
     this.scene = scene;
   }
 
-  initUi = () => {
+  initUi = (backButtonAction: Function) => {
     // Create a button to go back to the main menu
     const backButton = this.scene.add.text(0, 0, 'Back');
     backButton.setStyle({ fontSize: '16px', fill: '#000000' });
 
     backButton.setInteractive();
     backButton.on('pointerdown', () => {
+      backButtonAction();
       this.scene.scene.start('main-menu');
     });
 
