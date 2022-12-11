@@ -94,6 +94,12 @@ io.on('connection', (socket: Socket) => {
     // Find the lobby that the players are in
     const game = games.find((element) => element.lobbyId == data.lobbyId);
     // Send both players the message
+    console.log("Chat message received from game with id: " + String(data.lobbyId));
+    let gameID = game != undefined ? game?.lobbyId : -1;
+    console.log("Matched with game with ID: " + String(gameID) + " with players: ");
+    console.log(game?.playerOneClient?.id);
+    console.log(game?.playerTwoClient?.id);
+    console.log("Socket ID: " + socket.id);
     game?.playerOneClient?.emit('chatMessage', { message: data.message });
     game?.playerTwoClient?.emit('chatMessage', { message: data.message });
   });
