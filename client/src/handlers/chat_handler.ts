@@ -14,9 +14,9 @@ export default class ChatHandler {
       .dom(1196, 690)
       .createFromCache('chatbox')
       .setOrigin(0.5);
-    this.chat = this.scene.add.text(1000, 10, '', {
+    this.chat = this.scene.add.text(1500, 100, '', {
       lineSpacing: 15,
-      backgroundColor: '#D3D3D3',
+      backgroundColor: '#FFFFFF',
       color: '#000000',
       padding: 10,
       fontStyle: 'bold',

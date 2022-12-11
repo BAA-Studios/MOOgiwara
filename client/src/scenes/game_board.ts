@@ -26,7 +26,7 @@ export default class GameBoard extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('background', './images/moogiwara_game_board.png');
+    this.load.image('background', './images/game_board.png');
     this.load.html('chatbox', './src/game/chat/chat.html');
   }
 
