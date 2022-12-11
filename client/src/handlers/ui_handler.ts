@@ -1,19 +1,19 @@
-import Phaser from 'phaser';
+import GameBoard from "../scenes/game_board";
 
 export default class UiHandler {
-  scene: Phaser.Scene;
-  constructor(scene: Phaser.Scene) {
+  scene: GameBoard;
+  constructor(scene: GameBoard) {
     this.scene = scene;
   }
 
-  initUi = (backButtonAction: Function) => {
+  initUi = () => {
     // Create a button to go back to the main menu
     const backButton = this.scene.add.text(0, 0, 'Back');
     backButton.setStyle({ fontSize: '16px', fill: '#000000' });
 
     backButton.setInteractive();
     backButton.on('pointerdown', () => {
-      backButtonAction();
+      this.scene.client.disconnect();
       this.scene.scene.start('main-menu');
     });
 

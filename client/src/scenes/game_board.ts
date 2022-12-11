@@ -11,7 +11,7 @@ export default class GameBoard extends Phaser.Scene {
   player: Player;
   opponent: Player;
   chatHandler: ChatHandler;
-  client: any; // socket.io, putting 'any' because the defining the type throw errors
+  client: Socket;
   lobbyId: number;
 
   constructor() {
@@ -34,7 +34,7 @@ export default class GameBoard extends Phaser.Scene {
     this.add.image(0, 0, 'background').setOrigin(0, 0);
     // Initialize any UI Here
     this.uiHandler = new UiHandler(this);
-    this.uiHandler.initUi(this.client.disconnect);
+    this.uiHandler.initUi();
 
     // Initialize Chat Handler Here
     this.chatHandler = new ChatHandler(this);
