@@ -11,26 +11,35 @@ export default class ChatHandler {
     this.scene = scene;
     this.messages = [];
     this.textInput = this.scene.add
-      .dom(1196, 690)
-      .createFromCache('chatbox')
-      .setOrigin(0.5);
-    this.chat = this.scene.add.text(1500, 100, '', {
+      .dom(1500, 100)
+      .createFromCache('chatbox');
+    this.chat = this.scene.add.text(1441, 110, '', {
       lineSpacing: 15,
       backgroundColor: '#FFFFFF',
       color: '#000000',
       padding: 10,
       fontStyle: 'bold',
     });
-    this.chat.setFixedSize(270, 645);
+    this.chat.setFixedSize(400, 750);
   }
 
   initChat = () => {
     this.enterKey = this.scene.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.ENTER
     );
+
     this.enterKey.on('down', (event) => {
       this.onEnterMessage();
     });
+
+    // If they click outside of the input box, then we want to unfocus the input box
+    this.scene.input.on('pointerdown', (event) => {
+      if (event.target !== 'chat') {
+        let el = (<HTMLInputElement>document.getElementById('chat'));
+        el.blur();
+      }
+    });
+
     this.scene.client.on('chatMessage', (data: any) => {
       this.messages.push(data.message);
       this.chat.setText(this.messages.join('\n'));
@@ -40,6 +49,9 @@ export default class ChatHandler {
   onEnterMessage = () => {
     const chatbox = this.textInput.getChildByName("chat");
     if (chatbox === null) {
+      return;
+    }
+    if (chatbox.value === "") {
       return;
     }
     const message = chatbox.value;

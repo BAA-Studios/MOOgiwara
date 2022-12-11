@@ -18,7 +18,6 @@ export default class GameBoard extends Phaser.Scene {
   }
 
   init(data: any) {
-    console.log(data);
     this.player = data.player;
     this.opponent = data.opponent;
     this.client = data.client;
@@ -36,7 +35,7 @@ export default class GameBoard extends Phaser.Scene {
     this.uiHandler = new UiHandler(this);
     this.uiHandler.initUi();
 
-    // Initialize Chat Box Here
+    // Initialize Chat Handler Here
     this.chatHandler = new ChatHandler(this);
     this.chatHandler.initChat();
 
