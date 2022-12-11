@@ -15,6 +15,7 @@ const io = new Server(server, {
   },
 });
 
+const PORT: number = 3000;
 const users: string[] = [];
 const games: Game[] = [];
 
@@ -98,6 +99,6 @@ io.on('connection', (socket: Socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log('Server is now listening on port: 3000');
+server.listen(PORT, () => {
+  console.log('Server is now listening on port: ' + PORT);
 });
