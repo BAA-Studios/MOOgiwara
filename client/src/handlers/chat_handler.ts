@@ -11,7 +11,7 @@ export default class ChatHandler {
     this.scene = scene;
     this.messages = [];
     this.textInput = this.scene.add
-      .dom(1500, 100)
+      .dom(1690, 922)
       .createFromCache('chatbox');
     this.chat = this.scene.add.text(1441, 110, '', {
       lineSpacing: 15,

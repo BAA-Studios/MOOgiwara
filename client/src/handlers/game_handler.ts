@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
+import { Socket } from 'socket.io-client';
 import Player from "../game/player";
 
 export default class GameHandler {
   player: Player;
   opponent: Player;
-  client: any; // socket.io, putting 'any' because the defining the type throw errors
+  client: Socket;
 
   scene: Phaser.Scene;
 

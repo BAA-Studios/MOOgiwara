@@ -15,6 +15,7 @@ export function connectToServer(scene: Phaser.Scene) {
 // The server sends a packet to the client to match the client with another player
 export function waitForGame(scene: Phaser.Scene, io: any) {
   io.on('start', (data) => {
+    // TODO: Initialise the player's and opponent's decks given from the server
     const player = new Player('test', data.lobbyId);
     const opponent = new Player('opponent', data.lobbyId);
     scene.scene.start('game-board', {
