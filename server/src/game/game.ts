@@ -47,6 +47,11 @@ export default class Game {
     });
   }
 
+  broadcastPacket(header:string, data: any) {
+    this.playerOne?.client.emit(header, data);
+    this.playerTwo?.client.emit(header, data);
+  }
+
   getPlayer(index: number) {
     return index === 1 ? this.playerOne : this.playerTwo;
   }

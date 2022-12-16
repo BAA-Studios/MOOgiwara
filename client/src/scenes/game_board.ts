@@ -28,14 +28,12 @@ export default class GameBoard extends Phaser.Scene {
     this.lobbyId = this.player.lobbyId;
     this.deckList = data.deckList;
     this.opponentDeckList = data.opponentDeckList;
+    this.player.client = this.client;
   }
 
   preload() {
     this.load.image('background', './images/game_board.png');
     this.load.html('chatbox', './src/game/chat/chat.html');
-    this.load.image('rock', './images/rock.png');
-    this.load.image('scissors', './images/scissors.png');
-    this.load.image('paper', './images/paper.jpg');
 
     let cardsToRender = new Set(this.deckList);
     let opponentCardsToRender = new Set(this.opponentDeckList);
@@ -56,14 +54,9 @@ export default class GameBoard extends Phaser.Scene {
     this.add.image(0, 0, 'background').setOrigin(0, 0);
 
     // Create a translucent gray background
-    let positionIndex = 0;
     for (let cardId of this.deckList) {
       // Set config of each card here
-      let card = this.add.existing(new Card(this.player, this, cardId))
-        .setOrigin(0, 0)
-        .setScale(0.25)
-        .setPosition(100 * positionIndex, 0);
-      
+      let card = new Card(this.player, this, cardId).setOrigin(0, 0).setScale(0.25);
       card.setInteractive();
       this.input.setDraggable(card);
 
@@ -94,11 +87,10 @@ export default class GameBoard extends Phaser.Scene {
         // TODO: Add logic to check if card is being dragged over a valid zone
       });
 
-      card.indexInHand = positionIndex;
-      this.player.addToHand(card);
-      positionIndex++;
+      this.player.addTopOfDeck(card);
       // TODO: Initialize opponent's cards here
     }
+    this.player.shuffleDeck();
     // Initialize any UI Here
     this.uiHandler = new UiHandler(this);
     this.uiHandler.initUi();
@@ -109,6 +101,7 @@ export default class GameBoard extends Phaser.Scene {
 
     // Initialize Game Handler Here
     // Start game here
+
     this.gameHandler = new GameHandler(
       this,
       this.player,
@@ -116,7 +109,13 @@ export default class GameBoard extends Phaser.Scene {
       this.client
     );
 
+    this.player.drawCard(3, this);
+
     this.client.emit("boardFullyLoaded" , { lobbyId: this.lobbyId });
+
+    this.client.on('changeTurn', (data: any) => {
+      this.gameHandler.changeTurn(data);
+    });
 
     this.gameHandler.startGame();
   }

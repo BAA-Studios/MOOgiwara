@@ -2,12 +2,20 @@ import Phaser from 'phaser';
 import { Socket } from 'socket.io-client';
 import Player from "../game/player";
 
+enum PlayerState {
+  OPPONENTS_TURN,
+  MAIN_PHASE,
+  COUNTER_PHASE,
+  DON_PHASE,
+  DRAW_PHASE,
+}
+
 export default class GameHandler {
   player: Player;
   opponent: Player;
   client: Socket;
 
-  myTurn: boolean = false;
+  playerState: PlayerState = PlayerState.OPPONENTS_TURN;
 
   scene: Phaser.Scene;
 
@@ -17,7 +25,7 @@ export default class GameHandler {
   playerHandArea: Phaser.GameObjects.Container;
   opponentHandArea: Phaser.GameObjects.Container;
 
-  playerDeckArea: Phaser.GameObjects.Rectangle;
+  playerDeckArea: Phaser.GameObjects.Container;
   opponentDeckArea: Phaser.GameObjects.Rectangle;
 
   playerTrashArea: Phaser.GameObjects.Rectangle;
@@ -53,7 +61,7 @@ export default class GameHandler {
     this.playerHandArea = this.scene.add.container(576, 996).setInteractive();
     this.opponentHandArea = this.scene.add.container(576, 89);
 
-    // this.playerDeckArea = this.scene.add.container();
+    this.playerDeckArea = this.scene.add.container(1255, 703);
     // this.opponentDeckArea = this.scene.add.container();
 
     // this.playerTrashArea = this.scene.add.container();
@@ -71,11 +79,17 @@ export default class GameHandler {
     // this.playerLifeArea = this.scene.add.container();
     // this.opponentLifeArea = this.scene.add.container();
 
-    this.playerHandArea.add(this.player.hand)
-    // this.opponentHandArea.add(this.opponent.hand)
   }
 
   startGame() {
 
+  }
+
+  changeTurn(data: any) {
+    if (data.personToChangeTurnTo === this.player.getUniqueId()) {
+      this.playerState = PlayerState.MAIN_PHASE;
+    } else {
+      this.playerState = PlayerState.OPPONENTS_TURN;
+    }
   }
 }

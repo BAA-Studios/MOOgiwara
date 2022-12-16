@@ -128,8 +128,10 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('boardFullyLoaded', () => {
     player.boardReady = true;
+    let personWhoGoesFirst = game?.getPlayer(game.whoseTurn)?.client.id;
     if (game?.bothPlayersReady()) {
-      game?.broadcastChat("Server: Game started! \nPlayer " + game.getPlayer(game.whoseTurn)?.client.id + " goes first.");
+      game?.broadcastChat("Server: Game started! \nPlayer " + personWhoGoesFirst + " goes first.");
+      game?.broadcastPacket('changeTurn', { personToChangeTurnTo: personWhoGoesFirst });
     }
   });
 
