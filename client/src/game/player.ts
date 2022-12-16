@@ -22,4 +22,31 @@ export default class Player {
     this.lifeCards = [];
     this.lobbyId = lobbyId;
   }
+
+  addDeck(deck: Card[]) {
+    this.deck = deck;
+  }
+
+  addTopOfDeck(card: Card) {
+    this.deck.push(card);
+  }
+
+  addBottomOfDeck(card: Card) {
+    this.deck.unshift(card);
+  }
+
+  addHand(card: Card) {
+    this.hand.push(card);
+  }
+
+  addTrash(card: Card) {
+    this.trash.push(card);
+  }
+
+  drawCard() {
+    const card = this.deck.pop();
+    if (!card) return;
+    this.addHand(card);
+    return card;
+  }
 }

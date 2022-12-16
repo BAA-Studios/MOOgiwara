@@ -9,11 +9,11 @@ export default class GameHandler {
 
   scene: Phaser.Scene;
 
-  playerCharacterArea: Phaser.GameObjects.Rectangle;
-  opponentCharacterArea: Phaser.GameObjects.Rectangle;
+  playerCharacterArea: Phaser.GameObjects.Container;
+  opponentCharacterArea: Phaser.GameObjects.Container;
 
-  playerHandArea: Phaser.GameObjects.Rectangle;
-  opponentHandArea: Phaser.GameObjects.Rectangle;
+  playerHandArea: Phaser.GameObjects.Container;
+  opponentHandArea: Phaser.GameObjects.Container;
 
   playerDeckArea: Phaser.GameObjects.Rectangle;
   opponentDeckArea: Phaser.GameObjects.Rectangle;
@@ -43,32 +43,36 @@ export default class GameHandler {
     this.opponent = opponent;
     this.scene = scene;
     this.client = client;
-    // Each retangle represents an area on the board, we can use to render cards and other game objects
+    // Each container represents an area on the board, we can use to render cards and other game objects
     // TODO: separate all coordinates to a constant file
-    // this.playerCharacterArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentCharacterArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerCharacterArea = this.scene.add.container(720, 555);
+    this.opponentCharacterArea = this.scene.add.container(720, 400);
 
-    // this.playerHandArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentHandArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    this.playerHandArea = this.scene.add.container(576, 996).setInteractive();
+    this.opponentHandArea = this.scene.add.container(576, 89);
 
-    // this.playerDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    // this.playerDeckArea = this.scene.add.container();
+    // this.opponentDeckArea = this.scene.add.container();
 
-    // this.playerTrashArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentTrashArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    // this.playerTrashArea = this.scene.add.container();
+    // this.opponentTrashArea = this.scene.add.container();
 
-    // this.playerLeaderArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentLeaderArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    // this.playerLeaderArea = this.scene.add.container();
+    // this.opponentLeaderArea = this.scene.add.container();
 
-    // this.playerDonArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentDonArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    // this.playerDonArea = this.scene.add.container();
+    // this.opponentDonArea = this.scene.add.container();
 
-    // this.playerDonDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentDonDeckArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    // this.playerDonDeckArea = this.scene.add.container();
+    // this.opponentDonDeckArea = this.scene.add.container();
 
-    // this.playerLifeArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
-    // this.opponentLifeArea = this.scene.add.rectangle(0, 0, 0, 0, 0x000000);
+    // this.playerLifeArea = this.scene.add.container();
+    // this.opponentLifeArea = this.scene.add.container();
+
+    this.playerHandArea.add(this.player.hand)
   }
 
-  startGame() {}
+  startGame() {
+
+  }
 }
