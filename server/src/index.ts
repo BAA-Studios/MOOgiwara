@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import { createServer } from 'http';
 import { Socket, Server } from 'socket.io';
+import Player from './game/player';
 
 import Game from './game/game';
 
@@ -66,13 +67,71 @@ io.on('connection', (socket: Socket) => {
   let lobbyId = findMatch(socket.id);
   let game = games.get(lobbyId);
   console.log('[LOG] USER: ' + socket.id + ' joined game: ' + lobbyId);
-  game?.push(socket);
+  let player = new Player(socket, userId, lobbyId);
+  game?.push(player);
   if (game?.isFull()) {
     // Start the game
-    game.playerOneClient?.emit('start', { lobbyId: lobbyId });
-    game.playerTwoClient?.emit('start', { lobbyId: lobbyId });
+    let playerWhoStartsFirst = Math.floor(Math.random() * 2) + 1;
+    game.whoseTurn = playerWhoStartsFirst;
+    game.playerOne?.client.emit('start', {
+      lobbyId: lobbyId,
+      deckList: [
+        "OP01-077_p1",
+        "OP01-076",
+        "OP01-075",
+        "OP01-074",
+        "OP01-073",
+        "OP01-072",
+        "OP01-071",
+        "OP01-070",
+        "OP01-069",
+      ],
+      opponentDeckList: [
+        "OP01-077_p1",
+        "OP01-076",
+        "OP01-075",
+        "OP01-074",
+        "OP01-073",
+        "OP01-072",
+        "OP01-071",
+        "OP01-070",
+        "OP01-069",
+      ]
+    });
+    game.playerTwo?.client.emit('start', { 
+      lobbyId: lobbyId,
+      deckList: [
+        "OP01-077_p1",
+        "OP01-076",
+        "OP01-075",
+        "OP01-074",
+        "OP01-073",
+        "OP01-072",
+        "OP01-071",
+        "OP01-070",
+        "OP01-069",
+      ],
+      opponentDeckList: [
+        "OP01-077_p1",
+        "OP01-076",
+        "OP01-075",
+        "OP01-074",
+        "OP01-073",
+        "OP01-072",
+        "OP01-071",
+        "OP01-070",
+        "OP01-069",
+      ]
+    });
     console.log("[LOG] Game started: " + lobbyId);
   }
+
+  socket.on('boardFullyLoaded', () => {
+    player.boardReady = true;
+    if (game?.bothPlayersReady()) {
+      game?.broadcastChat("Server: Game started! \nPlayer " + game.getPlayer(game.whoseTurn)?.client.id + " goes first.");
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log('User ' + userId + ' disconnected');
@@ -87,11 +146,10 @@ io.on('connection', (socket: Socket) => {
     // Find the lobby that the players are in
     let game = games.get(data.lobbyId);
     // Send both players the message
-    console.log(game?.playerOneClient?.id);
-    console.log(game?.playerTwoClient?.id);
+    console.log(game?.playerOne?.client.id);
+    console.log(game?.playerTwo?.client.id);
     console.log("Socket ID: " + socket.id);
-    game?.playerOneClient?.emit('chatMessage', { message: data.message });
-    game?.playerTwoClient?.emit('chatMessage', { message: data.message });
+    game?.broadcastChat(data.message);
   });
 });
 

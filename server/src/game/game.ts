@@ -1,35 +1,53 @@
-import { Socket } from 'socket.io';
+import Player from './player';
 
 export default class Game {
-  playerOneClient: Socket | undefined;
-  playerTwoClient: Socket | undefined;
+  playerOne: Player | undefined;
+  playerTwo: Player | undefined;
+  whoseTurn: number = 1;
 
-  constructor(playerOne?: Socket, playerTwo?: Socket) {
-    this.playerOneClient = playerOne;
-    this.playerTwoClient = playerTwo;
+  constructor(playerOne?: Player, playerTwo?: Player) {
+    this.playerOne = playerOne;
+    this.playerTwo = playerTwo;
   }
 
   isFull() {
-    return this.playerOneClient && this.playerTwoClient;
+    return this.playerOne && this.playerTwo;
   }
 
   isEmpty() {
-    if (!this.playerTwoClient) {
-      return this.playerOneClient?.disconnected
+    if (!this.playerTwo) {
+      return this.playerOne?.client.disconnected
     }
-    return this.playerOneClient?.disconnected && this.playerTwoClient?.disconnected;
+    return this.playerOne?.client.disconnected && this.playerTwo?.client.disconnected;
+  }
+
+  bothPlayersReady() {
+    return this.playerOne?.boardReady && this.playerTwo?.boardReady;
   }
 
   clearPlayers() {
-    this.playerOneClient = undefined;
-    this.playerTwoClient = undefined;
+    this.playerOne = undefined;
+    this.playerTwo = undefined;
   }
 
-  push(client: Socket) {
-    if (!this.playerOneClient) {
-      this.playerOneClient = client;
-    } else if (!this.playerTwoClient) {
-      this.playerTwoClient = client;
+  push(player: Player) {
+    if (!this.playerOne) {
+      this.playerOne = player;
+    } else if (!this.playerTwo) {
+      this.playerTwo = player;
     }
+  }
+
+  broadcastChat(message: string) {
+    this.playerOne?.client.emit('chatMessage', {
+      message: message
+    });
+    this.playerTwo?.client.emit('chatMessage', {
+      message: message
+    });
+  }
+
+  getPlayer(index: number) {
+    return index === 1 ? this.playerOne : this.playerTwo;
   }
 }
