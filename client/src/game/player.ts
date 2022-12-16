@@ -35,7 +35,11 @@ export default class Player {
     this.deck.unshift(card);
   }
 
-  addHand(card: Card) {
+  addToFrontOfHand(card: Card) {
+    this.hand.unshift(card);
+  }
+
+  addToHand(card: Card) {
     this.hand.push(card);
   }
 
@@ -46,7 +50,7 @@ export default class Player {
   drawCard() {
     const card = this.deck.pop();
     if (!card) return;
-    this.addHand(card);
+    this.addToHand(card);
     return card;
   }
 }

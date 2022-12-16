@@ -35,10 +35,15 @@ export default class GameBoard extends Phaser.Scene {
     for (let cardId of cardsToRender) {
       this.load.image(cardId, './cards/' + cardId + ".png");
     }
+    // TODO: load all of the opponent's cards too
   }
 
   create() {
+    // This game will inject the right click button
+    this.input.mouse?.disableContextMenu();
+
     this.add.image(0, 0, 'background').setOrigin(0, 0);
+    // Create a translucent gray background
     let positionIndex = 0;
     for (let cardId of this.deckList) {
       // Set config of each card here
@@ -53,6 +58,7 @@ export default class GameBoard extends Phaser.Scene {
       // Setting the location of where the card should return if its not played or released
       card.on('pointerdown', (pointer) => {
         if (pointer.rightButtonDown()) {
+          this.displayCardInHigherRes(card.cardId);
           return;
         }
         card.dragX = card.x
@@ -78,7 +84,7 @@ export default class GameBoard extends Phaser.Scene {
       });
 
       card.indexInHand = positionIndex;
-      this.player.addHand(card);
+      this.player.addToHand(card);
       positionIndex++;
 
       // TODO: Initialize opponent's cards here
@@ -100,5 +106,22 @@ export default class GameBoard extends Phaser.Scene {
       this.client
     );
     this.gameHandler.startGame();
+  }
+
+  // Used in game mechanics that require scrying the deck, or displaying something
+  inflateTransparentBackgroundAndLockInputs() {
+    // Creates an interactive rectangle that covers the entire screen
+    return this.add.rectangle(0, 0, 1920, 1080, 0x000000, 0.5).setOrigin(0, 0).setInteractive().setName('transparentBackground');
+  }
+
+  // For when users right click a card in play
+  // Show the image of the card in a higher resolution
+  displayCardInHigherRes(cardId: string) {
+    let rect = this.inflateTransparentBackgroundAndLockInputs();
+    let cardImg = this.add.image(960, 540, cardId).setScale(0.75).setInteractive();
+    rect.on('pointerdown', () => {
+      cardImg.destroy();
+      rect.destroy();
+    });
   }
 }
