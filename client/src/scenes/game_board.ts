@@ -15,6 +15,7 @@ export default class GameBoard extends Phaser.Scene {
   client: Socket;
   lobbyId: number;
   deckList: string[];
+  opponentDeckList: string[];
 
   constructor() {
     super('game-board');
@@ -26,13 +27,24 @@ export default class GameBoard extends Phaser.Scene {
     this.client = data.client;
     this.lobbyId = this.player.lobbyId;
     this.deckList = data.deckList;
+    this.opponentDeckList = data.opponentDeckList;
   }
 
   preload() {
     this.load.image('background', './images/game_board.png');
     this.load.html('chatbox', './src/game/chat/chat.html');
+    this.load.image('rock', './images/rock.png');
+    this.load.image('scissors', './images/scissors.png');
+    this.load.image('paper', './images/paper.jpg');
+
     let cardsToRender = new Set(this.deckList);
+    let opponentCardsToRender = new Set(this.opponentDeckList);
+    // Loads our deck
     for (let cardId of cardsToRender) {
+      this.load.image(cardId, './cards/' + cardId + ".png");
+    }
+    // Loads the opponent's deck
+    for (let cardId of opponentCardsToRender) {
       this.load.image(cardId, './cards/' + cardId + ".png");
     }
     // TODO: load all of the opponent's cards too
@@ -41,16 +53,16 @@ export default class GameBoard extends Phaser.Scene {
   create() {
     // This game will inject the right click button
     this.input.mouse?.disableContextMenu();
-
     this.add.image(0, 0, 'background').setOrigin(0, 0);
+
     // Create a translucent gray background
     let positionIndex = 0;
     for (let cardId of this.deckList) {
       // Set config of each card here
       let card = this.add.existing(new Card(this.player, this, cardId))
-      .setOrigin(0, 0)
-      .setScale(0.25)
-      .setPosition(100 * positionIndex, 0);
+        .setOrigin(0, 0)
+        .setScale(0.25)
+        .setPosition(100 * positionIndex, 0);
       
       card.setInteractive();
       this.input.setDraggable(card);
@@ -61,8 +73,6 @@ export default class GameBoard extends Phaser.Scene {
           this.displayCardInHigherRes(card.cardId);
           return;
         }
-        card.dragX = card.x
-        card.dragY = card.y
       });
 
       card.on('dragend', () => {
@@ -70,14 +80,15 @@ export default class GameBoard extends Phaser.Scene {
         // Smoothly return the object to its original position
         this.tweens.add({
           targets: card,
-          x: card.dragX,
-          y: card.dragY,
+          x: card.calculatePositionInHand(),
+          y: 0,
           duration: 200,
           ease: 'Power2'
         });
       });
 
       this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+        gameObject.is_dragging = true;
         gameObject.x = dragX;
         gameObject.y = dragY;
         // TODO: Add logic to check if card is being dragged over a valid zone
@@ -86,7 +97,6 @@ export default class GameBoard extends Phaser.Scene {
       card.indexInHand = positionIndex;
       this.player.addToHand(card);
       positionIndex++;
-
       // TODO: Initialize opponent's cards here
     }
     // Initialize any UI Here
@@ -105,11 +115,14 @@ export default class GameBoard extends Phaser.Scene {
       this.opponent,
       this.client
     );
+
+    this.client.emit("boardFullyLoaded" , { lobbyId: this.lobbyId });
+
     this.gameHandler.startGame();
   }
 
   // Used in game mechanics that require scrying the deck, or displaying something
-  inflateTransparentBackgroundAndLockInputs() {
+  inflateTransparentBackground() {
     // Creates an interactive rectangle that covers the entire screen
     return this.add.rectangle(0, 0, 1920, 1080, 0x000000, 0.5).setOrigin(0, 0).setInteractive().setName('transparentBackground');
   }
@@ -117,7 +130,7 @@ export default class GameBoard extends Phaser.Scene {
   // For when users right click a card in play
   // Show the image of the card in a higher resolution
   displayCardInHigherRes(cardId: string) {
-    let rect = this.inflateTransparentBackgroundAndLockInputs();
+    let rect = this.inflateTransparentBackground();
     let cardImg = this.add.image(960, 540, cardId).setScale(0.75).setInteractive();
     rect.on('pointerdown', () => {
       cardImg.destroy();

@@ -14,8 +14,9 @@ export default class Card extends Phaser.GameObjects.Image {
   dragX: number;
   dragY: number;
   indexInHand: number;
+  is_dragging: boolean;
 
-  constructor(owner: Player, scene: GameBoard, cardId: string) {
+  constructor(owner: Player, scene: GameBoard, cardId: string, indexInHand: number = -1) {
     // cardId is to keep this card unique from another card that has the same name and ID
     super(scene, 0, 0, cardId);
     this.cardId = cardId;
@@ -29,9 +30,12 @@ export default class Card extends Phaser.GameObjects.Image {
 
     this.owner = owner;
 
+    this.indexInHand = indexInHand;
+
     this.dragX = 0;
     this.dragY = 0;
-    this.indexInHand = 0;
+
+    this.is_dragging = false;
   }
 
   render(x: number, y: number) {
@@ -43,5 +47,14 @@ export default class Card extends Phaser.GameObjects.Image {
     if (card.getData['owner'] === this.owner.username) {
       this.scene.input.setDraggable(card);
     }
+  }
+
+  calculatePositionInHand() {
+    // TODO: Fix magic number 100
+    return this.indexInHand * 100;
+  }
+
+  isInHand() {
+    return this.indexInHand !== -1;
   }
 }

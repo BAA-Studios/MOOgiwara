@@ -7,6 +7,8 @@ export default class GameHandler {
   opponent: Player;
   client: Socket;
 
+  myTurn: boolean = false;
+
   scene: Phaser.Scene;
 
   playerCharacterArea: Phaser.GameObjects.Container;
@@ -70,6 +72,7 @@ export default class GameHandler {
     // this.opponentLifeArea = this.scene.add.container();
 
     this.playerHandArea.add(this.player.hand)
+    // this.opponentHandArea.add(this.opponent.hand)
   }
 
   startGame() {

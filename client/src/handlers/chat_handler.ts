@@ -21,6 +21,11 @@ export default class ChatHandler {
       fontStyle: 'bold',
     });
     this.chat.setFixedSize(400, 750);
+    this.scene.client.on('chatMessage', (data: any) => {
+      console.log(data.message);
+      this.messages.push(data.message);
+      this.chat.setText(this.messages.join('\n'));
+    });
   }
 
   initChat = () => {
@@ -38,11 +43,6 @@ export default class ChatHandler {
         let el = (<HTMLInputElement>document.getElementById('chat'));
         el.blur();
       }
-    });
-
-    this.scene.client.on('chatMessage', (data: any) => {
-      this.messages.push(data.message);
-      this.chat.setText(this.messages.join('\n'));
     });
   };
 
