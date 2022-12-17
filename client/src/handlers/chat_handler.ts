@@ -54,8 +54,22 @@ export default class ChatHandler {
     if (chatbox.value === "") {
       return;
     }
-    const message = chatbox.value;
+    let message = chatbox.value;
+    let copyMessage = message;
     chatbox.value = '';
+
+    const maxLength: number = 34;
+    const lines: string[] = [];
+
+    while (message.length >= maxLength) {
+      lines.push(message.substring(0, maxLength));
+      message = message.substring(maxLength);
+    }
+
+    if (maxLength * lines.length < copyMessage.length) {
+      lines.push(copyMessage.substring(maxLength * lines.length));
+      message = lines.join('\n');
+    }
 
     this.scene.client.emit('chatMessage', {
       message: this.scene.player.username + ': ' + message,
