@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
-import Player from '../game/player';
+import Player, { PlayerState } from '../game/player';
 import GameHandler from '../handlers/game_handler';
 import UiHandler from '../handlers/ui_handler';
 import ChatHandler from '../handlers/chat_handler';
 import { Socket } from 'socket.io-client';
 import Card from '../game/card';
+import { displayCardInHigherRes } from './game_board_pop_ups';
 
 export default class GameBoard extends Phaser.Scene {
   gameHandler: GameHandler;
@@ -34,16 +35,19 @@ export default class GameBoard extends Phaser.Scene {
   preload() {
     this.load.image('background', './images/game_board.png');
     this.load.html('chatbox', './src/game/chat/chat.html');
+    this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
+    this.load.image('standardButton', './buttons/Standard Button.png');
+    this.load.image('loading', './images/mugiwara_logo_temp.png');
 
-    let cardsToRender = new Set(this.deckList);
-    let opponentCardsToRender = new Set(this.opponentDeckList);
+    const cardsToRender = new Set(this.deckList);
+    const opponentCardsToRender = new Set(this.opponentDeckList);
     // Loads our deck
-    for (let cardId of cardsToRender) {
-      this.load.image(cardId, './cards/' + cardId + ".png");
+    for (const cardId of cardsToRender) {
+      this.load.image(cardId, './cards/' + cardId + '.png');
     }
     // Loads the opponent's deck
-    for (let cardId of opponentCardsToRender) {
-      this.load.image(cardId, './cards/' + cardId + ".png");
+    for (const cardId of opponentCardsToRender) {
+      this.load.image(cardId, './cards/' + cardId + '.png');
     }
     // TODO: load all of the opponent's cards too
   }
@@ -54,16 +58,27 @@ export default class GameBoard extends Phaser.Scene {
     this.add.image(0, 0, 'background').setOrigin(0, 0);
 
     // Create a translucent gray background
-    for (let cardId of this.deckList) {
+    for (const cardId of this.deckList) {
       // Set config of each card here
-      let card = new Card(this.player, this, cardId).setOrigin(0, 0).setScale(0.25);
+      const card = new Card(this.player, this, cardId)
+        .setOrigin(0, 0)
+        .setScale(0.25);
       card.setInteractive();
       this.input.setDraggable(card);
+
+      // Adding/Removing a highlight when players hover over a card in their hand
+      card.on('pointerover', () => {
+        card.setTint(0xbebebe);
+      });
+
+      card.on('pointerout', () => {
+        card.clearTint();
+      });
 
       // Setting the location of where the card should return if its not played or released
       card.on('pointerdown', (pointer) => {
         if (pointer.rightButtonDown()) {
-          this.displayCardInHigherRes(card.cardId);
+          displayCardInHigherRes(this, card.cardId);
           return;
         }
       });
@@ -76,11 +91,14 @@ export default class GameBoard extends Phaser.Scene {
           x: card.calculatePositionInHand(),
           y: 0,
           duration: 200,
-          ease: 'Power2'
+          ease: 'Power2',
         });
       });
 
-      this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+      this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+        if (gameObject.owner.playerState != PlayerState.MAIN_PHASE) {
+          return;
+        }
         gameObject.is_dragging = true;
         gameObject.x = dragX;
         gameObject.y = dragY;
@@ -109,31 +127,10 @@ export default class GameBoard extends Phaser.Scene {
       this.client
     );
 
-    this.player.drawCard(3, this);
+    this.player.drawCard(5, this);
 
-    this.client.emit("boardFullyLoaded" , { lobbyId: this.lobbyId });
+    this.client.emit("boardFullyLoaded", { lobbyId: this.lobbyId });
 
-    this.client.on('changeTurn', (data: any) => {
-      this.gameHandler.changeTurn(data);
-    });
-
-    this.gameHandler.startGame();
-  }
-
-  // Used in game mechanics that require scrying the deck, or displaying something
-  inflateTransparentBackground() {
-    // Creates an interactive rectangle that covers the entire screen
-    return this.add.rectangle(0, 0, 1920, 1080, 0x000000, 0.5).setOrigin(0, 0).setInteractive().setName('transparentBackground');
-  }
-
-  // For when users right click a card in play
-  // Show the image of the card in a higher resolution
-  displayCardInHigherRes(cardId: string) {
-    let rect = this.inflateTransparentBackground();
-    let cardImg = this.add.image(960, 540, cardId).setScale(0.75).setInteractive();
-    rect.on('pointerdown', () => {
-      cardImg.destroy();
-      rect.destroy();
-    });
+    this.gameHandler.initListeners();
   }
 }

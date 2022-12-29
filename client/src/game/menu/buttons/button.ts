@@ -62,4 +62,10 @@ export default class Button extends Phaser.GameObjects.Container {
   enterButtonActiveState() {
     this.buttonImage.setTint(this.activeTintColor); // slight grey tint, whilst button is held down
   }
+
+  override destroy() {
+    super.destroy();
+    this.buttonImage.destroy();
+    this.buttonText.destroy();
+  }
 }

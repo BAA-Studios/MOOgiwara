@@ -1,0 +1,98 @@
+import GameBoard from './game_board';
+import StandardButton from '../game/menu/buttons/standard_button';
+import LoadingButton from '../game/menu/buttons/loading_button';
+
+// Used in game mechanics that require scrying the deck, or displaying something
+export function inflateTransparentBackground(scene: GameBoard) {
+  // Creates an interactive rectangle that covers the entire screen
+  return scene.add
+    .rectangle(0, 0, 1920, 1080, 0x000000, 0.5)
+    .setOrigin(0, 0)
+    .setInteractive()
+    .setName('transparentBackground');
+}
+
+// For when users right click a card in play
+// Show the image of the card in a higher resolution
+export function displayCardInHigherRes(scene: GameBoard, cardId: string) {
+  const rect = inflateTransparentBackground(scene);
+  const cardImg = scene.add
+    .image(960, 540, cardId)
+    .setScale(0.75)
+    .setInteractive();
+  rect.on('pointerdown', () => {
+    cardImg.destroy();
+    rect.destroy();
+  });
+}
+
+// This will display a screen that asks the user if they want to mulligan given their hand
+export function displayMulliganSelection(scene: GameBoard) {
+  const hand = scene.player.hand;
+  const rect = inflateTransparentBackground(scene);
+  const mulliganText = scene.add
+    .text(960, 200, "Choose Whether to Mulligan")
+    .setOrigin(0.5, 0.5)
+    .setFontSize(50)
+    .setInteractive();
+  const cardImgs: Phaser.GameObjects.Image[] = [];
+
+  for (let i = 0; i < hand.length; i++) {
+    const card = hand.getElementByPos(i);
+    cardImgs.push(
+      scene.add.image(260 + i * 350, 500, card.cardId).setScale(0.5)
+    );
+  }
+
+  let loadingButton: LoadingButton | undefined = undefined;
+
+  // Add a button that will emit a mulligan event to the server
+  const mulliganButton = scene.add.existing(
+    new StandardButton(scene, 960, 800, "MULLIGAN", () => {
+      scene.player.client.emit("onMulligan", {
+        lobbyId: scene.lobbyId,
+        mulligan: "mulligan",
+      });
+      loadingButton = scene.add.existing(
+        new LoadingButton(scene, 960, 800, "standardButton")
+      );
+      scene.player.moveHandToDeck(scene);
+      scene.player.drawCard(5, scene);
+      // Destroy old cards displayed to push new hand
+      for (const cardImg of cardImgs) {
+        cardImg.destroy();
+      }
+      cardImgs.splice(0); // Clear the array
+      for (let i = 0; i < hand.size(); i++) {
+        const card = hand.getElementByPos(i);
+        cardImgs.push(
+          scene.add.image(260 + i * 350, 500, card.cardId).setScale(0.5)
+        );
+      }
+    })
+  );
+
+  const keepButton = scene.add.existing(
+    new StandardButton(scene, 960, 875, "KEEP", () => {
+      scene.client.emit("onMulligan", {
+        lobbyId: scene.lobbyId,
+        mulligan: "keep",
+      });
+      keepButton.disableInteractive();
+      mulliganButton.disableInteractive();
+      loadingButton = scene.add.existing(
+        new LoadingButton(scene, 960, 875, "standardButton")
+      );
+    })
+  );
+  scene.client.on('mulliganDone', () => {
+    rect.destroy();
+    mulliganText.destroy();
+    mulliganButton.destroy();
+    for (const cardImg of cardImgs) {
+      cardImg.destroy();
+    }
+    loadingButton?.destroy();
+    keepButton.destroy();
+  });
+}

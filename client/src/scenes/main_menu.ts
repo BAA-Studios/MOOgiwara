@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import PlayButton from '../game/menu/buttons/play_button';
 import HollowShortButton from '../game/menu/buttons/hollow_short_button';
 import LoadingButton from '../game/menu/buttons/loading_button';
-import { connectToServer, waitForGame } from '../network/connection';
+import { connectToServer } from '../network/connection';
 
 export default class MainMenu extends Phaser.Scene {
   constructor() {

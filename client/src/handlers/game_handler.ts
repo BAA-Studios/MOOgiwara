@@ -1,23 +1,16 @@
 import Phaser from 'phaser';
 import { Socket } from 'socket.io-client';
 import Player from "../game/player";
-
-enum PlayerState {
-  OPPONENTS_TURN,
-  MAIN_PHASE,
-  COUNTER_PHASE,
-  DON_PHASE,
-  DRAW_PHASE,
-}
+import { PlayerState } from '../game/player';
+import GameBoard from '../scenes/game_board';
+import { displayMulliganSelection } from '../scenes/game_board_pop_ups';
 
 export default class GameHandler {
   player: Player;
   opponent: Player;
   client: Socket;
 
-  playerState: PlayerState = PlayerState.OPPONENTS_TURN;
-
-  scene: Phaser.Scene;
+  scene: GameBoard;
 
   playerCharacterArea: Phaser.GameObjects.Container;
   opponentCharacterArea: Phaser.GameObjects.Container;
@@ -43,12 +36,7 @@ export default class GameHandler {
   playerDonDeckArea: Phaser.GameObjects.Rectangle;
   opponentDonDeckArea: Phaser.GameObjects.Rectangle;
 
-  constructor(
-    scene: Phaser.Scene,
-    player: Player,
-    opponent: Player,
-    client: any
-  ) {
+  constructor(scene: GameBoard, player: Player, opponent: Player, client: any) {
     this.player = player;
     this.opponent = opponent;
     this.scene = scene;
@@ -78,18 +66,29 @@ export default class GameHandler {
 
     // this.playerLifeArea = this.scene.add.container();
     // this.opponentLifeArea = this.scene.add.container();
-
   }
 
-  startGame() {
+  // Listens to game events from the server
+  initListeners() {
+    this.client.on('changeTurn', (data: any) => {
+      this.changeTurn(data);
+    });
 
+    this.client.on('mulligan', (data: any) => {
+      this.mulligan(data);
+    });
   }
 
   changeTurn(data: any) {
     if (data.personToChangeTurnTo === this.player.getUniqueId()) {
-      this.playerState = PlayerState.MAIN_PHASE;
+      this.player.playerState = PlayerState.MAIN_PHASE;
     } else {
-      this.playerState = PlayerState.OPPONENTS_TURN;
+      this.player.playerState = PlayerState.OPPONENTS_TURN;
     }
+  }
+
+  mulligan(data: any) {
+    this.player.playerState = PlayerState.MULLIGAN;
+    displayMulliganSelection(this.scene);
   }
 }

@@ -18,14 +18,14 @@ export function waitForGame(scene: Phaser.Scene, io: any) {
     // TODO: Initialise the player's and opponent's decks given from the server
     const player = new Player('test', data.lobbyId);
     const opponent = new Player('opponent', data.lobbyId);
-    
+
     // TODO: Initialise the player's and opponent's decks given from the server
     scene.scene.start('game-board', {
       player: player,
       opponent: opponent,
       client: io,
       deckList: data.deckList,
-      opponentDeckList: data.opponentDeckList
+      opponentDeckList: data.opponentDeckList,
     });
   });
 }

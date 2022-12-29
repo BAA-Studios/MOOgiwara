@@ -3,7 +3,7 @@ import Player from './player';
 export default class Game {
   playerOne: Player | undefined;
   playerTwo: Player | undefined;
-  whoseTurn: number = 1;
+  whoseTurn = 1;
 
   constructor(playerOne?: Player, playerTwo?: Player) {
     this.playerOne = playerOne;
@@ -16,13 +16,19 @@ export default class Game {
 
   isEmpty() {
     if (!this.playerTwo) {
-      return this.playerOne?.client.disconnected
+      return this.playerOne?.client.disconnected;
     }
-    return this.playerOne?.client.disconnected && this.playerTwo?.client.disconnected;
+    return (
+      this.playerOne?.client.disconnected && this.playerTwo?.client.disconnected
+    );
   }
 
   bothPlayersReady() {
     return this.playerOne?.boardReady && this.playerTwo?.boardReady;
+  }
+
+  bothPlayersMulliganed() {
+    return this.playerOne?.mulligan && this.playerTwo?.mulligan;
   }
 
   clearPlayers() {
@@ -40,14 +46,14 @@ export default class Game {
 
   broadcastChat(message: string) {
     this.playerOne?.client.emit('chatMessage', {
-      message: message
+      message: message,
     });
     this.playerTwo?.client.emit('chatMessage', {
-      message: message
+      message: message,
     });
   }
 
-  broadcastPacket(header:string, data: any) {
+  broadcastPacket(header: string, data: any) {
     this.playerOne?.client.emit(header, data);
     this.playerTwo?.client.emit(header, data);
   }

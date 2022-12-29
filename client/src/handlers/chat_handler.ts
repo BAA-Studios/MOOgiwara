@@ -10,9 +10,7 @@ export default class ChatHandler {
   constructor(scene: GameBoard) {
     this.scene = scene;
     this.messages = [];
-    this.textInput = this.scene.add
-      .dom(1690, 922)
-      .createFromCache('chatbox');
+    this.textInput = this.scene.add.dom(1690, 922).createFromCache('chatbox');
     this.chat = this.scene.add.text(1441, 110, '', {
       lineSpacing: 15,
       backgroundColor: '#FFFFFF',
@@ -40,7 +38,7 @@ export default class ChatHandler {
     // If they click outside of the input box, then we want to unfocus the input box
     this.scene.input.on('pointerdown', (event) => {
       if (event.target !== 'chat') {
-        let el = (<HTMLInputElement>document.getElementById('chat'));
+        const el = <HTMLInputElement>document.getElementById("chat");
         el.blur();
       }
     });
@@ -55,10 +53,10 @@ export default class ChatHandler {
       return;
     }
     let message = chatbox.value;
-    let copyMessage = message;
+    const copyMessage = message;
     chatbox.value = '';
 
-    const maxLength: number = 34;
+    const maxLength = 34;
     const lines: string[] = [];
 
     while (message.length >= maxLength) {

@@ -16,7 +16,12 @@ export default class Card extends Phaser.GameObjects.Image {
   indexInHand: number;
   is_dragging: boolean;
 
-  constructor(owner: Player, scene: GameBoard, cardId: string, indexInHand: number = -1) {
+  constructor(
+    owner: Player,
+    scene: GameBoard,
+    cardId: string,
+    indexInHand = -1
+  ) {
     // cardId is to keep this card unique from another card that has the same name and ID
     super(scene, 0, 0, cardId);
     this.cardId = cardId;
