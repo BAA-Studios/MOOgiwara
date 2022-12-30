@@ -12,6 +12,7 @@ export default class MainMenu extends Phaser.Scene {
 
   // TODO: https://blog.ourcade.co/posts/2020/phaser-3-google-fonts-webfontloader/
   preload() {
+    this.load.html('signin', './src/login/signin.html');
     this.load.image('tallButton', './buttons/Tall Button.png');
     this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
     this.load.image('loading', './images/mugiwara_logo_temp.png');
@@ -19,6 +20,27 @@ export default class MainMenu extends Phaser.Scene {
 
   // TODO: Groupings + dynamic relative coordinate resolution
   create() {
+    // Sign In With Google -------------------------------------------
+    // Inject button div
+    signInButton: Phaser.GameObjects.DOMElement = this.add
+      .dom(1690, 80)
+      .createFromCache('signin').setOrigin(0.5);
+    
+    // Handle Google's response
+    function handleCredentialResponse(response) {
+      console.log("Encoded JWT ID token: " + response.credential);
+    }
+
+    // Render the actual button
+    window.google.accounts.id.initialize({
+      client_id: "137166021162-mp5r4oe8edrn94tlfrjglr66m7bib2m4.apps.googleusercontent.com",
+      callback: handleCredentialResponse
+    });
+    window.google.accounts.id.renderButton(
+      document.getElementById("buttonDiv"),
+      { theme: "outline", size: "large" }  // customization attributes
+    );
+
     // Logo ----------------------------------------------------------
     this.add.text(10, 80, 'PLACEHOLDER FOR LOGO', {
       fontFamily: 'Georgia Bold',
