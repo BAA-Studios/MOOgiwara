@@ -43,17 +43,6 @@ export default class Card extends Phaser.GameObjects.Image {
     this.is_dragging = false;
   }
 
-  render(x: number, y: number) {
-    const card = this.scene.add.image(x, y, this.image);
-    card.setData({
-      owner: this.owner.username,
-    });
-    card.setInteractive();
-    if (card.getData['owner'] === this.owner.username) {
-      this.scene.input.setDraggable(card);
-    }
-  }
-
   calculatePositionInHand() {
     // TODO: Fix magic number 100
     return this.indexInHand * 100;
