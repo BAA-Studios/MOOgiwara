@@ -1,3 +1,13 @@
+/**
+ * This file contains all the pop ups that are displayed in the game board
+ * 
+ * This includes:
+ * - Displaying a card in higher resolution
+ * - Displaying a mulligan selection
+ * - Scryin effects
+ * - Displaying Trash Pile
+ */
+
 import GameBoard from './game_board';
 import StandardButton from '../game/menu/buttons/standard_button';
 import LoadingButton from '../game/menu/buttons/loading_button';
@@ -16,10 +26,18 @@ export function inflateTransparentBackground(scene: GameBoard) {
 // Show the image of the card in a higher resolution
 export function displayCardInHigherRes(scene: GameBoard, cardId: string) {
   const rect = inflateTransparentBackground(scene);
+  // Animation for when the card pops up in the screen similar to hearthstone
   const cardImg = scene.add
     .image(960, 540, cardId)
-    .setScale(0.75)
+    .setScale(0.01)
     .setInteractive();
+  scene.add.tween({
+      targets: cardImg,
+      scaleX: 0.75,
+      scaleY: 0.75,
+      duration: 250,
+      ease: 'Power1',
+    });
   rect.on('pointerdown', () => {
     cardImg.destroy();
     rect.destroy();
@@ -40,8 +58,15 @@ export function displayMulliganSelection(scene: GameBoard) {
   for (let i = 0; i < hand.length; i++) {
     const card = hand.getElementByPos(i);
     cardImgs.push(
-      scene.add.image(260 + i * 350, 500, card.cardId).setScale(0.5)
+      scene.add.image(260 + i * 350, 500, card.cardId).setScale(0.01)
     );
+    scene.add.tween({
+      targets: cardImgs[i],
+      scaleX: 0.5,
+      scaleY: 0.5,
+      duration: 250,
+      ease: 'Power1',
+    });
   }
 
   let loadingButton: LoadingButton | undefined = undefined;
@@ -66,8 +91,15 @@ export function displayMulliganSelection(scene: GameBoard) {
       for (let i = 0; i < hand.size(); i++) {
         const card = hand.getElementByPos(i);
         cardImgs.push(
-          scene.add.image(260 + i * 350, 500, card.cardId).setScale(0.5)
+          scene.add.image(260 + i * 350, 500, card.cardId).setScale(0.01)
         );
+        scene.add.tween({
+          targets: cardImgs[i],
+          scaleX: 0.5,
+          scaleY: 0.5,
+          duration: 250,
+          ease: 'Power1',
+        });
       }
     })
   );
