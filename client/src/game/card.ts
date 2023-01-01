@@ -1,5 +1,6 @@
 import GameBoard from "../scenes/game_board";
 import Player from "./player";
+import cardMetadata from '../cards/metadata.json';
 
 export default class Card extends Phaser.GameObjects.Image {
   cardId: string;
@@ -10,11 +11,13 @@ export default class Card extends Phaser.GameObjects.Image {
   attribute: string;
   image: string;
   owner: Player;
-  is_resting: boolean;
+  isResting: boolean;
   dragX: number;
   dragY: number;
   indexInHand: number;
-  is_dragging: boolean;
+  isDragging: boolean;
+  category: string;
+  life: number;
 
   constructor(
     owner: Player,
@@ -25,13 +28,18 @@ export default class Card extends Phaser.GameObjects.Image {
     // cardId is to keep this card unique from another card that has the same name and ID
     super(scene, 0, 0, cardId);
     this.cardId = cardId;
-    this.name = 'Luffy';
-    this.description = 'This is a card';
-    this.cost = 0;
-    this.attack = 0;
-    this.attribute = 'Strike';
+
+    // TODO: Sanity checks as not all cards may have these attributes and may show up as undefined
+    this.category = cardMetadata[cardId]['Category']; // All caps as per the API
+    // Allocate the properties based off the cardID from the metadata
+    this.name = cardMetadata[cardId]['Name'];
+    this.description = cardMetadata[cardId]['Effect'];
+    this.cost = cardMetadata[cardId]['Cost'];
+    this.attack = cardMetadata[cardId]['Power'];
+    this.attribute = cardMetadata[cardId]['Attribute'];
+    this.life = cardMetadata[cardId]['Life'];
     this.image = cardId + '.png';
-    this.is_resting = false;
+    this.isResting = false;
 
     this.owner = owner;
 
@@ -40,7 +48,7 @@ export default class Card extends Phaser.GameObjects.Image {
     this.dragX = 0;
     this.dragY = 0;
 
-    this.is_dragging = false;
+    this.isDragging = false;
   }
 
   calculatePositionInHand() {
@@ -50,5 +58,10 @@ export default class Card extends Phaser.GameObjects.Image {
 
   isInHand() {
     return this.indexInHand !== -1;
+  }
+
+  isDraggable() {
+    // TODO: Finish all conditionals
+    return this.isInHand();
   }
 }

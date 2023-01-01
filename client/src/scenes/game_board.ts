@@ -6,6 +6,7 @@ import ChatHandler from '../handlers/chat_handler';
 import { Socket } from 'socket.io-client';
 import Card from '../game/card';
 import { displayCardInHigherRes } from './game_board_pop_ups';
+import { identifyLeaderCard } from '../utility/util';
 
 export default class GameBoard extends Phaser.Scene {
   gameHandler: GameHandler;
@@ -44,12 +45,12 @@ export default class GameBoard extends Phaser.Scene {
     // Loads our deck
     for (const cardId of cardsToRender) {
       this.load.image(cardId, './cards/' + cardId + '.png');
+      // Identify the leader card and remove it from the decklist
     }
     // Loads the opponent's deck
     for (const cardId of opponentCardsToRender) {
       this.load.image(cardId, './cards/' + cardId + '.png');
     }
-    // TODO: load all of the opponent's cards too
   }
 
   create() {
@@ -57,7 +58,6 @@ export default class GameBoard extends Phaser.Scene {
     this.input.mouse?.disableContextMenu();
     this.add.image(0, 0, 'background').setOrigin(0, 0);
 
-    // Create a translucent gray background
     for (const cardId of this.deckList) {
       // Set config of each card here
       const card = new Card(this.player, this, cardId)
@@ -86,6 +86,10 @@ export default class GameBoard extends Phaser.Scene {
       card.on('dragend', () => {
         // TODO: Add logic to check if card has been dragged over a valid zone
         // Smoothly return the object to its original position
+        card.isDragging = false;
+        if (!card.isDraggable()) {
+          return;
+        }
         this.tweens.add({
           targets: card,
           x: card.calculatePositionInHand(),
@@ -99,15 +103,54 @@ export default class GameBoard extends Phaser.Scene {
         if (gameObject.owner.playerState != PlayerState.MAIN_PHASE) {
           return;
         }
+        if(!gameObject.isDraggable()) {
+          return;
+        }
         gameObject.is_dragging = true;
         gameObject.x = dragX;
         gameObject.y = dragY;
         // TODO: Add logic to check if card is being dragged over a valid zone
       });
 
+      // TODO(FIX): This is a crude way of identifying the leader from a decklist
+      // The deck builder will use a specific syntax for decks that will allow us to identify the leader card faster
+      if (card.category === 'LEADER') {
+        card.setScale(0.16);
+        this.player.leader = card;
+        console.log(card)
+        continue;
+      }
       this.player.addTopOfDeck(card);
-      // TODO: Initialize opponent's cards here
     }
+
+    // TODO: Initialize opponent's cards here
+    // TODO: DRY this code up
+    // Find opponent's leader card
+    for (const cardId of this.opponentDeckList) {
+      if (identifyLeaderCard(cardId)) {
+        let card = new Card(this.opponent, this, cardId);
+        this.opponent.leader = card
+          .setOrigin(0, 0)
+          .setScale(0.16)
+          .setInteractive();
+        card.category = 'LEADER';
+        card.on('pointerdown', (pointer) => {
+          if (pointer.rightButtonDown()) {
+            displayCardInHigherRes(this, cardId);
+            return;
+          }
+        });
+        // Adding/Removing a highlight when players hover over a card in their hand
+        card.on('pointerover', () => {
+          card.setTint(0xbebebe);
+        });
+
+        card.on('pointerout', () => {
+          card.clearTint();
+        });
+      }
+    }
+
     this.player.shuffleDeck();
     // Initialize any UI Here
     this.uiHandler = new UiHandler(this);

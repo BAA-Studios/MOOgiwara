@@ -76,6 +76,7 @@ io.on('connection', (socket: Socket) => {
     game.playerOne?.client.emit('start', {
       lobbyId: lobbyId,
       deckList: [
+        "OP01-060_p1",
         "OP01-077_p1",
         "OP01-076",
         "OP01-075",
@@ -87,6 +88,7 @@ io.on('connection', (socket: Socket) => {
         "OP01-069",
       ],
       opponentDeckList: [
+        "OP01-060_p1",
         "OP01-077_p1",
         "OP01-076",
         "OP01-075",
@@ -101,6 +103,7 @@ io.on('connection', (socket: Socket) => {
     game.playerTwo?.client.emit('start', {
       lobbyId: lobbyId,
       deckList: [
+        "OP01-060_p1",
         "OP01-077_p1",
         "OP01-076",
         "OP01-075",
@@ -112,6 +115,7 @@ io.on('connection', (socket: Socket) => {
         "OP01-069",
       ],
       opponentDeckList: [
+        "OP01-060_p1",
         "OP01-077_p1",
         "OP01-076",
         "OP01-075",
@@ -126,6 +130,7 @@ io.on('connection', (socket: Socket) => {
     console.log("[LOG] Game started: " + lobbyId);
   }
 
+  // Packets Received Start ----------------------------
   socket.on('boardFullyLoaded', () => {
     player.boardReady = true;
     if (game?.bothPlayersReady()) {
@@ -168,6 +173,7 @@ io.on('connection', (socket: Socket) => {
     console.log("Socket ID: " + socket.id);
     game?.broadcastChat(data.message);
   });
+  // Packets Received End ----------------------------
 });
 
 server.listen(PORT, () => {

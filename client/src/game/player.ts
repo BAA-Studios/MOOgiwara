@@ -18,7 +18,7 @@ export default class Player {
   username: string;
   lobbyId: number;
   playerState: PlayerState;
-
+  leader: Card | null = null;
   hand: Vector<Card>;
   deck: Vector<Card>;
   trash: Vector<Card>;

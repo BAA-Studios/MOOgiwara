@@ -1,3 +1,7 @@
+/*
+  This file is responsible for handling a game instance
+*/
+
 import Player from './player';
 
 export default class Game {

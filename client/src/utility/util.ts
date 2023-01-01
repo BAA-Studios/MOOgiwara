@@ -1,4 +1,5 @@
 import { Vector } from 'js-sdsl';
+import cardMetadata from '../cards/metadata.json';
 
 /**
  * Shuffles a js-sdsl vector in-place, using Durstenfeld Shuffle
@@ -12,4 +13,13 @@ export function shuffle(vector: Vector<any>): void {
     vector.setElementByPos(i, vector.getElementByPos(j));
     vector.setElementByPos(j, temp);
   }
+}
+
+/** 
+ *
+ * given a cardId, check the metadata in public file to see if it matches a leader card
+ */
+export function identifyLeaderCard(cardId: string) {
+  const card = cardMetadata[cardId];
+  return card['Category'] === 'LEADER';
 }

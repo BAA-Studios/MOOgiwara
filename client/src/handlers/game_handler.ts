@@ -24,8 +24,8 @@ export default class GameHandler {
   playerTrashArea: Phaser.GameObjects.Rectangle;
   opponentTrashArea: Phaser.GameObjects.Rectangle;
 
-  playerLeaderArea: Phaser.GameObjects.Rectangle;
-  opponentLeaderArea: Phaser.GameObjects.Rectangle;
+  playerLeaderArea: Phaser.GameObjects.Container;
+  opponentLeaderArea: Phaser.GameObjects.Container;
 
   playerDonArea: Phaser.GameObjects.Rectangle;
   opponentDonArea: Phaser.GameObjects.Rectangle;
@@ -55,8 +55,8 @@ export default class GameHandler {
     // this.playerTrashArea = this.scene.add.container();
     // this.opponentTrashArea = this.scene.add.container();
 
-    // this.playerLeaderArea = this.scene.add.container();
-    // this.opponentLeaderArea = this.scene.add.container();
+    this.playerLeaderArea = this.scene.add.container(945, 703);
+    this.opponentLeaderArea = this.scene.add.container(945, 244);
 
     // this.playerDonArea = this.scene.add.container();
     // this.opponentDonArea = this.scene.add.container();
@@ -66,6 +66,17 @@ export default class GameHandler {
 
     // this.playerLifeArea = this.scene.add.container();
     // this.opponentLifeArea = this.scene.add.container();
+
+    // render the hand above the leader area
+    this.scene.children.bringToTop(this.playerHandArea);
+    
+    // Render both player's Leader cards
+    if (this.player.leader && this.opponent.leader) {
+      this.playerLeaderArea.add(this.player.leader);
+      // Render the opponent's cards upside down
+      this.opponent.leader.flipY = true;
+      this.opponentLeaderArea.add(this.opponent.leader);
+    }
   }
 
   // Listens to game events from the server
