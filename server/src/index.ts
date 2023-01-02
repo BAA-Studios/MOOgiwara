@@ -2,6 +2,7 @@ import express, { Express } from 'express';
 import { createServer } from 'http';
 import { Socket, Server } from 'socket.io';
 import Player from './game/player';
+import testDeck from './cards/test_deck.json';
 
 import Game from './game/game';
 
@@ -75,57 +76,13 @@ io.on('connection', (socket: Socket) => {
     game.whoseTurn = playerWhoStartsFirst;
     game.playerOne?.client.emit('start', {
       lobbyId: lobbyId,
-      deckList: [
-        "OP01-060_p1",
-        "OP01-077_p1",
-        "OP01-076",
-        "OP01-075",
-        "OP01-074",
-        "OP01-073",
-        "OP01-072",
-        "OP01-071",
-        "OP01-070",
-        "OP01-069",
-      ],
-      opponentDeckList: [
-        "OP01-060_p1",
-        "OP01-077_p1",
-        "OP01-076",
-        "OP01-075",
-        "OP01-074",
-        "OP01-073",
-        "OP01-072",
-        "OP01-071",
-        "OP01-070",
-        "OP01-069",
-      ],
+      deckList: testDeck,
+      opponentDeckList: testDeck
     });
     game.playerTwo?.client.emit('start', {
       lobbyId: lobbyId,
-      deckList: [
-        "OP01-060_p1",
-        "OP01-077_p1",
-        "OP01-076",
-        "OP01-075",
-        "OP01-074",
-        "OP01-073",
-        "OP01-072",
-        "OP01-071",
-        "OP01-070",
-        "OP01-069",
-      ],
-      opponentDeckList: [
-        "OP01-060_p1",
-        "OP01-077_p1",
-        "OP01-076",
-        "OP01-075",
-        "OP01-074",
-        "OP01-073",
-        "OP01-072",
-        "OP01-071",
-        "OP01-070",
-        "OP01-069",
-      ],
+      deckList: testDeck,
+      opponentDeckList: testDeck
     });
     console.log("[LOG] Game started: " + lobbyId);
   }
