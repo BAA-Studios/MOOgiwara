@@ -62,7 +62,6 @@ export default class Player {
     }
     // Update the client's hand
     this.hand.update(this.client);
-    this.client.emit("finishDrawCard", { });
   }
 
   shuffleHandToDeck() {
