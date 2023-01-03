@@ -25,8 +25,6 @@ export default class Player {
   donDeck: Vector<Card>;
   lifeCards: Vector<Card>; // These will be filled with blank cards, players only need to know the quantity of life cards left
 
-  handUpToDate: boolean = false; // Stores information about whether the client has finished rendering the hand
-
   constructor(username: string, lobbyId: number) {
     this.username = username;
     this.hand = new Vector<Card>();
@@ -64,11 +62,6 @@ export default class Player {
     this.client.emit("shuffleHandToDeck", { });
   }
 
-  addTrash(card: Card) {
-    this.trash.pushBack(card);
-  }
-
-  // a promise that resolves when the player has finished drawing cards
   drawCard(amount = 1) {
     this.client.emit("drawCard", {
       amount: amount
