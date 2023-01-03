@@ -1,4 +1,5 @@
-import cardMetadata from '../cards/metadata.json';
+// @ts-ignore
+import cardMetadata from '../cards/metadata.json' assert { type: 'json' };
 
 export class Card {
     id: string;

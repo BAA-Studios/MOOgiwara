@@ -1,7 +1,6 @@
 import GameBoard from "../scenes/game_board";
 import Card from "./card";
 import { Vector } from "js-sdsl";
-import { shuffle } from "../utility/util";
 
 export enum PlayerState {
   LOADING,
@@ -19,35 +18,24 @@ export default class Player {
   lobbyId: number;
   playerState: PlayerState;
   leader: Card | null = null;
+  // deck: Vector<Card>: Players don't need to know the deck, info is stored on server
   hand: Vector<Card>;
-  deck: Vector<Card>;
   trash: Vector<Card>;
   field: Vector<Card>;
   donDeck: Vector<Card>;
-  lifeCards: Vector<Card>;
+  lifeCards: Vector<Card>; // These will be filled with blank cards, players only need to know the quantity of life cards left
+
+  handUpToDate: boolean = false; // Stores information about whether the client has finished rendering the hand
 
   constructor(username: string, lobbyId: number) {
     this.username = username;
     this.hand = new Vector<Card>();
-    this.deck = new Vector<Card>();
     this.trash = new Vector<Card>();
     this.field = new Vector<Card>();
     this.donDeck = new Vector<Card>();
     this.lifeCards = new Vector<Card>();
     this.lobbyId = lobbyId;
     this.playerState = PlayerState.LOADING;
-  }
-
-  addDeck(deck: Vector<Card>) {
-    this.deck = deck;
-  }
-
-  addTopOfDeck(card: Card) {
-    this.deck.insert(0, card);
-  }
-
-  addBottomOfDeck(card: Card) {
-    this.deck.pushBack(card);
   }
 
   addToFrontOfHand(card: Card) {
@@ -58,11 +46,6 @@ export default class Player {
     this.hand.pushBack(card);
   }
 
-  removeCardFromTopOfDeck() {
-    const cardRemoved = this.deck.getElementByPos(0);
-    this.deck.eraseElementByPos(0);
-    return cardRemoved;
-  }
 
   // Reshift the hand to the left and reassign index of card to -1
   removeCardFromHand(index: number, scene: GameBoard) {
@@ -77,41 +60,46 @@ export default class Player {
     return cardRemoved;
   }
 
-  moveHandToDeck(scene: GameBoard) {
-    while (!this.hand.empty()) {
-      const card = this.removeCardFromHand(0, scene);
-      this.addBottomOfDeck(card);
-    }
-    this.shuffleDeck();
+  shuffleHandToDeck() {
+    this.client.emit("shuffleHandToDeck", { });
   }
 
   addTrash(card: Card) {
     this.trash.pushBack(card);
   }
 
-  drawCard(amount = 1, scene: GameBoard) {
-    // Check if the amount is greater than the deck size
-    if (amount > this.deck.length) {
-      return;
-    }
-    for (let i = 0; i < amount; i++) {
-      const card = this.removeCardFromTopOfDeck();
-      if (!card) return;
-      // Check if card has already been added to scene
-      let sceneCard = card;
-      if (sceneCard.scene) {
-        sceneCard.setActive(true).setVisible(true);
-      } else {
-        sceneCard = scene.add.existing(card);
-      }
+  // a promise that resolves when the player has finished drawing cards
+  drawCard(amount = 1) {
+    this.client.emit("drawCard", {
+      amount: amount
+    });
+  }
 
-      // TODO: Add animation for drawing card from deck to hand
-      this.addToHand(sceneCard);
-      card.indexInHand = this.hand.size() - 1;
-      sceneCard.setPosition(card.calculatePositionInHand(), 0);
-      scene.gameHandler.playerHandArea.add(sceneCard);
+  /*
+  *  Given a new hand from the server, rerender the hand
+  */
+  updateHand(scene: GameBoard, newHand) {
+    // Destroy all cards in hand
+    while (!this.hand.empty()) {
+      const card = this.removeCardFromHand(0, scene);
+      card.destroy();
     }
-    // TODO:
+    // Add new cards to hand
+    let cards = newHand.W;
+    for (let i = 0; i < newHand.i; i++) {
+      const card = new Card(this, scene, cards[i].id)
+      .setOrigin(0, 0)
+      .setScale(0.25)
+      .setInteractive();
+
+      card.initInteractables();
+
+      this.addToHand(card);
+      scene.gameHandler.playerHandArea.add(card);
+      card.indexInHand = this.hand.size() - 1;
+      card.setPosition(card.calculatePositionInHand(), 0);
+    }
+    this.handUpToDate = true;
   }
 
   getUniqueId() {
@@ -119,6 +107,6 @@ export default class Player {
   }
 
   shuffleDeck() {
-    shuffle(this.deck);
+    this.client.emit("shuffleDeck", {});
   }
 }

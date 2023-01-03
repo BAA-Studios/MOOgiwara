@@ -2,7 +2,6 @@ import express, { Express } from 'express';
 import { createServer } from 'http';
 import { Socket, Server } from 'socket.io';
 import Player from './game/player';
-import testDeck from './cards/test_deck.json';
 
 import Game from './game/game';
 
@@ -20,6 +19,19 @@ const io = new Server(server, {
 const PORT = 3000;
 const users: string[] = [];
 const games = new Map<string, Game>();
+
+const testDeck = [
+  "OP01-060_p1",
+  "OP01-077_p1",
+  "OP01-076",
+  "OP01-075",
+  "OP01-074",
+  "OP01-073",
+  "OP01-072",
+  "OP01-071",
+  "OP01-070",
+  "OP01-069"
+];
 
 /**
  * Find a game that has an open player slot
@@ -68,7 +80,7 @@ io.on('connection', (socket: Socket) => {
   const lobbyId = findMatch(socket.id);
   const game = games.get(lobbyId);
   console.log('[LOG] USER: ' + socket.id + ' joined game: ' + lobbyId);
-  const player = new Player(socket, userId, lobbyId);
+  const player = new Player(socket, userId, lobbyId, testDeck);
   game?.push(player);
   if (game?.isFull()) {
     // Start the game
@@ -88,8 +100,12 @@ io.on('connection', (socket: Socket) => {
   }
 
   // Packets Received Start ----------------------------
+
+  player.initListeners();
+  
   socket.on('boardFullyLoaded', () => {
     player.boardReady = true;
+    player.deck.shuffle(); // Shuffle the player's deck
     if (game?.bothPlayersReady()) {
       game?.broadcastPacket('mulligan', {});
     }

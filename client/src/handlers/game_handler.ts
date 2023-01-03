@@ -81,6 +81,10 @@ export default class GameHandler {
 
   // Listens to game events from the server
   initListeners() {
+    this.client.on('updateCardList', (data: any) => {
+      this.updateCardList(data.cards, data.type);
+    });
+
     this.client.on('changeTurn', (data: any) => {
       this.changeTurn(data);
     });
@@ -101,5 +105,19 @@ export default class GameHandler {
   mulligan(data: any) {
     this.player.playerState = PlayerState.MULLIGAN;
     displayMulliganSelection(this.scene);
+  }
+
+  updateCardList(cards: string, type: any) {
+    switch(type) {
+      case 'hand':
+        this.player.updateHand(this.scene, cards);
+        break;
+      // case 'donDeck':
+      //   this.player.updateDonDeck(data);
+      //   break;
+      // case 'trash':
+      //   this.player.updateTrash(data);
+      //   break;
+    }
   }
 }

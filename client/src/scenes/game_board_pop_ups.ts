@@ -13,7 +13,7 @@ import StandardButton from '../game/menu/buttons/standard_button';
 import LoadingButton from '../game/menu/buttons/loading_button';
 
 // Used in game mechanics that require scrying the deck, or displaying something
-export function inflateTransparentBackground(scene: GameBoard) {
+export function inflateTransparentBackground(scene: Phaser.Scene) {
   // Creates an interactive rectangle that covers the entire screen
   return scene.add
     .rectangle(0, 0, 1920, 1080, 0x000000, 0.5)
@@ -24,7 +24,7 @@ export function inflateTransparentBackground(scene: GameBoard) {
 
 // For when users right click a card in play
 // Show the image of the card in a higher resolution
-export function displayCardInHigherRes(scene: GameBoard, cardId: string) {
+export function displayCardInHigherRes(scene: Phaser.Scene, cardId: string) {
   const rect = inflateTransparentBackground(scene);
   // Animation for when the card pops up in the screen similar to hearthstone
   const cardImg = scene.add
@@ -74,33 +74,35 @@ export function displayMulliganSelection(scene: GameBoard) {
   // Add a button that will emit a mulligan event to the server
   const mulliganButton = scene.add.existing(
     new StandardButton(scene, 960, 800, "MULLIGAN", () => {
-      scene.player.client.emit("onMulligan", {
-        lobbyId: scene.lobbyId,
-        mulligan: "mulligan",
-      });
       loadingButton = scene.add.existing(
         new LoadingButton(scene, 960, 800, "standardButton")
       );
-      scene.player.moveHandToDeck(scene);
-      scene.player.drawCard(5, scene);
-      // Destroy old cards displayed to push new hand
-      for (const cardImg of cardImgs) {
-        cardImg.destroy();
-      }
-      cardImgs.splice(0); // Clear the array
-      for (let i = 0; i < hand.size(); i++) {
-        const card = hand.getElementByPos(i);
-        cardImgs.push(
-          scene.add.image(260 + i * 350, 500, card.cardId).setScale(0.01)
-        );
-        scene.add.tween({
-          targets: cardImgs[i],
-          scaleX: 0.5,
-          scaleY: 0.5,
-          duration: 250,
-          ease: 'Power1',
+      scene.player.shuffleHandToDeck();
+      scene.player.drawCard(5);
+      scene.time.delayedCall(250, () => {
+        // Destroy old cards displayed to push new hand
+        for (const cardImg of cardImgs) {
+          cardImg.destroy();
+        }
+        cardImgs.splice(0); // Clear the array
+        for (let i = 0; i < hand.size(); i++) {
+          const card = hand.getElementByPos(i);
+          cardImgs.push(
+            scene.add.image(260 + i * 350, 500, card.cardId).setScale(0.01)
+          );
+          scene.add.tween({
+            targets: cardImgs[i],
+            scaleX: 0.5,
+            scaleY: 0.5,
+            duration: 250,
+            ease: 'Power1',
+          });
+        }
+        scene.player.client.emit("onMulligan", {
+          lobbyId: scene.lobbyId,
+          mulligan: "mulligan",
         });
-      }
+      });
     })
   );
 
