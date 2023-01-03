@@ -92,7 +92,6 @@ export default class Player {
       card.indexInHand = this.hand.size() - 1;
       card.setPosition(card.calculatePositionInHand(), 0);
     }
-    this.handUpToDate = true;
   }
 
   getUniqueId() {
