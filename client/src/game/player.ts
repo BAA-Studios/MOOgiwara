@@ -53,8 +53,7 @@ export default class Player {
     for (let i = index; i < this.hand.size(); i++) {
       this.hand.getElementByPos(i).indexInHand = i;
     }
-    scene.gameHandler.playerHandArea.remove(cardRemoved);
-    cardRemoved.setActive(false).setVisible(false);
+    scene.gameHandler.playerHandArea.remove(cardRemoved, true);
     return cardRemoved;
   }
 
@@ -74,8 +73,7 @@ export default class Player {
   updateHand(scene: GameBoard, newHand) {
     // Destroy all cards in hand
     while (!this.hand.empty()) {
-      const card = this.removeCardFromHand(0, scene);
-      card.destroy();
+      this.removeCardFromHand(0, scene);
     }
     // Add new cards to hand
     let cards = newHand.W;
