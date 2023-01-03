@@ -121,12 +121,4 @@ export default class Player {
   shuffleDeck() {
     shuffle(this.deck);
   }
-
-  rerenderHand(scene: GameBoard): void {
-    scene.gameHandler.playerHandArea.removeAll(true);
-    this.hand.forEach((card) => {
-      const sceneCard = scene.add.existing(card);
-      scene.gameHandler.playerHandArea.add(sceneCard);
-    });
-  }
 }
