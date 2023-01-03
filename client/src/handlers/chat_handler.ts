@@ -10,8 +10,8 @@ export default class ChatHandler {
   constructor(scene: GameBoard) {
     this.scene = scene;
     this.messages = [];
-    this.textInput = this.scene.add.dom(1690, 922).createFromCache('chatbox');
-    this.chat = this.scene.add.text(1441, 110, '', {
+    this.textInput = this.scene.add.dom(1724, 900).createFromCache('chatbox');
+    this.chat = this.scene.add.text(1500, 110, '', {
       lineSpacing: 15,
       backgroundColor: '#FFFFFF',
       color: '#000000',
