@@ -77,6 +77,9 @@ export function displayMulliganSelection(scene: GameBoard) {
       loadingButton = scene.add.existing(
         new LoadingButton(scene, 960, 800, "standardButton")
       );
+      keepButton.disableInteractive();
+      mulliganButton.disableInteractive();
+      
       scene.player.shuffleHandToDeck();
       scene.player.drawCard(5);
       scene.time.delayedCall(250, () => {

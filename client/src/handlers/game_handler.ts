@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Socket } from 'socket.io-client';
+import Card from '../game/card';
 import Player from "../game/player";
 import { PlayerState } from '../game/player';
 import GameBoard from '../scenes/game_board';
@@ -55,8 +56,8 @@ export default class GameHandler {
     // this.playerTrashArea = this.scene.add.container();
     // this.opponentTrashArea = this.scene.add.container();
 
-    this.playerLeaderArea = this.scene.add.container(945, 703);
-    this.opponentLeaderArea = this.scene.add.container(945, 244);
+    this.playerLeaderArea = this.scene.add.container(947, 704);
+    this.opponentLeaderArea = this.scene.add.container(947, 243);
 
     // this.playerDonArea = this.scene.add.container();
     // this.opponentDonArea = this.scene.add.container();
@@ -91,6 +92,12 @@ export default class GameHandler {
 
     this.client.on('mulligan', (data: any) => {
       this.mulligan(data);
+    });
+    
+    this.client.on('opponentDrewCard', (data: any) => {
+      // blankCard just shows the back of the card
+      const blankCard = new Card(this.opponent, this.scene, 'blankCard');
+      this.opponent.addToHand(blankCard);
     });
   }
 
