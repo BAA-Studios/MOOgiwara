@@ -20,7 +20,7 @@ export default class GameHandler {
   opponentHandArea: Phaser.GameObjects.Container;
 
   playerDeckArea: Phaser.GameObjects.Container;
-  opponentDeckArea: Phaser.GameObjects.Rectangle;
+  opponentDeckArea: Phaser.GameObjects.Container;
 
   playerTrashArea: Phaser.GameObjects.Rectangle;
   opponentTrashArea: Phaser.GameObjects.Rectangle;
@@ -47,11 +47,11 @@ export default class GameHandler {
     this.playerCharacterArea = this.scene.add.container(720, 555);
     this.opponentCharacterArea = this.scene.add.container(720, 400);
 
-    this.playerHandArea = this.scene.add.container(576, 996).setInteractive();
+    this.playerHandArea = this.scene.add.container(515, 996).setInteractive();
     this.opponentHandArea = this.scene.add.container(596, -123);
 
-    this.playerDeckArea = this.scene.add.container(1255, 703);
-    // this.opponentDeckArea = this.scene.add.container();
+    this.playerDeckArea = this.scene.add.container(1253, 704);
+    this.opponentDeckArea = this.scene.add.container(1253, 242);
 
     // this.playerTrashArea = this.scene.add.container();
     // this.opponentTrashArea = this.scene.add.container();
@@ -70,6 +70,17 @@ export default class GameHandler {
 
     // render the hand above the leader area
     this.scene.children.bringToTop(this.playerHandArea);
+
+    // Render the card back on deck area for both sides
+    const cardBack = new Card(this.player, this.scene, 'optcg_card_back')
+      .setScale(0.16)
+      .setOrigin(0, 0);
+    this.playerDeckArea.add(cardBack);
+    const oppCardBack = new Card(this.player, this.scene, 'optcg_card_back')
+      .setScale(0.16)
+      .setOrigin(0, 0);
+    oppCardBack.flipY = true;
+    this.opponentDeckArea.add(oppCardBack);
     
     // Render both player's Leader cards
     if (this.player.leader && this.opponent.leader) {
