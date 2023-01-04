@@ -6,6 +6,7 @@ import { PlayerState } from "./player";
 
 export default class Card extends Phaser.GameObjects.Image {
   cardId: string;
+  objectId: number = 0;
   name: string;
   description: string;
   cost: number;

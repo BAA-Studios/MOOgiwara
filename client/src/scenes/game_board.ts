@@ -39,6 +39,7 @@ export default class GameBoard extends Phaser.Scene {
     this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
     this.load.image('standardButton', './buttons/Standard Button.png');
     this.load.image('loading', './images/mugiwara_logo_temp.png');
+    this.load.image('optcg_card_back', './cards/optcg_card_back.jpg');
 
     const cardsToRender = new Set(this.deckList);
     const opponentCardsToRender = new Set(this.opponentDeckList);
@@ -119,8 +120,6 @@ export default class GameBoard extends Phaser.Scene {
       this.opponent,
       this.client
     );
-
-    this.player.drawCard(5);
 
     this.client.emit("boardFullyLoaded", { lobbyId: this.lobbyId });
 

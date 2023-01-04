@@ -60,8 +60,14 @@ export default class Player {
   shuffleHandToDeck() {
     this.client.emit("shuffleHandToDeck", { });
   }
+  
+  // Called when the server sends a drawCard request
+  handleDrawCard(card: Card) {
+    this.addToHand(card);
+  }
 
-  drawCard(amount = 1) {
+  // Sends a request to the server to draw a card
+  requestDrawCard(amount = 1) {
     this.client.emit("drawCard", {
       amount: amount
     });
@@ -89,6 +95,7 @@ export default class Player {
       scene.gameHandler.playerHandArea.add(card);
       card.indexInHand = this.hand.size() - 1;
       card.setPosition(card.calculatePositionInHand(), 0);
+      card.objectId = cards[i].objectId;
     }
   }
 

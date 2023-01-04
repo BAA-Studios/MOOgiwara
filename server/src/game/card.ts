@@ -3,6 +3,7 @@ import cardMetadata from '../cards/metadata.json' assert { type: 'json' };
 
 export class Card {
     id: string;
+    objectId: number = 0;
     name: string;
     life: number;
     cost: number;

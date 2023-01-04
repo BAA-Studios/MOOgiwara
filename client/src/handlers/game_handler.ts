@@ -48,7 +48,7 @@ export default class GameHandler {
     this.opponentCharacterArea = this.scene.add.container(720, 400);
 
     this.playerHandArea = this.scene.add.container(576, 996).setInteractive();
-    this.opponentHandArea = this.scene.add.container(576, 89);
+    this.opponentHandArea = this.scene.add.container(596, -123);
 
     this.playerDeckArea = this.scene.add.container(1255, 703);
     // this.opponentDeckArea = this.scene.add.container();
@@ -86,18 +86,48 @@ export default class GameHandler {
       this.updateCardList(data.cards, data.type);
     });
 
+    // The server sends a card to be drawn
+    this.client.on("drawCard", (data: any) => {
+      this.player.handleDrawCard(data.card);
+    });
+
     this.client.on('changeTurn', (data: any) => {
       this.changeTurn(data);
     });
 
-    this.client.on('mulligan', (data: any) => {
-      this.mulligan(data);
+    this.client.once('mulligan', (data: any) => {
+      this.player.requestDrawCard(5);
+
+      // TODO: don't make this a delayed call and instead make it a promise
+      this.scene.time.delayedCall(1000, () => {
+        this.mulligan(data);
+      });
     });
-    
-    this.client.on('opponentDrewCard', (data: any) => {
-      // blankCard just shows the back of the card
-      const blankCard = new Card(this.opponent, this.scene, 'blankCard');
-      this.opponent.addToHand(blankCard);
+
+    // Opponent rendering related events
+    this.client.on("opponentDrawCard", (data: any) => {
+      let amount = data.amount;
+      for (let i = 0; i < amount; i++) {
+        const blankCard = new Card(this.opponent, this.scene, 'optcg_card_back')
+        .setOrigin(0, 0)
+        .setScale(0.25);
+        blankCard.flipY = true;
+
+        this.opponent.addToHand(blankCard);
+
+        blankCard.indexInHand = this.opponentHandArea.length-1;
+        blankCard.setPosition(blankCard.calculatePositionInHand(), 0)
+
+        this.opponentHandArea.add(blankCard);
+      }
+    });
+
+    this.client.on("opponentRemoveCardFromHand", (data: any) => {
+      let amount = data.amount;
+      // Remove last card from the opponent's hand
+      for (let i = 0; i < amount; i++) {
+        this.opponentHandArea.removeAt(this.opponentHandArea.length - 1, true);
+      }
     });
   }
 

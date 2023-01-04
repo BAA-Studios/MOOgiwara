@@ -62,7 +62,35 @@ export default class Game {
     this.playerTwo?.client.emit(header, data);
   }
 
+  broadcastPacketExceptSelf(header: string, data: any, player: Player) {
+    if (player === this.playerOne) {
+      this.playerTwo?.client.emit(header, data);
+    } else {
+      this.playerOne?.client.emit(header, data);
+    }
+  }
+
   getPlayer(index: number) {
     return index === 1 ? this.playerOne : this.playerTwo;
+  }
+
+  start() {
+    // Assign each player's cards in their deck with a unique object Id
+    if (!(this.playerOne?.deck && this.playerTwo?.deck)) {
+      return;
+    }
+    let id = 0;
+
+    for(let i = 0; i < this.playerOne?.deck.size(); i++) {
+      let card = this.playerOne?.deck.get(i);
+      card.objectId = id;
+      id++;
+    }
+
+    for(let i = 0; i < this.playerTwo?.deck.size(); i++) {
+      let card = this.playerOne?.deck.get(i);
+      card.objectId = id;
+      id++
+    }
   }
 }
