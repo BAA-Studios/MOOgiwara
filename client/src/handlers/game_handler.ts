@@ -31,8 +31,8 @@ export default class GameHandler {
   playerDonArea: Phaser.GameObjects.Rectangle;
   opponentDonArea: Phaser.GameObjects.Rectangle;
 
-  playerLifeArea: Phaser.GameObjects.Rectangle;
-  opponentLifeArea: Phaser.GameObjects.Rectangle;
+  playerLifeArea: Phaser.GameObjects.Container;
+  opponentLifeArea: Phaser.GameObjects.Container;
 
   playerDonDeckArea: Phaser.GameObjects.Rectangle;
   opponentDonDeckArea: Phaser.GameObjects.Rectangle;
@@ -65,8 +65,8 @@ export default class GameHandler {
     // this.playerDonDeckArea = this.scene.add.container();
     // this.opponentDonDeckArea = this.scene.add.container();
 
-    // this.playerLifeArea = this.scene.add.container();
-    // this.opponentLifeArea = this.scene.add.container();
+    this.playerLifeArea = this.scene.add.container(572, 555);
+    this.opponentLifeArea = this.scene.add.container(572, 247);
 
     // render the hand above the leader area
     this.scene.children.bringToTop(this.playerHandArea);
@@ -76,7 +76,7 @@ export default class GameHandler {
       .setScale(0.16)
       .setOrigin(0, 0);
     this.playerDeckArea.add(cardBack);
-    const oppCardBack = new Card(this.player, this.scene, 'optcg_card_back')
+    const oppCardBack = new Card(this.opponent, this.scene, 'optcg_card_back')
       .setScale(0.16)
       .setOrigin(0, 0);
     oppCardBack.flipY = true;

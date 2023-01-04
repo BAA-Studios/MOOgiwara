@@ -11,6 +11,7 @@
 import GameBoard from './game_board';
 import StandardButton from '../game/menu/buttons/standard_button';
 import LoadingButton from '../game/menu/buttons/loading_button';
+import Card from '../game/card';
 
 // Used in game mechanics that require scrying the deck, or displaying something
 export function inflateTransparentBackground(scene: Phaser.Scene) {
@@ -122,7 +123,7 @@ export function displayMulliganSelection(scene: GameBoard) {
       );
     })
   );
-  scene.client.on('mulliganDone', () => {
+  scene.client.once('mulliganDone', () => {
     rect.destroy();
     mulliganText.destroy();
     mulliganButton.destroy();
@@ -131,5 +132,33 @@ export function displayMulliganSelection(scene: GameBoard) {
     }
     loadingButton?.destroy();
     keepButton.destroy();
+
+    // Rendering the initial life cards for both sides
+    if (scene.player.leader) {
+      for (let i = 0; i < scene.player.leader.life; i++) { 
+        let blankCard = new Card(scene.player, scene, 'optcg_card_back')
+          .setOrigin(0, 0)
+          .setScale(0.16);
+        // Rotate the card horizontally to the right
+        blankCard.flipX = true;
+        blankCard.flipY = true;
+        blankCard.setRotation(Math.PI / 2);
+        blankCard.setPosition(128, i * 35);
+        scene.gameHandler.playerLifeArea.add(blankCard);
+      }
+    }
+
+    if (scene.opponent.leader) {
+      for (let i = 0; i < scene.opponent.leader.life; i++) {
+        let blankCard = new Card(scene.opponent, scene, 'optcg_card_back')
+          .setOrigin(0, 0)
+          .setScale(0.16);
+        blankCard.flipX = true;
+        blankCard.flipY = true;
+        blankCard.setRotation(Math.PI / 2);
+        blankCard.setPosition(128, i * 35);
+        scene.gameHandler.opponentLifeArea.add(blankCard);
+      }
+    }
   });
 }

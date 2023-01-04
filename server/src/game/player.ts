@@ -109,4 +109,17 @@ export default class Player {
     // Update the client's hand
     this.hand.update(this.client);
   }
+
+  setLifeCards() {
+    if (this.leader === undefined) {
+      return;
+    }
+    for (let i = 0; i < this.leader.life; i++) {
+      this.lifeCards.push(this.deck.popTopCard());
+    }
+  }
+
+  getHeathLeft() {
+    return this.lifeCards.size();
+  }
 }

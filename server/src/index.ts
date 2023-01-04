@@ -94,7 +94,7 @@ io.on('connection', (socket: Socket) => {
 
   player.initListeners();
   
-  socket.on('boardFullyLoaded', () => {
+  socket.once('boardFullyLoaded', () => {
     player.boardReady = true;
     player.deck.shuffle(); // Shuffle the player's deck
     if (game?.bothPlayersReady()) {
@@ -102,13 +102,14 @@ io.on('connection', (socket: Socket) => {
     }
   });
 
-  socket.on('onMulligan', (data) => {
+  socket.once('onMulligan', (data) => {
     player.mulligan = true;
     console.log(
       '[INFO] Player ' + player.client.id + ' mulliganed: ' + data.mulligan
     );
     if (game?.bothPlayersMulliganed()) {
       game?.broadcastPacket("mulliganDone", {});
+      player.setLifeCards();
       const personWhoGoesFirst = game?.getPlayer(game.whoseTurn)?.client.id;
       game?.broadcastChat(
         "Server: Game started! \nPlayer " + personWhoGoesFirst + " goes first."
