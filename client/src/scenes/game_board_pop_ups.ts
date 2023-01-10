@@ -123,7 +123,7 @@ export function displayMulliganSelection(scene: GameBoard) {
       );
     })
   );
-  scene.client.once('mulliganDone', () => {
+  scene.client.on('mulliganDone', () => {
     rect.destroy();
     mulliganText.destroy();
     mulliganButton.destroy();

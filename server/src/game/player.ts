@@ -24,6 +24,7 @@ export default class Player {
   leader: Card | undefined = undefined;
   characterArea: SyncCardList = new SyncCardList("characterArea");
   donDeck: SyncCardList = new SyncCardList("donDeck");
+  donArea: SyncCardList = new SyncCardList("donArea");
   hand: SyncCardList = new SyncCardList("hand");
   trash: SyncCardList = new SyncCardList("trash");
 
@@ -43,6 +44,12 @@ export default class Player {
     }
     this.deck = new SyncCardList("deck", deckList);
     deckList.push(tempLeaderId)
+
+    // Init the don deck with 10 don cards
+    for (let i = 0; i < 10; i++) {
+      const card = new Card("donCardAltArt");
+      this.donDeck.push(card);
+    }
   }
 
   /*
@@ -51,7 +58,7 @@ export default class Player {
   initListeners() {
     this.client.on("drawCard", (data) => {
       let amount = data.amount || 1;
-      console.log(`Player ${this.username} requested to draw ${amount} card(s)`);
+      console.log(`[INFO] Player ${this.username} requested to draw ${amount} card(s)`);
       this.drawCard(amount);
 
       // Update the opponent's client
@@ -60,13 +67,23 @@ export default class Player {
       }, this);
     });
 
+    this.client.on("drawDon", (data) => {
+      let amount = data.amount;
+      console.log(`[INFO] Player ${this.username} requested to draw ${amount} Don!!`);
+      this.drawDon(amount);
+
+      this.game?.broadcastPacketExceptSelf("opponentDrawDon", {
+        amount: amount,
+      }, this);
+    });
+
     this.client.on("shuffleHandToDeck", () => {
-      console.log(`Player ${this.username} requested to shuffle hand to deck`);
+      console.log(`[INFO] Player ${this.username} requested to shuffle hand to deck`);
       this.shuffleHandToDeck();
     });
 
     this.client.on('shuffleDeck', () => {
-      console.log(`Player ${this.username} requested to shuffle deck`);
+      console.log(`[INFO] Player ${this.username} requested to shuffle deck`);
       this.deck.shuffle();
     });
   }
@@ -81,6 +98,18 @@ export default class Player {
     }
     // Update the client's hand
     this.hand.update(this.client);
+  }
+
+  drawDon(amount: number = 1) {
+    for (let i = 0; i < amount; i++) {
+      if (this.donDeck.size() === 0) {
+        break;
+      }
+      const card = this.donDeck.popTopCard();
+      this.donArea.push(card);
+    }
+
+    this.donArea.update(this.client);
   }
 
   removeCardFromHand(index: number) {
@@ -122,4 +151,13 @@ export default class Player {
   getHeathLeft() {
     return this.lifeCards.size();
   }
+
+  getActiveDonLeft() {
+    return this.donArea.size();
+  }
+
+  getDonTotal() {
+    return this.donArea.size();
+  }
+
 }

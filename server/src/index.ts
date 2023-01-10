@@ -114,9 +114,7 @@ io.on('connection', (socket: Socket) => {
       game?.broadcastChat(
         "Server: Game started! \nPlayer " + personWhoGoesFirst + " goes first."
       );
-      game?.broadcastPacket('changeTurn', {
-        personToChangeTurnTo: personWhoGoesFirst,
-      });
+      game?.sendChangeTurnPacket(personWhoGoesFirst);
     }
   });
 

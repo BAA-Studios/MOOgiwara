@@ -28,14 +28,14 @@ export default class GameHandler {
   playerLeaderArea: Phaser.GameObjects.Container;
   opponentLeaderArea: Phaser.GameObjects.Container;
 
-  playerDonArea: Phaser.GameObjects.Rectangle;
-  opponentDonArea: Phaser.GameObjects.Rectangle;
+  playerDonArea: Phaser.GameObjects.Container;
+  opponentDonArea: Phaser.GameObjects.Container;
 
   playerLifeArea: Phaser.GameObjects.Container;
   opponentLifeArea: Phaser.GameObjects.Container;
 
-  playerDonDeckArea: Phaser.GameObjects.Rectangle;
-  opponentDonDeckArea: Phaser.GameObjects.Rectangle;
+  playerDonDeckArea: Phaser.GameObjects.Container;
+  opponentDonDeckArea: Phaser.GameObjects.Container;
 
   constructor(scene: GameBoard, player: Player, opponent: Player, client: any) {
     this.player = player;
@@ -59,15 +59,16 @@ export default class GameHandler {
     this.playerLeaderArea = this.scene.add.container(947, 704);
     this.opponentLeaderArea = this.scene.add.container(947, 243);
 
-    // this.playerDonArea = this.scene.add.container();
-    // this.opponentDonArea = this.scene.add.container();
+    this.playerDonArea = this.scene.add.container(630, 858);
+    this.opponentDonArea = this.scene.add.container(630, 93);
 
-    // this.playerDonDeckArea = this.scene.add.container();
-    // this.opponentDonDeckArea = this.scene.add.container();
+    this.playerDonDeckArea = this.scene.add.container(722, 705);
+    this.opponentDonDeckArea = this.scene.add.container(722, 241);
 
     this.playerLifeArea = this.scene.add.container(572, 555);
     this.opponentLifeArea = this.scene.add.container(572, 247);
 
+    this.scene.children.bringToTop(this.playerDonArea);
     // render the hand above the leader area
     this.scene.children.bringToTop(this.playerHandArea);
 
@@ -81,6 +82,17 @@ export default class GameHandler {
       .setOrigin(0, 0);
     oppCardBack.flipY = true;
     this.opponentDeckArea.add(oppCardBack);
+
+    // Render the card back on don deck area for both sides
+    const donCardBack = new Card(this.player, this.scene, 'optcg_card_back')
+      .setScale(0.16)
+      .setOrigin(0, 0);
+    this.playerDonDeckArea.add(donCardBack);
+    const oppDonCardBack = new Card(this.opponent, this.scene, 'optcg_card_back')
+      .setScale(0.16)
+      .setOrigin(0, 0);
+    oppDonCardBack.flipY = true;
+    this.opponentDonDeckArea.add(oppDonCardBack);
     
     // Render both player's Leader cards
     if (this.player.leader && this.opponent.leader) {
@@ -102,15 +114,26 @@ export default class GameHandler {
       this.player.handleDrawCard(data.card);
     });
 
+    this.client.on("drawDon", (data: any) => {
+      const donCard = new Card(this.player, this.scene, "donCardAltArt");
+      donCard.setOrigin(0, 0);
+      donCard.setScale(0.16);
+      donCard.setInteractive();
+      donCard.initInteractables();
+      donCard.indexInHand = this.playerDonArea.length;
+      // TODO: Animate a card going from the donDeckArea to the donArea in their respective location
+      this.playerDonArea.add(donCard);
+    });
+
     this.client.on('changeTurn', (data: any) => {
       this.changeTurn(data);
     });
 
-    this.client.once('mulligan', (data: any) => {
+    this.client.on('mulligan', (data: any) => {
       this.player.requestDrawCard(5);
 
       // TODO: don't make this a delayed call and instead make it a promise
-      this.scene.time.delayedCall(1000, () => {
+    this.scene.time.delayedCall(1000, () => {
         this.mulligan(data);
       });
     });
@@ -140,10 +163,42 @@ export default class GameHandler {
         this.opponentHandArea.removeAt(this.opponentHandArea.length - 1, true);
       }
     });
+
+    this.client.on("opponentDrawDon", (data: any) => {
+      let amount = data.amount;
+      for (let i = 0; i < amount; i++) {
+        const donCard = new Card(this.opponent, this.scene, 'donCardAltArt')
+        .setOrigin(0, 0)
+        .setScale(0.16);
+        donCard.flipY = true;
+        donCard.setInteractive();
+        donCard.initInteractables(false);
+
+        this.opponent.donArea.pushBack(donCard);
+
+        donCard.indexInHand = this.opponent.donArea.length;
+        this.opponentDonArea.add(donCard);
+      }
+    });
   }
 
   changeTurn(data: any) {
     if (data.personToChangeTurnTo === this.player.getUniqueId()) {
+      // TODO: REFRESH PHASE
+
+      // DRAW PHASE
+      if (data.turnNumber !== 0) { // The player going first on their first turn does not draw a card for their turn
+        this.player.requestDrawCard();
+      }
+
+      // DON PHASE
+      let donAmountToDraw = 2;
+      if (data.turnNumber === 0) { // first turn for the person going first
+        donAmountToDraw--;
+      }
+      this.player.requestDrawDon(donAmountToDraw);
+
+      // MAIN PHASE
       this.player.playerState = PlayerState.MAIN_PHASE;
     } else {
       this.player.playerState = PlayerState.OPPONENTS_TURN;
@@ -160,9 +215,9 @@ export default class GameHandler {
       case 'hand':
         this.player.updateHand(this.scene, cards);
         break;
-      // case 'donDeck':
-      //   this.player.updateDonDeck(data);
-      //   break;
+      case 'donArea':
+        this.player.updateDonArea(this.scene, cards);
+        break;
       // case 'trash':
       //   this.player.updateTrash(data);
       //   break;

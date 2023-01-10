@@ -40,6 +40,7 @@ export default class GameBoard extends Phaser.Scene {
     this.load.image('standardButton', './buttons/Standard Button.png');
     this.load.image('loading', './images/mugiwara_logo_temp.png');
     this.load.image('optcg_card_back', './cards/optcg_card_back.jpg');
+    this.load.image('donCardAltArt', './cards/donCardAltArt.png');
 
     const cardsToRender = new Set(this.deckList);
     const opponentCardsToRender = new Set(this.opponentDeckList);
@@ -73,7 +74,6 @@ export default class GameBoard extends Phaser.Scene {
       }
     }
 
-    // TODO: Initialize opponent's cards here
     // TODO: DRY this code up
     // Find opponent's leader card
     for (const cardId of this.opponentDeckList) {

@@ -84,22 +84,41 @@ export default class Card extends Phaser.GameObjects.Image {
     this.flipY = false;
   }
 
-  initInteractables() {
-    this.scene.input.setDraggable(this);
+  initInteractables(draggable: boolean = true) {
 
-    this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
-      if (gameObject.owner.playerState != PlayerState.MAIN_PHASE) {
-        return;
-      }
-      if(!gameObject.isDraggable()) {
-        return;
-      }
-      gameObject.isDragging = true;
-      gameObject.x = dragX;
-      gameObject.y = dragY;
-      // TODO: Add logic to check if card is being dragged over a valid zone
-    });
+    if (draggable) {
+      this.scene.input.setDraggable(this);
 
+      this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+        if (gameObject.owner.playerState != PlayerState.MAIN_PHASE) {
+          return;
+        }
+        if(!gameObject.isDraggable()) {
+          return;
+        }
+        gameObject.isDragging = true;
+        gameObject.x = dragX;
+        gameObject.y = dragY;
+        // TODO: Add logic to check if card is being dragged over a valid zone
+      });
+
+      this.on('dragend', () => {
+        // TODO: Add logic to check if card has been dragged over a valid zone
+        // Smoothly return the object to its original position
+        this.isDragging = false;
+        if (!this.isDraggable()) {
+          return;
+        }
+        this.scene.tweens.add({
+          targets: this,
+          x: this.calculatePositionInHand(),
+          y: 0,
+          duration: 200,
+          ease: 'Power2',
+        });
+      });
+    }
+    
     // Adding/Removing a highlight when players hover over a card in their hand
     this.on('pointerover', () => {
       this.setTint(0xbebebe);
@@ -115,22 +134,6 @@ export default class Card extends Phaser.GameObjects.Image {
         displayCardInHigherRes(this.scene, this.cardId);
         return;
       }
-    });
-
-    this.on('dragend', () => {
-      // TODO: Add logic to check if card has been dragged over a valid zone
-      // Smoothly return the object to its original position
-      this.isDragging = false;
-      if (!this.isDraggable()) {
-        return;
-      }
-      this.scene.tweens.add({
-        targets: this,
-        x: this.calculatePositionInHand(),
-        y: 0,
-        duration: 200,
-        ease: 'Power2',
-      });
     });
   }
 }

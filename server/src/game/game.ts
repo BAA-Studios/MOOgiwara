@@ -8,6 +8,7 @@ export default class Game {
   playerOne: Player | undefined;
   playerTwo: Player | undefined;
   whoseTurn = 1;
+  turnNumber = 0;
 
   constructor(playerOne?: Player, playerTwo?: Player) {
     this.playerOne = playerOne;
@@ -46,6 +47,23 @@ export default class Game {
     } else if (!this.playerTwo) {
       this.playerTwo = player;
     }
+  }
+
+  changeTurn() {
+    if (this.whoseTurn === 1) {
+      this.whoseTurn = 2;
+    } else {
+      this.whoseTurn = 1;
+    }
+    this.turnNumber++;
+    this.sendChangeTurnPacket(this.getPlayer(this.whoseTurn)?.client.id);
+  }
+
+  sendChangeTurnPacket(playerId: string | undefined) {
+    this.broadcastPacket('changeTurn', {
+      personToChangeTurnTo: playerId,
+      turnNumber: this.turnNumber,
+    });
   }
 
   broadcastChat(message: string) {
