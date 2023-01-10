@@ -21,6 +21,7 @@ export default class Card extends Phaser.GameObjects.Image {
   isDragging: boolean;
   category: string;
   life: number;
+  isDonCard: boolean;
 
   constructor(
     owner: Player,
@@ -52,6 +53,7 @@ export default class Card extends Phaser.GameObjects.Image {
     this.dragY = 0;
 
     this.isDragging = false;
+    this.isDonCard = this.name == "Don!!";
   }
 
   calculatePositionInHand() {
@@ -65,7 +67,21 @@ export default class Card extends Phaser.GameObjects.Image {
 
   isDraggable() {
     // TODO: Finish all conditionals
-    return this.isInHand();
+    return this.isInHand() || this.isDonCard;
+  }
+
+  rest() {
+    this.isResting = true;
+    this.setRotation(Math.PI / 2);
+    this.flipX = true;
+    this.flipY = true;
+  }
+
+  unRest() {
+    this.isResting = false;
+    this.setRotation(0);
+    this.flipX = false;
+    this.flipY = false;
   }
 
   initInteractables() {
