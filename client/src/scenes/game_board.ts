@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
-import Player from '../game/player';
+import Player, { PlayerState } from '../game/player';
 import GameHandler from '../handlers/game_handler';
 import UiHandler from '../handlers/ui_handler';
 import ChatHandler from '../handlers/chat_handler';
 import { Socket } from 'socket.io-client';
 import Card from '../game/card';
+import { displayCardInHigherRes } from './game_board_pop_ups';
+import { identifyLeaderCard } from '../utility/util';
 
 export default class GameBoard extends Phaser.Scene {
   gameHandler: GameHandler;
@@ -34,18 +36,23 @@ export default class GameBoard extends Phaser.Scene {
   preload() {
     this.load.image('background', './images/game_board.png');
     this.load.html('chatbox', './src/game/chat/chat.html');
+    this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
+    this.load.image('standardButton', './buttons/Standard Button.png');
+    this.load.image('loading', './images/mugiwara_logo_temp.png');
+    this.load.image('optcg_card_back', './cards/optcg_card_back.jpg');
+    this.load.image('donCardAltArt', './cards/donCardAltArt.png');
 
-    let cardsToRender = new Set(this.deckList);
-    let opponentCardsToRender = new Set(this.opponentDeckList);
+    const cardsToRender = new Set(this.deckList);
+    const opponentCardsToRender = new Set(this.opponentDeckList);
     // Loads our deck
-    for (let cardId of cardsToRender) {
-      this.load.image(cardId, './cards/' + cardId + ".png");
+    for (const cardId of cardsToRender) {
+      this.load.image(cardId, './cards/' + cardId + '.png');
+      // Identify the leader card and remove it from the decklist
     }
     // Loads the opponent's deck
-    for (let cardId of opponentCardsToRender) {
-      this.load.image(cardId, './cards/' + cardId + ".png");
+    for (const cardId of opponentCardsToRender) {
+      this.load.image(cardId, './cards/' + cardId + '.png');
     }
-    // TODO: load all of the opponent's cards too
   }
 
   create() {
@@ -53,44 +60,49 @@ export default class GameBoard extends Phaser.Scene {
     this.input.mouse?.disableContextMenu();
     this.add.image(0, 0, 'background').setOrigin(0, 0);
 
-    // Create a translucent gray background
-    for (let cardId of this.deckList) {
-      // Set config of each card here
-      let card = new Card(this.player, this, cardId).setOrigin(0, 0).setScale(0.25);
-      card.setInteractive();
-      this.input.setDraggable(card);
-
-      // Setting the location of where the card should return if its not played or released
-      card.on('pointerdown', (pointer) => {
-        if (pointer.rightButtonDown()) {
-          this.displayCardInHigherRes(card.cardId);
-          return;
-        }
-      });
-
-      card.on('dragend', () => {
-        // TODO: Add logic to check if card has been dragged over a valid zone
-        // Smoothly return the object to its original position
-        this.tweens.add({
-          targets: card,
-          x: card.calculatePositionInHand(),
-          y: 0,
-          duration: 200,
-          ease: 'Power2'
-        });
-      });
-
-      this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
-        gameObject.is_dragging = true;
-        gameObject.x = dragX;
-        gameObject.y = dragY;
-        // TODO: Add logic to check if card is being dragged over a valid zone
-      });
-
-      this.player.addTopOfDeck(card);
-      // TODO: Initialize opponent's cards here
+    // Identifying the leader card
+    for (const cardId of this.deckList) {
+      const card = new Card(this.player, this, cardId);
+      // TODO(FIX): This is a crude way of identifying the leader from a decklist
+      // The deck builder will use a specific syntax for decks that will allow us to identify the leader card faster
+      if (card.category === 'LEADER') {
+        card.setOrigin(0, 0).setScale(0.25).setInteractive();
+        card.initInteractables();
+        card.setScale(0.16);
+        this.player.leader = card;
+        continue;
+      }
     }
+
+    // TODO: DRY this code up
+    // Find opponent's leader card
+    for (const cardId of this.opponentDeckList) {
+      if (identifyLeaderCard(cardId)) {
+        let card = new Card(this.opponent, this, cardId);
+        this.opponent.leader = card
+          .setOrigin(0, 0)
+          .setScale(0.16)
+          .setInteractive();
+        card.category = 'LEADER';
+        card.on('pointerdown', (pointer) => {
+          if (pointer.rightButtonDown()) {
+            displayCardInHigherRes(this, cardId);
+            return;
+          }
+        });
+        // Adding/Removing a highlight when players hover over a card in their hand
+        card.on('pointerover', () => {
+          card.setTint(0xbebebe);
+        });
+
+        card.on('pointerout', () => {
+          card.clearTint();
+        });
+      }
+    }
+
     this.player.shuffleDeck();
+
     // Initialize any UI Here
     this.uiHandler = new UiHandler(this);
     this.uiHandler.initUi();
@@ -109,31 +121,8 @@ export default class GameBoard extends Phaser.Scene {
       this.client
     );
 
-    this.player.drawCard(3, this);
+    this.client.emit("boardFullyLoaded", { lobbyId: this.lobbyId });
 
-    this.client.emit("boardFullyLoaded" , { lobbyId: this.lobbyId });
-
-    this.client.on('changeTurn', (data: any) => {
-      this.gameHandler.changeTurn(data);
-    });
-
-    this.gameHandler.startGame();
-  }
-
-  // Used in game mechanics that require scrying the deck, or displaying something
-  inflateTransparentBackground() {
-    // Creates an interactive rectangle that covers the entire screen
-    return this.add.rectangle(0, 0, 1920, 1080, 0x000000, 0.5).setOrigin(0, 0).setInteractive().setName('transparentBackground');
-  }
-
-  // For when users right click a card in play
-  // Show the image of the card in a higher resolution
-  displayCardInHigherRes(cardId: string) {
-    let rect = this.inflateTransparentBackground();
-    let cardImg = this.add.image(960, 540, cardId).setScale(0.75).setInteractive();
-    rect.on('pointerdown', () => {
-      cardImg.destroy();
-      rect.destroy();
-    });
+    this.gameHandler.initListeners();
   }
 }

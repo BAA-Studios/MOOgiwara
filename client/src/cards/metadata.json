@@ -1,4 +1,38 @@
 {
+    "optcg_card_back": {
+        "Card ID": "cardBack",
+        "Rarity": "-",
+        "Category": "-",
+        "Name": "-",
+        "Life": "-",
+        "Attribute": "-",
+        "Power": "-",
+        "Cost" : "-",
+        "Counter": "-",
+        "Color": "-",
+        "Type": "-",
+        "Effect": "-",
+        "Trigger": "-",
+        "Card Set(s)": "-",
+        "Alternate Art": "-"
+    },
+    "donCardAltArt": {
+        "Card ID": "donCardAltArt",
+        "Rarity": "-",
+        "Category": "-",
+        "Name": "Don!!",
+        "Life": "-",
+        "Attribute": "-",
+        "Power": "-",
+        "Cost" : "-",
+        "Counter": "-",
+        "Color": "-",
+        "Type": "-",
+        "Effect": "-",
+        "Trigger": "-",
+        "Card Set(s)": "-ROMANCE DAWN- [OP01]",
+        "Alternate Art": "-"
+    },
     "OP01-001": {
         "Card ID": "OP01-001",
         "Rarity": "L",

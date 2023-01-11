@@ -2,6 +2,8 @@ import express, { Express } from 'express';
 import { createServer } from 'http';
 import { Socket, Server } from 'socket.io';
 import Player from './game/player';
+// @ts-ignore
+import testDeck from './cards/test_deck.json' assert { type: "json" };
 
 import Game from './game/game';
 
@@ -16,7 +18,7 @@ const io = new Server(server, {
   },
 });
 
-const PORT: number = 3000;
+const PORT = 3000;
 const users: string[] = [];
 const games = new Map<string, Game>();
 
@@ -26,11 +28,11 @@ const games = new Map<string, Game>();
  * @returns     Lobby ID of game instance, if a match has been found; else null
  */
 function findOpenGame(games: Map<string, Game>): string | null {
-  console.log("LOOKING FOR OPEN GAMES")
-  for (let [lobbyId, game] of games) {
-    console.log('ID: ' + lobbyId)
+  console.log("LOOKING FOR OPEN GAMES");
+  for (const [lobbyId, game] of games) {
+    console.log('ID: ' + lobbyId);
     if (!game.isFull()) {
-      console.log("FOUND!")
+      console.log("FOUND!");
       return lobbyId; // Short-circuit if found
     }
   }
@@ -41,7 +43,7 @@ function findOpenGame(games: Map<string, Game>): string | null {
  * Creates a new game, and adds it to the global list of games
  */
 function createNewGame(socketId: string): void {
-  let newGame = new Game();
+  const newGame = new Game();
   games.set(socketId, newGame);
 }
 
@@ -51,7 +53,7 @@ function createNewGame(socketId: string): void {
  * @returns Lobby ID of game instance with one open player slot
  */
 function findMatch(socketId: string): string {
-  let openGame = findOpenGame(games);
+  const openGame = findOpenGame(games);
   if (!openGame) {
     createNewGame(socketId);
     return socketId;
@@ -61,77 +63,58 @@ function findMatch(socketId: string): string {
 
 io.on('connection', (socket: Socket) => {
   console.log('User: ' + socket.id + ' connected');
-  users.push(socket.id);  // TODO: Remove on disconnect - might need to use Set instead of Array?
+  users.push(socket.id); // TODO: Remove on disconnect - might need to use Set instead of Array?
 
-  let userId = socket.id;  // temporary - to convert this to database PK if not guest
-  let lobbyId = findMatch(socket.id);
-  let game = games.get(lobbyId);
+  const userId = socket.id; // temporary - to convert this to database PK if not guest
+  const lobbyId = findMatch(socket.id);
+  const game = games.get(lobbyId);
   console.log('[LOG] USER: ' + socket.id + ' joined game: ' + lobbyId);
-  let player = new Player(socket, userId, lobbyId);
+  const player = new Player(socket, userId, lobbyId, testDeck);
   game?.push(player);
+  player.game = game;
   if (game?.isFull()) {
     // Start the game
-    let playerWhoStartsFirst = Math.floor(Math.random() * 2) + 1;
+    const playerWhoStartsFirst = Math.floor(Math.random() * 2) + 1;
     game.whoseTurn = playerWhoStartsFirst;
     game.playerOne?.client.emit('start', {
       lobbyId: lobbyId,
-      deckList: [
-        "OP01-077_p1",
-        "OP01-076",
-        "OP01-075",
-        "OP01-074",
-        "OP01-073",
-        "OP01-072",
-        "OP01-071",
-        "OP01-070",
-        "OP01-069",
-      ],
-      opponentDeckList: [
-        "OP01-077_p1",
-        "OP01-076",
-        "OP01-075",
-        "OP01-074",
-        "OP01-073",
-        "OP01-072",
-        "OP01-071",
-        "OP01-070",
-        "OP01-069",
-      ]
+      deckList: testDeck,
+      opponentDeckList: testDeck
     });
-    game.playerTwo?.client.emit('start', { 
+    game.playerTwo?.client.emit('start', {
       lobbyId: lobbyId,
-      deckList: [
-        "OP01-077_p1",
-        "OP01-076",
-        "OP01-075",
-        "OP01-074",
-        "OP01-073",
-        "OP01-072",
-        "OP01-071",
-        "OP01-070",
-        "OP01-069",
-      ],
-      opponentDeckList: [
-        "OP01-077_p1",
-        "OP01-076",
-        "OP01-075",
-        "OP01-074",
-        "OP01-073",
-        "OP01-072",
-        "OP01-071",
-        "OP01-070",
-        "OP01-069",
-      ]
+      deckList: testDeck,
+      opponentDeckList: testDeck
     });
+    game.start();
     console.log("[LOG] Game started: " + lobbyId);
   }
 
-  socket.on('boardFullyLoaded', () => {
+  // Packets Received Start ----------------------------
+
+  player.initListeners();
+  
+  socket.once('boardFullyLoaded', () => {
     player.boardReady = true;
-    let personWhoGoesFirst = game?.getPlayer(game.whoseTurn)?.client.id;
+    player.deck.shuffle(); // Shuffle the player's deck
     if (game?.bothPlayersReady()) {
-      game?.broadcastChat("Server: Game started! \nPlayer " + personWhoGoesFirst + " goes first.");
-      game?.broadcastPacket('changeTurn', { personToChangeTurnTo: personWhoGoesFirst });
+      game?.broadcastPacket('mulligan', {});
+    }
+  });
+
+  socket.once('onMulligan', (data) => {
+    player.mulligan = true;
+    console.log(
+      '[INFO] Player ' + player.client.id + ' mulliganed: ' + data.mulligan
+    );
+    if (game?.bothPlayersMulliganed()) {
+      game?.broadcastPacket("mulliganDone", {});
+      player.setLifeCards();
+      const personWhoGoesFirst = game?.getPlayer(game.whoseTurn)?.client.id;
+      game?.broadcastChat(
+        "Server: Game started! \nPlayer " + personWhoGoesFirst + " goes first."
+      );
+      game?.sendChangeTurnPacket(personWhoGoesFirst);
     }
   });
 
@@ -146,13 +129,14 @@ io.on('connection', (socket: Socket) => {
   socket.on('chatMessage', (data) => {
     console.log('Chat message received: ' + data.message);
     // Find the lobby that the players are in
-    let game = games.get(data.lobbyId);
+    const game = games.get(data.lobbyId);
     // Send both players the message
     console.log(game?.playerOne?.client.id);
     console.log(game?.playerTwo?.client.id);
     console.log("Socket ID: " + socket.id);
     game?.broadcastChat(data.message);
   });
+  // Packets Received End ----------------------------
 });
 
 server.listen(PORT, () => {

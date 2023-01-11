@@ -31,7 +31,11 @@ export default class UiHandler {
 
     // TODO: Replace this with the player's username once its implemented
     // Add the player's ID to the bottom left of the screen
-    const playerText = this.scene.add.text(0, 20, 'Player ID: ' + this.scene.player.getUniqueId());
+    const playerText = this.scene.add.text(
+      0,
+      20,
+      'Player ID: ' + this.scene.player.getUniqueId()
+    );
     playerText.setStyle({ fontSize: '16px', fill: '#000000' });
   };
 
