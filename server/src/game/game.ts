@@ -37,8 +37,15 @@ export default class Game {
   }
 
   clearPlayers() {
-    this.playerOne = undefined;
-    this.playerTwo = undefined;
+    if (this.playerOne) {
+      this.playerOne.game = undefined;
+      this.playerOne = undefined;
+      return;
+    }
+    if (this.playerTwo) {
+      this.playerTwo.game = undefined;
+      this.playerTwo = undefined;
+    }
   }
 
   push(player: Player) {
