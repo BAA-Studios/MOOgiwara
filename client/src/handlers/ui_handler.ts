@@ -1,9 +1,14 @@
+import StandardButton from "../game/menu/buttons/standard_button";
 import GameBoard from "../scenes/game_board";
+import { PlayerState } from "../game/player";
 
 export default class UiHandler {
   scene: GameBoard;
+  endTurnButton: StandardButton;
   constructor(scene: GameBoard) {
     this.scene = scene;
+    this.endTurnButton = this.scene.add.existing(new StandardButton(this.scene, 250, 1080/2, 'LOADING...', this.onEndTurn));
+    this.endTurnButton.buttonText.setFontSize(34);
   }
 
   initUi = () => {
@@ -37,9 +42,18 @@ export default class UiHandler {
       'Player ID: ' + this.scene.player.getUniqueId()
     );
     playerText.setStyle({ fontSize: '16px', fill: '#000000' });
+
   };
 
   onEndTurn = () => {
-    console.log("End this player's turn");
+    console.log("[INFO] End Turn Button Clicked");
+    if (this.scene.player.playerState !== PlayerState.MAIN_PHASE) {
+      return;
+    }
+    this.endTurnButton.buttonText.setText("OPPONENT'S TURN");
+    this.endTurnButton.buttonText.setFontSize(34);
+    this.scene.client.emit("endTurn", { 
+      player: this.scene.player.getUniqueId() 
+    });
   };
 }

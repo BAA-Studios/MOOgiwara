@@ -8,6 +8,7 @@ export enum PlayerState {
   OPPONENTS_TURN,
   MAIN_PHASE,
   COUNTER_PHASE,
+  REFRESH_PHASE,
   DON_PHASE,
   DRAW_PHASE,
 }
@@ -119,12 +120,16 @@ export default class Player {
   }
 
   updateDonArea(scene: GameBoard, cardList) {
-    // Destroy all cards in hand
-    while (!this.donArea.empty()) {
-      this.removeCardFromHand(0, scene);
-    }
+    // Destroy all cards in donArea
+    this.donArea.clear();
+    scene.gameHandler.playerDonArea.removeAll(true);
     // Add new cards to hand
     let cards = cardList.W;
+    if (scene.gameHandler.playerDonDeckArea.length > 0) {
+      if (cards.length === 10) {
+        scene.gameHandler.playerDonDeckArea.removeAll(true);
+      }
+    }
     for (let i = 0; i < cardList.i; i++) {
       const card = new Card(this, scene, cards[i].id)
       .setOrigin(0, 0)
@@ -136,8 +141,7 @@ export default class Player {
       this.donArea.pushBack(card);
       scene.gameHandler.playerDonArea.add(card);
       card.indexInHand = this.donArea.size() - 1;
-      // TODO: Magic Number 200
-      card.setPosition(i * 200, 0);
+      card.setPosition(card.calculatePositionInHand(), 0);
       card.objectId = cards[i].objectId;
     }
   }

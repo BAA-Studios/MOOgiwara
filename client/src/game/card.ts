@@ -3,6 +3,7 @@ import Player from "./player";
 import cardMetadata from '../cards/metadata.json';
 import { displayCardInHigherRes } from "../scenes/game_board_pop_ups";
 import { PlayerState } from "./player";
+import { throws } from "assert";
 
 export default class Card extends Phaser.GameObjects.Image {
   cardId: string;
@@ -58,6 +59,9 @@ export default class Card extends Phaser.GameObjects.Image {
 
   calculatePositionInHand() {
     // TODO: Fix magic number 100
+    if (this.isDonCard) {
+      return this.indexInHand * 75;
+    }
     return this.indexInHand * 100;
   }
 

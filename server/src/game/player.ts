@@ -70,10 +70,12 @@ export default class Player {
     this.client.on("drawDon", (data) => {
       let amount = data.amount;
       console.log(`[INFO] Player ${this.username} requested to draw ${amount} Don!!`);
-      this.drawDon(amount);
-
+      if (this.donDeck.size() === 0) { 
+        return;
+      }
+      let serverAmountCalculated = this.drawDon(amount);
       this.game?.broadcastPacketExceptSelf("opponentDrawDon", {
-        amount: amount,
+        amount: serverAmountCalculated,
       }, this);
     });
 
@@ -85,6 +87,12 @@ export default class Player {
     this.client.on('shuffleDeck', () => {
       console.log(`[INFO] Player ${this.username} requested to shuffle deck`);
       this.deck.shuffle();
+    });
+
+    this.client.on('endTurn', () => {
+      console.log(`[INFO] Player ${this.username} requested to end turn`);
+      this.game?.broadcastChat(`${this.username} ended their turn.`);
+      this.game?.changeTurn();
     });
   }
 
@@ -101,15 +109,18 @@ export default class Player {
   }
 
   drawDon(amount: number = 1) {
+    let cardsDrawn = 0;
     for (let i = 0; i < amount; i++) {
       if (this.donDeck.size() === 0) {
         break;
       }
       const card = this.donDeck.popTopCard();
       this.donArea.push(card);
+      cardsDrawn++;
     }
 
     this.donArea.update(this.client);
+    return cardsDrawn;
   }
 
   removeCardFromHand(index: number) {

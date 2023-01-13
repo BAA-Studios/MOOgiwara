@@ -132,8 +132,8 @@ export default class GameHandler {
     this.client.on('mulligan', (data: any) => {
       this.player.requestDrawCard(5);
 
-      // TODO: don't make this a delayed call and instead make it a promise
-    this.scene.time.delayedCall(1000, () => {
+        // TODO: don't make this a delayed call and instead make it a promise
+      this.scene.time.delayedCall(1000, () => {
         this.mulligan(data);
       });
     });
@@ -176,8 +176,13 @@ export default class GameHandler {
 
         this.opponent.donArea.pushBack(donCard);
 
-        donCard.indexInHand = this.opponent.donArea.length;
+        donCard.indexInHand = this.opponent.donArea.length-1;
+        donCard.setPosition(donCard.indexInHand*75, 0);
         this.opponentDonArea.add(donCard);
+        
+        if (this.opponentDonArea.length === 10) {
+          this.opponentDonDeckArea.removeAll(true);
+        }
       }
     });
   }
@@ -185,21 +190,26 @@ export default class GameHandler {
   changeTurn(data: any) {
     if (data.personToChangeTurnTo === this.player.getUniqueId()) {
       // TODO: REFRESH PHASE
-
+      this.player.playerState = PlayerState.REFRESH_PHASE;
       // DRAW PHASE
       if (data.turnNumber !== 0) { // The player going first on their first turn does not draw a card for their turn
+        this.player.playerState = PlayerState.DRAW_PHASE;
         this.player.requestDrawCard();
       }
 
       // DON PHASE
       let donAmountToDraw = 2;
-      if (data.turnNumber === 0) { // first turn for the person going first
+      if (data.turnNumber === 0) { // first turn for the person going first only gains one Don!!
         donAmountToDraw--;
       }
+      this.player.playerState = PlayerState.DON_PHASE;
       this.player.requestDrawDon(donAmountToDraw);
 
       // MAIN PHASE
       this.player.playerState = PlayerState.MAIN_PHASE;
+      // Reset the end turn button
+      this.scene.uiHandler.endTurnButton.buttonText.setText("END TURN");
+      this.scene.uiHandler.endTurnButton.buttonText.setFontSize(34);
     } else {
       this.player.playerState = PlayerState.OPPONENTS_TURN;
     }
