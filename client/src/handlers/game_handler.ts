@@ -22,8 +22,8 @@ export default class GameHandler {
   playerDeckArea: Phaser.GameObjects.Container;
   opponentDeckArea: Phaser.GameObjects.Container;
 
-  playerTrashArea: Phaser.GameObjects.Rectangle;
-  opponentTrashArea: Phaser.GameObjects.Rectangle;
+  playerTrashArea: Phaser.GameObjects.Container;
+  opponentTrashArea: Phaser.GameObjects.Container;
 
   playerLeaderArea: Phaser.GameObjects.Container;
   opponentLeaderArea: Phaser.GameObjects.Container;
@@ -36,6 +36,8 @@ export default class GameHandler {
 
   playerDonDeckArea: Phaser.GameObjects.Container;
   opponentDonDeckArea: Phaser.GameObjects.Container;
+
+  playableCharacterArea: Phaser.GameObjects.Graphics; // This is the location of the character area in a rectangle
 
   constructor(scene: GameBoard, player: Player, opponent: Player, client: any) {
     this.player = player;
@@ -67,6 +69,12 @@ export default class GameHandler {
 
     this.playerLifeArea = this.scene.add.container(572, 555);
     this.opponentLifeArea = this.scene.add.container(572, 247);
+
+    // This is the location of the character area in a rectangle
+    this.playableCharacterArea = this.scene.add.graphics();
+    this.playableCharacterArea.fillStyle(0x00ff00, 0.3);
+    this.playableCharacterArea.fillRoundedRect(717, 552, 519, 141, 18);
+    this.playableCharacterArea.setVisible(false);
 
     this.scene.children.bringToTop(this.playerDonArea);
     // render the hand above the leader area
@@ -109,11 +117,12 @@ export default class GameHandler {
       this.updateCardList(data.cards, data.type);
     });
 
-    // The server sends a card to be drawn
+    // CURRENTLY DOES NOTHING
     this.client.on("drawCard", (data: any) => {
       this.player.handleDrawCard(data.card);
     });
 
+    // CURRENTLY DOES NOTHING
     this.client.on("drawDon", (data: any) => {
       const donCard = new Card(this.player, this.scene, "donCardAltArt");
       donCard.setOrigin(0, 0);
@@ -130,10 +139,7 @@ export default class GameHandler {
     });
 
     this.client.on('mulligan', (data: any) => {
-      this.player.requestDrawCard(5);
-
-        // TODO: don't make this a delayed call and instead make it a promise
-      this.scene.time.delayedCall(1000, () => {
+      this.player.requestDrawCard(this.scene, 5, () => {
         this.mulligan(data);
       });
     });
@@ -179,7 +185,7 @@ export default class GameHandler {
         donCard.indexInHand = this.opponent.donArea.length-1;
         donCard.setPosition(donCard.indexInHand*75, 0);
         this.opponentDonArea.add(donCard);
-        
+
         if (this.opponentDonArea.length === 10) {
           this.opponentDonDeckArea.removeAll(true);
         }
@@ -194,7 +200,7 @@ export default class GameHandler {
       // DRAW PHASE
       if (data.turnNumber !== 0) { // The player going first on their first turn does not draw a card for their turn
         this.player.playerState = PlayerState.DRAW_PHASE;
-        this.player.requestDrawCard();
+        this.player.requestDrawCard(this.scene);
       }
 
       // DON PHASE
@@ -212,6 +218,8 @@ export default class GameHandler {
       this.scene.uiHandler.endTurnButton.buttonText.setFontSize(34);
     } else {
       this.player.playerState = PlayerState.OPPONENTS_TURN;
+      this.scene.uiHandler.endTurnButton.buttonText.setText("OPPONENT'S TURN");
+      this.scene.uiHandler.endTurnButton.buttonText.setFontSize(34);
     }
   }
 
@@ -231,6 +239,22 @@ export default class GameHandler {
       // case 'trash':
       //   this.player.updateTrash(data);
       //   break;
+    }
+  }
+
+  highlightValidZones(card: Card) {
+    if (card.isCharacterCard()) {
+      // For some reason, setting alpha anything that isn't 0 doesn't work
+      if (this.playableCharacterArea.visible) {
+        return;
+      }
+      this.playableCharacterArea.setVisible(true);
+    }
+  }
+
+  unHighlightValidZones(card: Card) {
+    if (card.isCharacterCard()) {
+      this.playableCharacterArea.setVisible(false);
     }
   }
 }

@@ -32,7 +32,6 @@ export default class UiHandler {
       backButton.setStyle({ fill: '#000000' });
     });
 
-    // TODO: Create a button to go back to end turn in the middle of the screen
 
     // TODO: Replace this with the player's username once its implemented
     // Add the player's ID to the bottom left of the screen
@@ -50,8 +49,6 @@ export default class UiHandler {
     if (this.scene.player.playerState !== PlayerState.MAIN_PHASE) {
       return;
     }
-    this.endTurnButton.buttonText.setText("OPPONENT'S TURN");
-    this.endTurnButton.buttonText.setFontSize(34);
     this.scene.client.emit("endTurn", { 
       player: this.scene.player.getUniqueId() 
     });

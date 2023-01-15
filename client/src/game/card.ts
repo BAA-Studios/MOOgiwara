@@ -3,10 +3,10 @@ import Player from "./player";
 import cardMetadata from '../cards/metadata.json';
 import { displayCardInHigherRes } from "../scenes/game_board_pop_ups";
 import { PlayerState } from "./player";
-import { throws } from "assert";
 
 export default class Card extends Phaser.GameObjects.Image {
   cardId: string;
+  gameBoard: GameBoard;
   objectId: number = 0;
   name: string;
   description: string;
@@ -33,6 +33,7 @@ export default class Card extends Phaser.GameObjects.Image {
     // cardId is to keep this card unique from another card that has the same name and ID
     super(scene, 0, 0, cardId);
     this.cardId = cardId;
+    this.gameBoard = scene;
 
     // TODO: Sanity checks as not all cards may have these attributes and may show up as undefined
     this.category = cardMetadata[cardId]['Category']; // All caps as per the API
@@ -74,6 +75,10 @@ export default class Card extends Phaser.GameObjects.Image {
     return this.isInHand() || this.isDonCard;
   }
 
+  isCharacterCard() {
+    return this.category == 'CHARACTER';
+  }
+
   rest() {
     this.isResting = true;
     this.setRotation(Math.PI / 2);
@@ -100,19 +105,22 @@ export default class Card extends Phaser.GameObjects.Image {
         if(!gameObject.isDraggable()) {
           return;
         }
+        // Glow green/gray on areas where cards can be played
+        this.gameBoard.gameHandler.highlightValidZones(gameObject);
         gameObject.isDragging = true;
         gameObject.x = dragX;
         gameObject.y = dragY;
-        // TODO: Add logic to check if card is being dragged over a valid zone
       });
 
       this.on('dragend', () => {
         // TODO: Add logic to check if card has been dragged over a valid zone
-        // Smoothly return the object to its original position
         this.isDragging = false;
         if (!this.isDraggable()) {
           return;
         }
+        // Unhighlight any zones
+        this.gameBoard.gameHandler.unHighlightValidZones(this);
+        // Smoothly return the object to its original position
         this.scene.tweens.add({
           targets: this,
           x: this.calculatePositionInHand(),
