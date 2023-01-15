@@ -70,6 +70,10 @@ export class SyncCardList {
         return this._cards.getElementByPos(index);
     }
 
+    cards() {
+        return this._cards;
+    }
+
     /*
     * This function updates the client on the cards within this list
     */

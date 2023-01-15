@@ -82,8 +82,7 @@ export function displayMulliganSelection(scene: GameBoard) {
       mulliganButton.disableInteractive();
       
       scene.player.shuffleHandToDeck();
-      scene.player.requestDrawCard(5);
-      scene.time.delayedCall(250, () => {
+      scene.player.requestDrawCard(scene, 5, () => {
         // Destroy old cards displayed to push new hand
         for (const cardImg of cardImgs) {
           cardImg.destroy();

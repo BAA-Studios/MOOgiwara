@@ -7,6 +7,7 @@ export enum PlayerState {
   MULLIGAN,
   OPPONENTS_TURN,
   MAIN_PHASE,
+  ATTACK_PHASE,
   COUNTER_PHASE,
   REFRESH_PHASE,
   DON_PHASE,
@@ -79,10 +80,14 @@ export default class Player {
     this.addToHand(card);
   }
 
-  // Sends a request to the server to draw a card
-  requestDrawCard(amount: number = 1) {
-    this.client.emit("drawCard", {
-      amount: amount
+  // Sends a request to the server to draw a card, and handles the response and any actions after, the default function will do nothing
+  requestDrawCard(scene: GameBoard, amount: number = 1, actionAfter?: Function) {
+    // Using the callback method to determine when the server has finished drawing the card and it has resolved on the client side
+    this.client.emit("drawCard", amount, (data) => {
+      this.updateHand(scene, data.cards)
+      if (actionAfter) {
+        actionAfter();
+      }
     });
   }
 

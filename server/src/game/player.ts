@@ -56,10 +56,14 @@ export default class Player {
   * This function initializes the listeners to client requests
   */
   initListeners() {
-    this.client.on("drawCard", (data) => {
-      let amount = data.amount || 1;
+    this.client.on("drawCard", (amount: number, callback) => {
       console.log(`[INFO] Player ${this.username} requested to draw ${amount} card(s)`);
       this.drawCard(amount);
+
+      callback({
+        cards: this.hand.cards(),
+        type: this.hand.type
+      });
 
       // Update the opponent's client
       this.game?.broadcastPacketExceptSelf("opponentDrawCard", { 
@@ -104,8 +108,6 @@ export default class Player {
       const card = this.deck.popTopCard();
       this.hand.push(card);
     }
-    // Update the client's hand
-    this.hand.update(this.client);
   }
 
   drawDon(amount: number = 1) {
