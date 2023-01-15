@@ -18,7 +18,7 @@ export default class Card extends Phaser.GameObjects.Image {
   isResting: boolean;
   dragX: number;
   dragY: number;
-  indexInHand: number;
+  indexInHand: number; // Misleading name, this is the index of the card, in their respective containers, field, hand, etc.
   isDragging: boolean;
   category: string;
   life: number;
@@ -72,6 +72,9 @@ export default class Card extends Phaser.GameObjects.Image {
 
   isDraggable() {
     // TODO: Finish all conditionals
+    if (this.isResting) {
+      return false;
+    }
     return this.isInHand() || this.isDonCard;
   }
 
@@ -80,13 +83,13 @@ export default class Card extends Phaser.GameObjects.Image {
   }
 
   rest() {
+    this.setOrigin(0, 1)
     this.isResting = true;
     this.setRotation(Math.PI / 2);
-    this.flipX = true;
-    this.flipY = true;
   }
 
   unRest() {
+    this.setOrigin(0, 0)
     this.isResting = false;
     this.setRotation(0);
     this.flipX = false;
@@ -113,13 +116,20 @@ export default class Card extends Phaser.GameObjects.Image {
       });
 
       this.on('dragend', () => {
-        // TODO: Add logic to check if card has been dragged over a valid zone
         this.isDragging = false;
         if (!this.isDraggable()) {
           return;
         }
         // Unhighlight any zones
         this.gameBoard.gameHandler.unHighlightValidZones(this);
+
+        // Check if the card was dropped in a valid zone
+        if (this.gameBoard.gameHandler.checkIfCardWasDroppedInValidZone(this)) {
+          let result = this.owner.playCard(this);
+          if (result) {
+            return;
+          }
+        }
         // Smoothly return the object to its original position
         this.scene.tweens.add({
           targets: this,

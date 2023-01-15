@@ -38,6 +38,7 @@ export default class GameHandler {
   opponentDonDeckArea: Phaser.GameObjects.Container;
 
   playableCharacterArea: Phaser.GameObjects.Graphics; // This is the location of the character area in a rectangle
+  playableCharacterAreaHitBox: Phaser.GameObjects.Rectangle; // This is the hitbox of the character area
 
   constructor(scene: GameBoard, player: Player, opponent: Player, client: any) {
     this.player = player;
@@ -47,7 +48,7 @@ export default class GameHandler {
     // Each container represents an area on the board, we can use to render cards and other game objects
     // TODO: separate all coordinates to a constant file
     this.playerCharacterArea = this.scene.add.container(720, 555);
-    this.opponentCharacterArea = this.scene.add.container(720, 400);
+    this.opponentCharacterArea = this.scene.add.container(720, 392);
 
     this.playerHandArea = this.scene.add.container(515, 996).setInteractive();
     this.opponentHandArea = this.scene.add.container(596, -123);
@@ -76,6 +77,11 @@ export default class GameHandler {
     this.playableCharacterArea.fillRoundedRect(717, 552, 519, 141, 18);
     this.playableCharacterArea.setVisible(false);
 
+    // Used to do hit detection
+    this.playableCharacterAreaHitBox = this.scene.add.rectangle(717, 552, 519, 141, 0x000000);
+    this.playableCharacterAreaHitBox.setOrigin(0, 0);
+    this.playableCharacterAreaHitBox.setVisible(false);
+
     this.scene.children.bringToTop(this.playerDonArea);
     // render the hand above the leader area
     this.scene.children.bringToTop(this.playerHandArea);
@@ -89,6 +95,7 @@ export default class GameHandler {
       .setScale(0.16)
       .setOrigin(0, 0);
     oppCardBack.flipY = true;
+    oppCardBack.flipX = true;
     this.opponentDeckArea.add(oppCardBack);
 
     // Render the card back on don deck area for both sides
@@ -100,6 +107,7 @@ export default class GameHandler {
       .setScale(0.16)
       .setOrigin(0, 0);
     oppDonCardBack.flipY = true;
+    oppDonCardBack.flipX = true;
     this.opponentDonDeckArea.add(oppDonCardBack);
     
     // Render both player's Leader cards
@@ -107,6 +115,7 @@ export default class GameHandler {
       this.playerLeaderArea.add(this.player.leader);
       // Render the opponent's cards upside down
       this.opponent.leader.flipY = true;
+      this.opponent.leader.flipX = true;
       this.opponentLeaderArea.add(this.opponent.leader);
     }
   }
@@ -144,7 +153,11 @@ export default class GameHandler {
       });
     });
 
-    // Opponent rendering related events
+    this.client.on('playCard', (data: any) => {
+      console.log(data);
+    });
+
+    // Opponent rendering related events ---------------------------------------
     this.client.on("opponentDrawCard", (data: any) => {
       let amount = data.amount;
       for (let i = 0; i < amount; i++) {
@@ -191,12 +204,52 @@ export default class GameHandler {
         }
       }
     });
+
+    this.client.on("opponentUpdateCharacterArea", (data: any) => {
+      this.opponentCharacterArea.removeAll(true);
+      for (let i = 0; i < data.cards.i; i++) {
+        const card = new Card(this.opponent, this.scene, data.cards.W[i].id);
+        card.setOrigin(0, 0);
+        card.setScale(0.16);
+        card.flipY = true;
+        card.flipX = true;
+        card.setInteractive();
+        card.initInteractables(false);
+        card.indexInHand = i;
+        card.setPosition(card.calculatePositionInHand(), 0);
+        this.opponentCharacterArea.add(card);
+        if (data.cards.W[i].isResting) {
+          card.rest();
+        }
+      }
+    });
+
+    this.client.on("opponentUpdateDonArea", (data: any) => {
+      this.opponentDonArea.removeAll(true);
+      for (let i = 0; i < data.cards.i; i++) {
+        const card = new Card(this.opponent, this.scene, data.cards.W[i].id);
+        card.setOrigin(0, 0);
+        card.setScale(0.16);
+        card.flipY = true;
+        card.flipX = true;
+        card.setInteractive();
+        card.initInteractables(false);
+        card.indexInHand = i;
+        card.setPosition(card.calculatePositionInHand(), 0);
+        this.opponentDonArea.add(card);
+        if (data.cards.W[i].isResting) {
+          card.rest();
+        }
+      }
+    });
   }
 
   changeTurn(data: any) {
     if (data.personToChangeTurnTo === this.player.getUniqueId()) {
       // TODO: REFRESH PHASE
       this.player.playerState = PlayerState.REFRESH_PHASE;
+      this.player.requestRefreshPhase();
+
       // DRAW PHASE
       if (data.turnNumber !== 0) { // The player going first on their first turn does not draw a card for their turn
         this.player.playerState = PlayerState.DRAW_PHASE;
@@ -236,9 +289,9 @@ export default class GameHandler {
       case 'donArea':
         this.player.updateDonArea(this.scene, cards);
         break;
-      // case 'trash':
-      //   this.player.updateTrash(data);
-      //   break;
+      case 'characterArea':
+        this.player.updateCharacterArea(this.scene, cards);
+        break;
     }
   }
 
@@ -256,5 +309,15 @@ export default class GameHandler {
     if (card.isCharacterCard()) {
       this.playableCharacterArea.setVisible(false);
     }
+  }
+
+  checkIfCardWasDroppedInValidZone(card: Card) {
+    if (card.isCharacterCard()) {
+      // Check if the card is currently within the playableCharacterArea, assuming both are rectangles
+      if (Phaser.Geom.Rectangle.Overlaps(card.getBounds(), this.playableCharacterAreaHitBox.getBounds())) {
+          return true;
+      }
+    }
+    return false;
   }
 }

@@ -17,6 +17,8 @@ export class Card {
     trigger: string;
     cardSets: string;
 
+    isResting = false;
+
     constructor(cardId: string) {
         this.id = cardId;
         // Check if the cardId exists within the metaData if not throw an error
@@ -35,5 +37,9 @@ export class Card {
         this.effect = cardMetadata[cardId]['Effect'];
         this.trigger = cardMetadata[cardId]['Trigger'];
         this.cardSets = cardMetadata[cardId]['Card Set(s)'];
+    }
+
+    isCharacterCard() {
+        return this.category === 'CHARACTER';
     }
 }

@@ -23,7 +23,7 @@ export default class Player {
   deck: Vector<Card> // Players don't need to know the deck, info is stored on server, these will be filled with blank cards
   hand: Vector<Card>;
   trash: Vector<Card>;
-  field: Vector<Card>;
+  characterArea: Vector<Card>;
   donArea: Vector<Card>;
   lifeCards: Vector<Card>; // These will be filled with blank cards, players only need to know the quantity of life cards left
 
@@ -32,7 +32,7 @@ export default class Player {
     this.deck = new Vector<Card>();
     this.hand = new Vector<Card>();
     this.trash = new Vector<Card>();
-    this.field = new Vector<Card>();
+    this.characterArea = new Vector<Card>();
     this.donArea = new Vector<Card>();
     this.lifeCards = new Vector<Card>();
     this.lobbyId = lobbyId;
@@ -103,9 +103,8 @@ export default class Player {
   */
   updateHand(scene: GameBoard, newHand) {
     // Destroy all cards in hand
-    while (!this.hand.empty()) {
-      this.removeCardFromHand(0, scene);
-    }
+    this.hand.clear();
+    scene.gameHandler.playerHandArea.removeAll(true);
     // Add new cards to hand
     let cards = newHand.W;
     for (let i = 0; i < newHand.i; i++) {
@@ -148,6 +147,31 @@ export default class Player {
       card.indexInHand = this.donArea.size() - 1;
       card.setPosition(card.calculatePositionInHand(), 0);
       card.objectId = cards[i].objectId;
+      if (cards[i].isResting) {
+        card.rest();
+      }
+    }
+  }
+
+  updateCharacterArea(scene: GameBoard, cardList) {
+    // Destroy all cards in donArea
+    this.characterArea.clear();
+    scene.gameHandler.playerCharacterArea.removeAll(true);
+    // Add new cards to hand
+    let cards = cardList.W;
+    for (let i = 0; i < cardList.i; i++) {
+      const card = new Card(this, scene, cards[i].id)
+      .setOrigin(0, 0)
+      .setScale(0.16)
+      .setInteractive();
+
+      card.initInteractables(false);
+
+      this.characterArea.pushBack(card);
+      scene.gameHandler.playerCharacterArea.add(card);
+      card.indexInHand = this.characterArea.size() - 1;
+      card.setPosition(card.calculatePositionInHand(), 0);
+      card.objectId = cards[i].objectId;
     }
   }
 
@@ -157,5 +181,31 @@ export default class Player {
 
   shuffleDeck() {
     this.client.emit("shuffleDeck", {});
+  }
+
+  getTotalUnrestedDon() {
+    let total = 0;
+    for (let i = 0; i < this.donArea.size(); i++) {
+      if (!this.donArea.getElementByPos(i).isResting) {
+        total++;
+      }
+    }
+    return total;
+  }
+
+  playCard(card: Card) {
+    if (card.cost > this.getTotalUnrestedDon()) {
+      console.log("Not enough Don!!");
+      return false;
+    }
+    // TODO: Add logic for when the characterArea is full, recycle a card
+    this.client.emit("playCard", {
+      index: card.indexInHand
+    });
+    return true;
+  }
+
+  requestRefreshPhase() {
+    this.client.emit("refreshPhase", {});
   }
 }

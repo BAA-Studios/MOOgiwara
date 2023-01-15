@@ -40,6 +40,10 @@ export class SyncCardList {
         return cardRemoved;
     }
 
+    remove(card: Card) {
+        this._cards.eraseElementByValue(card);
+    }
+
     shuffle() {
         shuffle(this._cards);
     }
@@ -72,6 +76,15 @@ export class SyncCardList {
 
     cards() {
         return this._cards;
+    }
+
+    getCardFromObjectId(objectId: number) {
+        for (let card of this._cards) {
+            if (card.objectId === objectId) {
+                return card;
+            }
+        }
+        return undefined;
     }
 
     /*

@@ -7,6 +7,7 @@ import { SyncCardList } from "../game/sync_card_list";
 import { Card } from "../game/card";
 import { identifyLeaderCard } from "../util/utils";
 import Game from "../game/game";
+import { playCard } from "../cards/card_engine";
 
 export default class Player {
   client: Socket;
@@ -98,6 +99,36 @@ export default class Player {
       this.game?.broadcastChat(`${this.username} ended their turn.`);
       this.game?.changeTurn();
     });
+
+    this.client.on('playCard', (data) => {
+      let cardPlayed = this.hand.get(data.index);
+      if (cardPlayed === undefined) {
+        console.log(`[ERROR] Player ${this.username} tried to play a card that doesn't exist`);
+        return;
+      }
+      console.log(`[INFO] Player ${this.username} requested to play card ${cardPlayed.name}`);
+      // send card to the card engine to determine how it should be played.
+      playCard(this, cardPlayed);
+    });
+
+    this.client.on('refreshPhase', () => {
+      console.log(`[INFO] Player ${this.username} requested to refresh their board (Refresh Phase))`);
+      // Unrest all cards
+      this.characterArea.list().forEach((card) => {
+        card.isResting = false;
+      });
+      this.characterArea.update(this.client);
+      this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
+        cards: this.characterArea.list()
+      }, this);
+      this.donArea.list().forEach((card) => {
+        card.isResting = false;
+      });
+      this.donArea.update(this.client);
+      this.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", { 
+        cards: this.donArea.list() 
+    }, this);
+    });
   }
 
   drawCard(amount: number = 1) {
@@ -165,12 +196,39 @@ export default class Player {
     return this.lifeCards.size();
   }
 
-  getActiveDonLeft() {
-    return this.donArea.size();
+  getUnrestedDonLeft() {
+    let unrestedDon = 0;
+    for (let card of this.donArea.list()) {
+      if (!card.isResting) {
+        unrestedDon++;
+      }
+    }
+    return unrestedDon;
   }
 
   getDonTotal() {
     return this.donArea.size();
   }
 
+  restDon(amount: number = 1) {
+    let unrestedDon = this.getUnrestedDonLeft();
+    if (unrestedDon === 0) {
+      return;
+    }
+    if (amount > unrestedDon) {
+      amount = unrestedDon;
+    }
+    // Rest the cards starting from the back of the list
+    for (let i = this.donArea.size() - 1; i >= 0; i--) {
+      let card = this.donArea.get(i);
+      if (card === undefined) {
+        continue;
+      }
+      if (!card.isResting && amount > 0) {
+        card.isResting = true;
+        amount--;
+      }
+    }
+    this.donArea.update(this.client);
+  }
 }
