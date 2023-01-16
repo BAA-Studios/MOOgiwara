@@ -118,6 +118,7 @@ export default class Player {
         card.isResting = false;
       });
       this.characterArea.update(this.client);
+      this.setSummoningSickness();
       this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
         cards: this.characterArea.list()
       }, this);
@@ -230,5 +231,11 @@ export default class Player {
       }
     }
     this.donArea.update(this.client);
+  }
+
+  setSummoningSickness() {
+    for (let card of this.characterArea.list()) {
+      card.summoningSickness = false;
+    }
   }
 }

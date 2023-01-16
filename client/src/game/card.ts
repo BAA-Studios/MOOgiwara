@@ -23,6 +23,7 @@ export default class Card extends Phaser.GameObjects.Image {
   category: string;
   life: number;
   isDonCard: boolean;
+  summoningSickness: boolean;
 
   constructor(
     owner: Player,
@@ -56,6 +57,7 @@ export default class Card extends Phaser.GameObjects.Image {
 
     this.isDragging = false;
     this.isDonCard = this.name == "Don!!";
+    this.summoningSickness = false;
   }
 
   calculatePositionInHand() {

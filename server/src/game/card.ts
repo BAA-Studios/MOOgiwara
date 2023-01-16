@@ -18,6 +18,7 @@ export class Card {
     cardSets: string;
 
     isResting = false;
+    summoningSickness = false;
 
     constructor(cardId: string) {
         this.id = cardId;
@@ -37,6 +38,8 @@ export class Card {
         this.effect = cardMetadata[cardId]['Effect'];
         this.trigger = cardMetadata[cardId]['Trigger'];
         this.cardSets = cardMetadata[cardId]['Card Set(s)'];
+
+        this.summoningSickness = false;
     }
 
     isCharacterCard() {

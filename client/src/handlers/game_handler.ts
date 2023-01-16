@@ -246,9 +246,13 @@ export default class GameHandler {
 
   changeTurn(data: any) {
     if (data.personToChangeTurnTo === this.player.getUniqueId()) {
-      // TODO: REFRESH PHASE
+      // REFRESH PHASE
       this.player.playerState = PlayerState.REFRESH_PHASE;
       this.player.requestRefreshPhase();
+      // Set all character cards summoning sickness to false
+      this.player.characterArea.forEach((card: Card) => {
+        card.summoningSickness = false;
+      });
 
       // DRAW PHASE
       if (data.turnNumber !== 0) { // The player going first on their first turn does not draw a card for their turn
