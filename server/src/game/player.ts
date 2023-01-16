@@ -127,7 +127,7 @@ export default class Player {
       this.donArea.update(this.client);
       this.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", { 
         cards: this.donArea.list() 
-    }, this);
+      }, this);
     });
   }
 
