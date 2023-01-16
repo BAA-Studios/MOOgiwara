@@ -49,8 +49,7 @@ export default class UiHandler {
     if (this.scene.player.playerState !== PlayerState.MAIN_PHASE) {
       return;
     }
-    this.scene.client.emit("endTurn", { 
-      player: this.scene.player.getUniqueId() 
-    });
+    this.scene.player.playerState = PlayerState.LOADING;
+    this.scene.client.emit("endTurn", { player: this.scene.player.getUniqueId() });
   };
 }
