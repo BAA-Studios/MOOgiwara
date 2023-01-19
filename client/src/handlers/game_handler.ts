@@ -186,17 +186,30 @@ export default class GameHandler {
     this.client.on("opponentDrawCard", (data: any) => {
       let amount = data.amount;
       for (let i = 0; i < amount; i++) {
-        const blankCard = new Card(this.opponent, this.scene, 'optcg_card_back')
-        .setOrigin(0, 0)
-        .setScale(0.25);
+        const blankCard = this.scene.add.existing(new Card(this.opponent, this.scene, 'optcg_card_back'))
+          .setOrigin(0, 0)
+          .setScale(0.16);
         blankCard.flipY = true;
+        blankCard.flipX = true;
 
         this.opponent.addToHand(blankCard);
+        blankCard.indexInHand = this.opponent.hand.length-1;
 
-        blankCard.indexInHand = this.opponentHandArea.length-1;
-        blankCard.setPosition(blankCard.calculatePositionInHand(), 0)
-
-        this.opponentHandArea.add(blankCard);
+        // Animate it going from the deck to the hand
+        blankCard.setPosition(this.opponentDeckArea.x, this.opponentDeckArea.y);
+        
+        this.scene.tweens.add({
+          targets: blankCard,
+          x: this.opponentHandArea.x + blankCard.calculatePositionInHand(),
+          y: -123,
+          scale: 0.25,
+          duration: 1000,
+          ease: 'Power1',
+          onComplete: () => {
+            blankCard.setPosition(blankCard.calculatePositionInHand(), 0)
+            this.opponentHandArea.add(blankCard);
+          }
+        });
       }
     });
 
@@ -205,6 +218,11 @@ export default class GameHandler {
       // Remove last card from the opponent's hand
       for (let i = 0; i < amount; i++) {
         this.opponentHandArea.removeAt(this.opponentHandArea.length - 1, true);
+        this.opponent.hand.eraseElementByPos(this.opponent.hand.length - 1);
+      }
+      // Readjust all the card's indexInHand
+      for (let i = 0; i < this.opponent.hand.length; i++) {
+        this.opponent.hand.getElementByPos(i).indexInHand = i;
       }
     });
 

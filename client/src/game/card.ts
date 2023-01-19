@@ -110,26 +110,12 @@ export default class Card extends Phaser.GameObjects.Image {
     this.flipY = false;
   }
 
-  inflateMoogiwaraLogo(x, y) {
-    let moogiwaraLogo = this.scene.add.image(x, y, 'moogiwara');
-    moogiwaraLogo.setOrigin(0.5, 0.5);
-    moogiwaraLogo.setScale(0);
-    this.scene.tweens.add({
-      targets: moogiwaraLogo,
-      scaleX: .16,
-      scaleY: .16,
-      duration: 250,
-      ease: 'Power2',
-    });
-    this.effects.push(moogiwaraLogo);
-  }
-
-  deflateMoogiwaraLogo() {
-    for (let effect of this.effects) {
-      if (effect.texture.key == 'moogiwara') {
-        this.scene.tweens.killTweensOf(effect);
-      }
-    }
+  highlightBounds() {
+    let boundingBox = this.scene.add.graphics();
+    boundingBox.lineStyle(4, 0x00ff00);
+    boundingBox.strokeRectShape(this.getBounds());
+    boundingBox.setAlpha(0.3);
+    return boundingBox;
   }
 
   initInteractables(draggable: boolean = true) {
