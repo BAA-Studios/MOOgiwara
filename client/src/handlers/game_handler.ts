@@ -51,7 +51,7 @@ export default class GameHandler {
     this.opponentCharacterArea = this.scene.add.container(720, 392);
 
     this.playerHandArea = this.scene.add.container(515, 996).setInteractive();
-    this.opponentHandArea = this.scene.add.container(596, -123);
+    this.opponentHandArea = this.scene.add.container(515, -123);
 
     this.playerDeckArea = this.scene.add.container(1253, 704);
     this.opponentDeckArea = this.scene.add.container(1253, 242);
@@ -201,13 +201,13 @@ export default class GameHandler {
         this.scene.tweens.add({
           targets: blankCard,
           x: this.opponentHandArea.x + blankCard.calculatePositionInHand(),
-          y: -123,
+          y: this.opponentHandArea.y,
           scale: 0.25,
-          duration: 1000,
+          duration: 750,
           ease: 'Power1',
           onComplete: () => {
-            blankCard.setPosition(blankCard.calculatePositionInHand(), 0)
             this.opponentHandArea.add(blankCard);
+            blankCard.setPosition(blankCard.calculatePositionInHand(), 0)
           }
         });
       }
@@ -229,18 +229,29 @@ export default class GameHandler {
     this.client.on("opponentDrawDon", (data: any) => {
       let amount = data.amount;
       for (let i = 0; i < amount; i++) {
-        const donCard = new Card(this.opponent, this.scene, 'donCardAltArt')
-        .setOrigin(0, 0)
-        .setScale(0.16);
+        const donCard = this.scene.add.existing(new Card(this.opponent, this.scene, 'donCardAltArt'))
+         .setOrigin(0, 0)
+         .setScale(0.16);
         donCard.flipY = true;
-        donCard.setInteractive();
-        donCard.initInteractables(false);
+        donCard.flipX = true;
+        donCard.setPosition(this.opponentDonDeckArea.x, this.opponentDonDeckArea.y);
 
         this.opponent.donArea.pushBack(donCard);
-
         donCard.indexInHand = this.opponent.donArea.length-1;
-        donCard.setPosition(donCard.indexInHand*75, 0);
-        this.opponentDonArea.add(donCard);
+
+        this.scene.tweens.add({
+          targets: donCard,
+          x: this.opponentDonArea.x + donCard.indexInHand*75,
+          y: this.opponentDonArea.y,
+          duration: 750,
+          ease: 'Power1',
+          onComplete: () => {
+            donCard.setPosition(donCard.indexInHand*75, 0);
+            this.opponentDonArea.add(donCard);
+            donCard.setInteractive();
+            donCard.initInteractables(false);
+          }
+        });
 
         if (this.opponentDonArea.length === 10) {
           this.opponentDonDeckArea.removeAll(true);
