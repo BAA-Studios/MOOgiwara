@@ -100,7 +100,6 @@ export default class GameHandler {
         cardBack.textOnCard.setVisible(true);
         cardBack.textOnCard.setText(cardsInDeck.toString());
         cardBack.textOnCard.setFontFamily("Merriweather");
-        console.log(cardBack.textOnCard.)
         cardBack.textOnCard.setFontSize(50);
         let cardCenterX = this.playerDeckArea.x + (cardBack.displayWidth / 2);
         let cardCenterY = this.playerDeckArea.y + (cardBack.displayHeight / 2);
@@ -233,6 +232,7 @@ export default class GameHandler {
 
     this.client.on("opponentUpdateCharacterArea", (data: any) => {
       this.opponentCharacterArea.removeAll(true);
+      this.opponent.characterArea.clear();
       for (let i = 0; i < data.cards.i; i++) {
         const card = new Card(this.opponent, this.scene, data.cards.W[i].id);
         card.setOrigin(0, 0);
@@ -244,6 +244,7 @@ export default class GameHandler {
         card.indexInHand = i;
         card.setPosition(card.calculatePositionInHand(), 0);
         this.opponentCharacterArea.add(card);
+        this.opponent.characterArea.pushBack(card);
         if (data.cards.W[i].isResting) {
           card.rest();
         }
@@ -272,13 +273,19 @@ export default class GameHandler {
 
   changeTurn(data: any) {
     if (data.personToChangeTurnTo === this.player.getUniqueId()) {
-      // REFRESH PHASE
+      // TODO: REFRESH PHASE
       this.player.playerState = PlayerState.REFRESH_PHASE;
       this.player.requestRefreshPhase();
       // Set all character cards summoning sickness to false
       this.player.characterArea.forEach((card: Card) => {
         card.summoningSickness = false;
       });
+
+      if (data.turnNumber === 2 || data.turnNumber === 3) {
+        if (this.player.leader) {
+          this.player.leader.summoningSickness = false;
+        }
+      }
 
       // DRAW PHASE
       if (data.turnNumber !== 0) { // The player going first on their first turn does not draw a card for their turn
@@ -297,12 +304,10 @@ export default class GameHandler {
       // MAIN PHASE
       this.player.playerState = PlayerState.MAIN_PHASE;
       // Reset the end turn button
-      this.scene.uiHandler.endTurnButton.buttonText.setText("END TURN");
-      this.scene.uiHandler.endTurnButton.buttonText.setFontSize(34);
+      this.scene.uiHandler.setEndButtonToMainPhase();
     } else {
       this.player.playerState = PlayerState.OPPONENTS_TURN;
-      this.scene.uiHandler.endTurnButton.buttonText.setText("OPPONENT'S TURN");
-      this.scene.uiHandler.endTurnButton.buttonText.setFontSize(34);
+      this.scene.uiHandler.setEndButtonToOpponentsTurn();
     }
   }
 
@@ -349,5 +354,80 @@ export default class GameHandler {
       }
     }
     return false;
+  }
+
+  initiateAttack(card: Card, pointerX: number = 0, pointerY: number = 0) {
+    this.scene.uiHandler.setEndButtonToAttack();
+    let graphicsToCleanUp = this.player.setToAttackPhase(this.scene);
+
+    // Create X and Y coords of the center of the card on the screen
+    let cardXOnScreen = 0 
+    let cardYOnScreen = 0
+    
+    if (card.isLeaderCard()) {
+      cardXOnScreen = (card.x + this.playerLeaderArea.x) + (card.displayWidth / 2);
+      cardYOnScreen = (card.y + this.playerLeaderArea.y) + (card.displayHeight / 2);
+    } else {
+      cardXOnScreen = (card.x + this.playerCharacterArea.x) + (card.displayWidth / 2);
+      cardYOnScreen = (card.y + this.playerCharacterArea.y) + (card.displayHeight / 2);
+    }
+
+    let attackLine = this.scene.add.rectangle(cardXOnScreen, cardYOnScreen, 100, 6, 0xff0000)
+      .setOrigin(0, 0);
+    attackLine.width = Phaser.Math.Distance.Between(cardXOnScreen, cardYOnScreen, pointerX, pointerY);
+    attackLine.rotation = Phaser.Math.Angle.Between(cardXOnScreen, cardYOnScreen, pointerX, pointerY);
+    attackLine.setInteractive();
+    // Make the attack line follow and rotate towards the mouse
+    this.scene.input.on('pointermove', (pointer) => {
+      attackLine.x = cardXOnScreen;
+      attackLine.y = cardYOnScreen;
+      attackLine.width = Phaser.Math.Distance.Between(cardXOnScreen, cardYOnScreen, pointer.x, pointer.y);
+      attackLine.rotation = Phaser.Math.Angle.Between(cardXOnScreen, cardYOnScreen, pointer.x, pointer.y);
+      // Check if mouse is over an attackable card and add a green tint to it
+      this.opponentCharacterArea.each((card: Card) => {
+        if (Phaser.Geom.Rectangle.Contains(card.getBounds(), pointer.x, pointer.y)) {
+          card.setTint(0x00ff00);
+        } else {
+          card.clearTint();
+        }
+      });
+    });
+
+    // If player right clicks, it cancels the attack
+    this.scene.input.on('pointerdown', (pointer) => {
+      if (pointer.rightButtonDown()) {
+        // Add animation of the attack line receding back to the card
+        this.scene.tweens.add({
+          targets: attackLine,
+          x: cardXOnScreen,
+          y: cardYOnScreen,
+          width: 0,
+          duration: 350,
+          ease: 'Power1',
+          onComplete: () => {
+            attackLine.destroy();
+          }
+        });
+        this.player.playerState = PlayerState.MAIN_PHASE;
+        this.scene.uiHandler.setEndButtonToMainPhase();
+        // Remove the graphics that were used to highlight the attackable cards
+        graphicsToCleanUp.forEach((graphics) => {
+          // Remove tweens that were used
+          // Make them fade away
+          this.scene.tweens.add({
+            targets: graphics,
+            alpha: 0,
+            duration: 350,
+            ease: 'Power1',
+            onComplete: () => {
+              this.scene.tweens.killTweensOf(graphics);
+              graphics.destroy();
+            }
+          });
+        });
+        this.scene.input.off('pointermove');
+        this.scene.input.off('pointerdown');
+      }
+    });
   }
 }

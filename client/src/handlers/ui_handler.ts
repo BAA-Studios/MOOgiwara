@@ -45,6 +45,7 @@ export default class UiHandler {
   };
 
   onEndTurn = () => {
+    // Make it so if they right click the button, it will do nothing
     console.log("[INFO] End Turn Button Clicked");
     if (this.scene.player.playerState !== PlayerState.MAIN_PHASE) {
       return;
@@ -52,4 +53,19 @@ export default class UiHandler {
     this.scene.player.playerState = PlayerState.LOADING;
     this.scene.client.emit("endTurn", { player: this.scene.player.getUniqueId() });
   };
+
+  setEndButtonToAttack() {
+    this.endTurnButton.buttonText.setText("ATTACKING...");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
+
+  setEndButtonToOpponentsTurn() {
+    this.endTurnButton.buttonText.setText("OPPONENT'S TURN");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
+
+  setEndButtonToMainPhase() {
+    this.endTurnButton.buttonText.setText("END TURN");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
 }

@@ -44,7 +44,7 @@ export default class Player {
       }
     }
     this.deck = new SyncCardList("deck", deckList);
-    deckList.push(tempLeaderId)
+    deckList.push(tempLeaderId);
 
     // Init the don deck with 10 don cards
     for (let i = 0; i < 10; i++) {
@@ -117,8 +117,8 @@ export default class Player {
       this.characterArea.list().forEach((card) => {
         card.isResting = false;
       });
-      this.characterArea.update(this.client);
       this.setSummoningSickness();
+      this.characterArea.update(this.client);
       this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
         cards: this.characterArea.list()
       }, this);
@@ -133,6 +133,7 @@ export default class Player {
 
     this.client.on("deckCount", (_, callback: Function) => {
       let count = this.deck.size();
+      console.log(`[INFO] Player ${this.username} requested to know the size of their deck`)
       callback(count);
     });
   }
@@ -175,14 +176,14 @@ export default class Player {
   }
 
   shuffleHandToDeck() {
-    this.deck.extend(this.hand.list());
-
     // Update the opponent's client
     this.game?.broadcastPacketExceptSelf("opponentRemoveCardFromHand", {
       amount: this.hand.size(),
     }, this);
 
-    this.hand.clear();
+    while(!this.hand.empty()) {
+      this.deck.push(this.hand.popTopCard());
+    }
     this.deck.shuffle();
 
     // Update the client's hand

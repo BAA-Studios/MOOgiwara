@@ -172,6 +172,8 @@ export default class Player {
       card.indexInHand = this.characterArea.size() - 1;
       card.setPosition(card.calculatePositionInHand(), 0);
       card.objectId = cards[i].objectId;
+      card.summoningSickness = cards[i].summoningSickness;
+      card.isInPlay = true;
     }
   }
 
@@ -207,5 +209,47 @@ export default class Player {
 
   requestRefreshPhase() {
     this.client.emit("refreshPhase", {});
+  }
+
+  setToAttackPhase(scene: GameBoard) {
+    let graphics: Phaser.GameObjects.Graphics[] = [];
+    this.playerState = PlayerState.ATTACK_PHASE;
+    // Give every attackable card in the opponent's character area a green lined border
+    for (let i = 0; i < scene.gameHandler.opponent.characterArea.size(); i++) {
+      let characterCard = scene.gameHandler.opponent.characterArea.getElementByPos(i);
+      // TODO: Check if the card is attackable
+      // Set a box around the characterCard's bounds
+      let boundingBox = scene.add.graphics();
+      boundingBox.lineStyle(4, 0x00ff00);
+      boundingBox.strokeRectShape(characterCard.getBounds());
+      boundingBox.setAlpha(0.3);
+      // Add animation to the bounding boxing so its pulsing
+      scene.tweens.add({
+        targets: boundingBox,
+        alpha: 1,
+        duration: 850,
+        ease: 'Sine.easeInOut',
+        yoyo: true,
+        repeat: -1
+      });
+      graphics.push(boundingBox);
+    }
+    // Give the opponent's Leader card a green lined border
+    if (scene.opponent.leader) {
+      let boundingBoxLeader = scene.add.graphics();
+      boundingBoxLeader.lineStyle(4, 0x00ff00);
+      boundingBoxLeader.strokeRectShape(scene.opponent.leader.getBounds());
+      boundingBoxLeader.setAlpha(0.3);
+      scene.tweens.add({
+        targets: boundingBoxLeader,
+        alpha: 1,
+        duration: 850,
+        ease: 'Sine.easeInOut',
+        yoyo: true,
+        repeat: -1
+      });
+      graphics.push(boundingBoxLeader);
+    }
+    return graphics;
   }
 }

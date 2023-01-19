@@ -25,6 +25,8 @@ export default class Card extends Phaser.GameObjects.Image {
   isDonCard: boolean;
   summoningSickness: boolean;
   textOnCard: Phaser.GameObjects.Text;
+  isInPlay: boolean;
+  effects: any[]; // Stores any Phaser Game Objects
 
   constructor(
     owner: Player,
@@ -59,8 +61,11 @@ export default class Card extends Phaser.GameObjects.Image {
     this.isDragging = false;
     this.isDonCard = this.name == "Don!!";
     this.summoningSickness = false;
-    
+
     this.textOnCard = this.scene.add.text(this.x, this.y, '').setVisible(false);
+    this.isInPlay = false;
+
+    this.effects = [];
   }
 
   calculatePositionInHand() {
@@ -87,6 +92,10 @@ export default class Card extends Phaser.GameObjects.Image {
     return this.category == 'CHARACTER';
   }
 
+  isLeaderCard() {
+    return this.category == 'LEADER';
+  }
+
   rest() {
     this.setOrigin(0, 1)
     this.isResting = true;
@@ -99,6 +108,28 @@ export default class Card extends Phaser.GameObjects.Image {
     this.setRotation(0);
     this.flipX = false;
     this.flipY = false;
+  }
+
+  inflateMoogiwaraLogo(x, y) {
+    let moogiwaraLogo = this.scene.add.image(x, y, 'moogiwara');
+    moogiwaraLogo.setOrigin(0.5, 0.5);
+    moogiwaraLogo.setScale(0);
+    this.scene.tweens.add({
+      targets: moogiwaraLogo,
+      scaleX: .16,
+      scaleY: .16,
+      duration: 250,
+      ease: 'Power2',
+    });
+    this.effects.push(moogiwaraLogo);
+  }
+
+  deflateMoogiwaraLogo() {
+    for (let effect of this.effects) {
+      if (effect.texture.key == 'moogiwara') {
+        this.scene.tweens.killTweensOf(effect);
+      }
+    }
   }
 
   initInteractables(draggable: boolean = true) {
@@ -159,7 +190,15 @@ export default class Card extends Phaser.GameObjects.Image {
     this.on('pointerdown', (pointer) => {
       if (pointer.rightButtonDown()) {
         displayCardInHigherRes(this.scene, this.cardId);
-        return;
+        return; 
+      }
+      // Allow the players to initiate an attack with this card has no summoning sickness
+      // We don't need to check the owner of the person clicking the card, because the opponent's card's isInPlay attribute is always false
+      if (this.isCharacterCard() || this.isLeaderCard()) {
+        if (!this.isResting && !this.summoningSickness && this.isInPlay && this.owner.playerState == PlayerState.MAIN_PHASE) {
+          // Render an arrow from this card's center following the pointer
+          this.gameBoard.gameHandler.initiateAttack(this, pointer.x, pointer.y);
+        }
       }
     });
   }
