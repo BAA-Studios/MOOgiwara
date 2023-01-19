@@ -24,6 +24,7 @@ export default class Card extends Phaser.GameObjects.Image {
   life: number;
   isDonCard: boolean;
   summoningSickness: boolean;
+  textOnCard: Phaser.GameObjects.Text;
 
   constructor(
     owner: Player,
@@ -58,6 +59,8 @@ export default class Card extends Phaser.GameObjects.Image {
     this.isDragging = false;
     this.isDonCard = this.name == "Don!!";
     this.summoningSickness = false;
+    
+    this.textOnCard = this.scene.add.text(this.x, this.y, '').setVisible(false);
   }
 
   calculatePositionInHand() {

@@ -45,6 +45,13 @@ export function displayCardInHigherRes(scene: Phaser.Scene, cardId: string) {
   });
 }
 
+// Display the number of cards in the deck
+export function displayDeckCount(scene: Phaser.Scene, deckList: string) {
+  this.deckList('pointerover', () => {
+    this.setTint(0xbebebe);
+  });
+}
+
 // This will display a screen that asks the user if they want to mulligan given their hand
 export function displayMulliganSelection(scene: GameBoard) {
   const hand = scene.player.hand;

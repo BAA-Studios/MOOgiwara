@@ -130,6 +130,11 @@ export default class Player {
         cards: this.donArea.list() 
       }, this);
     });
+
+    this.client.on("deckCount", (_, callback: Function) => {
+      let count = this.deck.size();
+      callback(count);
+    });
   }
 
   drawCard(amount: number = 1) {

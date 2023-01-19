@@ -91,6 +91,32 @@ export default class GameHandler {
       .setScale(0.16)
       .setOrigin(0, 0);
     this.playerDeckArea.add(cardBack);
+    
+    // Display deck count
+    cardBack.setInteractive();
+    cardBack.on('pointerover', () => {
+      cardBack.setTint(0xbebebe);
+      this.player.client.emit('deckCount', {}, (cardsInDeck: number) => {
+        cardBack.textOnCard.setVisible(true);
+        cardBack.textOnCard.setText(cardsInDeck.toString());
+        cardBack.textOnCard.setFontFamily("Merriweather");
+        console.log(cardBack.textOnCard.)
+        cardBack.textOnCard.setFontSize(50);
+        let cardCenterX = this.playerDeckArea.x + (cardBack.displayWidth / 2);
+        let cardCenterY = this.playerDeckArea.y + (cardBack.displayHeight / 2);
+        cardBack.textOnCard.setOrigin(0.5, 0.5);
+        cardBack.textOnCard.setPosition(cardCenterX, cardCenterY);
+        console.log('Cards in Deck:', cardsInDeck);
+      });
+    });
+
+    cardBack.on('pointerout', () => {
+      cardBack.textOnCard.setVisible(false);
+      cardBack.clearTint();
+    });
+
+
+
     const oppCardBack = new Card(this.opponent, this.scene, 'optcg_card_back')
       .setScale(0.16)
       .setOrigin(0, 0);
