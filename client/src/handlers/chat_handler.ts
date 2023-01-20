@@ -44,9 +44,12 @@ export default class ChatHandler {
 
     this.scene.client.on('chatMessage', (data: any) => {
       console.log(data.message);
-      this.messages.push(data.message);
+      let messageArray = data.message.split('\n');
+      for (let i = 0; i < messageArray.length; i++) {
+        this.messages.push(messageArray[i]);
+      }
       if (this.messages.length >= 25) {
-        this.chatIndex++;
+        this.chatIndex += messageArray.length;
       }
       this.chat.setText(this.returnTextToRender());
     });
