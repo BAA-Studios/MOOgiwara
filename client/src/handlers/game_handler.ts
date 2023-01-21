@@ -309,6 +309,32 @@ export default class GameHandler {
         }
       }
     });
+
+    this.client.on("opponentUpdateLeader", (data: any) => {
+      this.opponent.leader?.boundingBox.destroy();
+      this.opponentLeaderArea.removeAll(true);
+      const newLeader = new Card(this.opponent, this.scene, data.card.id);
+      newLeader.setOrigin(0, 0);
+      newLeader.setScale(0.16);
+      newLeader.flipY = true;
+      newLeader.flipX = true;
+      newLeader.setInteractive();
+      newLeader.initInteractables(false);
+      this.opponentLeaderArea.add(newLeader);
+      this.opponent.leader = newLeader;
+      if (data.card.isResting) {
+        newLeader.rest();
+      }
+
+      // Check and populate the card's attachedDon
+      if (data.card.attachedDonCount > 0) {
+        newLeader.highlightBounds(0xff0000);
+        for (let j = 0; j < data.card.attachedDonCount; j++) {
+          const don = new Card(this.opponent, this.scene, 'donCardAltArt');
+          newLeader.donAttached.pushBack(don);
+        }
+      }
+    });
   }
 
   changeTurn(data: any) {
@@ -319,6 +345,9 @@ export default class GameHandler {
       this.player.characterArea.forEach((card: Card) => {
         card.summoningSickness = false;
       });
+
+      this.player.leader?.donAttached.clear();
+      this.player.leader?.unHighlightBounds();
 
       if (data.turnNumber === 2 || data.turnNumber === 3) {
         if (this.player.leader) {
@@ -448,6 +477,7 @@ export default class GameHandler {
         if (Phaser.Geom.Rectangle.Contains(this.player.leader.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
           res = true;
           console.log("Don!! Attachment to card:", this.player.leader.name);
+          this.player.attachDon(this.scene, card, this.player.leader);
         }
       }
     }

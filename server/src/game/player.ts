@@ -121,6 +121,14 @@ export default class Player {
         }
         card.clearDon();
       });
+      // Return dons from leader to don area
+      this.leader?.attachedDon.forEach((don) => {
+        this.donArea.push(don);
+      });
+
+      this.leader?.clearDon();
+      this.updateLeaderForOpponent();
+
       this.setSummoningSickness();
       this.characterArea.update(this.client);
       this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
@@ -142,8 +150,19 @@ export default class Player {
     });
 
     this.client.on("attachDon", (cardIndex: number, callback: Function) => {
-      let cardAttachedTo = this.characterArea.get(cardIndex);
-      console.log(`[INFO] Player ${this.username} requested to attach a Don!! to character ${this.characterArea.get(cardIndex)?.name}`);
+      let cardAttachedTo: Card | undefined;
+      if (cardIndex === -1) { // Is leader card
+        cardAttachedTo = this.leader;
+      } else {
+        cardAttachedTo = this.characterArea.get(cardIndex);
+      }
+
+      if (!cardAttachedTo) {
+        console.log(`[ERROR] Player ${this.username} tried to attach a don to a card that doesn't exist`);
+        return;
+      }
+
+      console.log(`[INFO] Player ${this.username} requested to attach a Don!! to character ${cardAttachedTo?.name}`);
       // Remove the last unrested don from the don area
       for (let i = this.donArea.size() - 1; i >= 0; i--) {
         let don = this.donArea.get(i);
@@ -157,9 +176,15 @@ export default class Player {
       this.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", { 
         cards: this.donArea.list() 
       }, this);
-      this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
-        cards: this.characterArea.list()
-      }, this);
+
+      if (cardIndex === -1) {
+        this.updateLeaderForOpponent();
+      } else {
+        this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
+          cards: this.characterArea.list()
+        }, this);
+      }
+
       // Broadcast the don attached to the opponent
       this.game?.broadcastChat(`${this.username} attached a Don!! \nto "${cardAttachedTo.name}"`);
     });
@@ -270,5 +295,11 @@ export default class Player {
     for (let card of this.characterArea.list()) {
       card.summoningSickness = false;
     }
+  }
+
+  updateLeaderForOpponent() {
+    this.game?.broadcastPacketExceptSelf("opponentUpdateLeader", {
+      card: this.leader
+    }, this);
   }
 }
