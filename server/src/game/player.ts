@@ -131,16 +131,12 @@ export default class Player {
 
       this.setSummoningSickness();
       this.characterArea.update(this.client);
-      this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
-        cards: this.characterArea.list()
-      }, this);
+      this.updateCharacterAreaForOpponent()
       this.donArea.list().forEach((card) => {
         card.isResting = false;
       });
       this.donArea.update(this.client);
-      this.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", { 
-        cards: this.donArea.list() 
-      }, this);
+      this.updateDonAreaForOpponent();
     });
 
     this.client.on("deckCount", (_, callback: Function) => {
@@ -173,16 +169,12 @@ export default class Player {
         }
       }
       callback(this.donArea.list());
-      this.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", { 
-        cards: this.donArea.list() 
-      }, this);
+      this.updateDonAreaForOpponent();
 
       if (cardIndex === -1) {
         this.updateLeaderForOpponent();
       } else {
-        this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
-          cards: this.characterArea.list()
-        }, this);
+        this.updateCharacterAreaForOpponent();
       }
 
       // Broadcast the don attached to the opponent
@@ -300,6 +292,18 @@ export default class Player {
   updateLeaderForOpponent() {
     this.game?.broadcastPacketExceptSelf("opponentUpdateLeader", {
       card: this.leader
+    }, this);
+  }
+
+  updateCharacterAreaForOpponent() {
+    this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
+      cards: this.characterArea.list()
+    }, this);
+  }
+
+  updateDonAreaForOpponent() {
+    this.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", {
+      cards: this.donArea.list()
     }, this);
   }
 }
