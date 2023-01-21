@@ -56,8 +56,8 @@ export default class GameHandler {
     this.playerDeckArea = this.scene.add.container(1253, 704);
     this.opponentDeckArea = this.scene.add.container(1253, 242);
 
-    // this.playerTrashArea = this.scene.add.container();
-    // this.opponentTrashArea = this.scene.add.container();
+    this.playerTrashArea = this.scene.add.container(1254, 555);
+    this.opponentTrashArea = this.scene.add.container(1254, 391);
 
     this.playerLeaderArea = this.scene.add.container(947, 704);
     this.opponentLeaderArea = this.scene.add.container(947, 243);
