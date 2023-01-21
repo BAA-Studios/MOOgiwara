@@ -260,6 +260,9 @@ export default class GameHandler {
     });
 
     this.client.on("opponentUpdateCharacterArea", (data: any) => {
+      for (let i = 0; i < this.opponent.characterArea.length; i++) {
+        this.opponent.characterArea.getElementByPos(i).boundingBox.destroy();
+      }
       this.opponentCharacterArea.removeAll(true);
       this.opponent.characterArea.clear();
       for (let i = 0; i < data.cards.i; i++) {
@@ -276,6 +279,14 @@ export default class GameHandler {
         this.opponent.characterArea.pushBack(card);
         if (data.cards.W[i].isResting) {
           card.rest();
+        }
+        // Check and populate the card's attachedDon
+        if (data.cards.W[i].attachedDonCount > 0) {
+          card.highlightBounds(0xff0000);
+          for (let j = 0; j < data.cards.W[i].attachedDonCount; j++) {
+            const don = new Card(this.opponent, this.scene, 'donCardAltArt');
+            card.donAttached.pushBack(don);
+          }
         }
       }
     });
@@ -302,7 +313,6 @@ export default class GameHandler {
 
   changeTurn(data: any) {
     if (data.personToChangeTurnTo === this.player.getUniqueId()) {
-      // TODO: REFRESH PHASE
       this.player.playerState = PlayerState.REFRESH_PHASE;
       this.player.requestRefreshPhase();
       // Set all character cards summoning sickness to false
@@ -367,11 +377,49 @@ export default class GameHandler {
       }
       this.playableCharacterArea.setVisible(true);
     }
+    // Indicate to players where they can attach a Don card to
+    if (card.isDonCard && !card.isDragging) {
+      // highlight every player character and leader card
+      this.player.characterArea.forEach((card: Card) => {
+        card.highlightBounds();
+      });
+      if (this.player.leader) {
+        this.player.leader.highlightBounds();
+      }
+    }
+    else if (card.isDonCard && card.isDragging) {
+      // Add a tint to cards the mouse is hovering over
+      this.player.characterArea.forEach((characterCard: Card) => {
+        if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
+          characterCard.setTint(0x00ff00);
+        }
+        else {
+          characterCard.clearTint();
+        }
+      });
+      if (this.player.leader) {
+        if (Phaser.Geom.Rectangle.Contains(this.player.leader.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
+          this.player.leader.setTint(0x00ff00);
+        }
+        else {
+          this.player.leader.clearTint();
+        }
+      }
+    }
   }
 
   unHighlightValidZones(card: Card) {
     if (card.isCharacterCard()) {
       this.playableCharacterArea.setVisible(false);
+    }
+    if (card.isDonCard) {
+      // unhighlight every player character and leader card
+      this.player.characterArea.forEach((card: Card) => {
+        card.unHighlightBounds();
+      });
+      if (this.player.leader) {
+        this.player.leader.unHighlightBounds();
+      }
     }
   }
 
@@ -385,10 +433,30 @@ export default class GameHandler {
     return false;
   }
 
+  checkForDonAttachment(card: Card) {
+    let res = false;
+    if (card.isDonCard) {
+      // Check if the mouse is currently colliding with any of the character cards in play
+      this.player.characterArea.forEach((characterCard: Card) => {
+        if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
+          res = true;
+          console.log("Don!! Attachment to card:", characterCard.name);
+          this.player.attachDon(this.scene, card, characterCard);
+        }
+      });
+      if (this.player.leader) {
+        if (Phaser.Geom.Rectangle.Contains(this.player.leader.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
+          res = true;
+          console.log("Don!! Attachment to card:", this.player.leader.name);
+        }
+      }
+    }
+    return res;
+  }
+
   initiateAttack(card: Card, pointerX: number = 0, pointerY: number = 0) {
     this.scene.uiHandler.setEndButtonToAttack();
-    let graphicsToCleanUp = this.player.setToAttackPhase(this.scene);
-
+    this.player.setToAttackPhase(this.scene);
     // Create X and Y coords of the center of the card on the screen
     let cardXOnScreen = 0 
     let cardYOnScreen = 0
@@ -420,11 +488,23 @@ export default class GameHandler {
           card.clearTint();
         }
       });
+      if (this.opponent.leader) {
+        if (Phaser.Geom.Rectangle.Contains(this.opponent.leader.getBounds(), pointer.x, pointer.y)) {
+          this.opponent.leader.setTint(0x00ff00);
+        } else {
+          this.opponent.leader.clearTint();
+        }
+      }
     });
 
     // If player right clicks, it cancels the attack
     this.scene.input.on('pointerdown', (pointer) => {
       if (pointer.rightButtonDown()) {
+        // Unhighlight all the attackable cards
+        this.opponentCharacterArea.each((card: Card) => {
+          card.unHighlightBounds();
+        });
+        this.opponent.leader?.unHighlightBounds();
         // Add animation of the attack line receding back to the card
         this.scene.tweens.add({
           targets: attackLine,
@@ -435,27 +515,26 @@ export default class GameHandler {
           ease: 'Power1',
           onComplete: () => {
             attackLine.destroy();
+            this.player.playerState = PlayerState.MAIN_PHASE;
+            this.scene.uiHandler.setEndButtonToMainPhase();
           }
         });
-        this.player.playerState = PlayerState.MAIN_PHASE;
-        this.scene.uiHandler.setEndButtonToMainPhase();
         // Remove the graphics that were used to highlight the attackable cards
-        graphicsToCleanUp.forEach((graphics) => {
-          // Remove tweens that were used
-          // Make them fade away
-          this.scene.tweens.add({
-            targets: graphics,
-            alpha: 0,
-            duration: 350,
-            ease: 'Power1',
-            onComplete: () => {
-              this.scene.tweens.killTweensOf(graphics);
-              graphics.destroy();
-            }
-          });
-        });
         this.scene.input.off('pointermove');
         this.scene.input.off('pointerdown');
+      }
+      else { // if the player left clicks
+        // Check if the mouse clicked on an attackable card
+        this.opponentCharacterArea.each((card: Card) => {
+          if (Phaser.Geom.Rectangle.Contains(card.getBounds(), pointer.x, pointer.y)) {
+            console.log("Attacking character card with index:", card.indexInHand);
+          }
+        });
+        if (this.opponent.leader) {
+          if (Phaser.Geom.Rectangle.Contains(this.opponent.leader.getBounds(), pointer.x, pointer.y)) {
+            console.log("Attacking leader card");
+          }
+        }
       }
     });
   }

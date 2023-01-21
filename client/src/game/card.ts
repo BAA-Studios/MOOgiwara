@@ -3,6 +3,7 @@ import Player from "./player";
 import cardMetadata from '../cards/metadata.json';
 import { displayCardInHigherRes } from "../scenes/game_board_pop_ups";
 import { PlayerState } from "./player";
+import { Vector } from "js-sdsl";
 
 export default class Card extends Phaser.GameObjects.Image {
   cardId: string;
@@ -26,7 +27,8 @@ export default class Card extends Phaser.GameObjects.Image {
   summoningSickness: boolean;
   textOnCard: Phaser.GameObjects.Text;
   isInPlay: boolean;
-  effects: any[]; // Stores any Phaser Game Objects
+  boundingBox: Phaser.GameObjects.Graphics; // Stores the outer ring highlights of a card
+  donAttached: Vector<Card> = new Vector<Card>; // Cards that are attached to this card
 
   constructor(
     owner: Player,
@@ -65,7 +67,7 @@ export default class Card extends Phaser.GameObjects.Image {
     this.textOnCard = this.scene.add.text(this.x, this.y, '').setVisible(false);
     this.isInPlay = false;
 
-    this.effects = [];
+    this.boundingBox = this.scene.add.graphics();
   }
 
   calculatePositionInHand() {
@@ -110,12 +112,42 @@ export default class Card extends Phaser.GameObjects.Image {
     this.flipY = false;
   }
 
-  highlightBounds() {
-    let boundingBox = this.scene.add.graphics();
-    boundingBox.lineStyle(4, 0x00ff00);
-    boundingBox.strokeRectShape(this.getBounds());
-    boundingBox.setAlpha(0.3);
-    return boundingBox;
+  highlightBounds(color: number = 0x00ff00) {
+    this.boundingBox.clear();
+    this.boundingBox.setAlpha(0.3);
+    this.boundingBox.lineStyle(4, color);
+    this.boundingBox.strokeRectShape(this.getBounds());
+    this.scene.tweens.add({
+      targets: this.boundingBox,
+      alpha: 1,
+      duration: 850,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1
+    });
+  }
+
+  unHighlightBounds() {
+    this.scene.tweens.add({
+      targets: this.boundingBox,
+      alpha: 0,
+      duration: 350,
+      ease: 'Power1',
+      onComplete: () => {
+        this.scene.tweens.killTweensOf(this.boundingBox);
+        if (this.hasDonAttached()) {
+          this.highlightBounds(0xff0000);
+        }
+      }
+    });
+  }
+
+  hasDonAttached() {
+    return this.donAttached.size() > 0;
+  }
+
+  calculateBonusAttackFromDon() {
+    return 1000 * this.donAttached.size();
   }
 
   initInteractables(draggable: boolean = true) {
@@ -138,6 +170,9 @@ export default class Card extends Phaser.GameObjects.Image {
       });
 
       this.on('dragend', () => {
+        if (this.owner.playerState != PlayerState.MAIN_PHASE) {
+          return;
+        }
         this.isDragging = false;
         if (!this.isDraggable()) {
           return;
@@ -151,6 +186,10 @@ export default class Card extends Phaser.GameObjects.Image {
           if (result) {
             return;
           }
+        }
+        let result = this.gameBoard.gameHandler.checkForDonAttachment(this);
+        if (result) {
+          return;
         }
         // Smoothly return the object to its original position
         this.scene.tweens.add({
@@ -175,7 +214,7 @@ export default class Card extends Phaser.GameObjects.Image {
     // Setting the location of where the card should return if its not played or released
     this.on('pointerdown', (pointer) => {
       if (pointer.rightButtonDown()) {
-        displayCardInHigherRes(this.scene, this.cardId);
+        displayCardInHigherRes(this.scene, this);
         return; 
       }
       // Allow the players to initiate an attack with this card has no summoning sickness

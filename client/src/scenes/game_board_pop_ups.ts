@@ -25,11 +25,11 @@ export function inflateTransparentBackground(scene: Phaser.Scene) {
 
 // For when users right click a card in play
 // Show the image of the card in a higher resolution
-export function displayCardInHigherRes(scene: Phaser.Scene, cardId: string) {
+export function displayCardInHigherRes(scene: Phaser.Scene, card: Card) {
   const rect = inflateTransparentBackground(scene);
   // Animation for when the card pops up in the screen similar to hearthstone
   const cardImg = scene.add
-    .image(960, 540, cardId)
+    .image(960, 540, card.cardId)
     .setScale(0.01)
     .setInteractive();
   scene.add.tween({
@@ -38,17 +38,52 @@ export function displayCardInHigherRes(scene: Phaser.Scene, cardId: string) {
       scaleY: 0.75,
       duration: 250,
       ease: 'Power1',
-    });
+  });
+  // Create another box to the right of the card to display the amount of Don!! Attached
+  const donAttachedBox = scene.add.rectangle(1190, 224, 200, 150, 0x000000, 0.6).setOrigin(0, 0).setScale(0.01);
+  // Create a text object to display the amount of Don!! Attached
+  const donAttachedText = scene.add
+    .text(1400, 540, '0')
+    .setOrigin(0.5, 0.5)
+    .setFontFamily("Merriweather")
+    .setFontSize(45)
+    .setScale(0.01);
+  donAttachedText.setText(`Don!!\n+${card.calculateBonusAttackFromDon()}`);
+  // Animation for when the box pops up in the screen similar to hearthstone
+  scene.add.tween({
+      targets: [donAttachedBox, donAttachedText],
+      scaleX: 1,
+      scaleY: 1,
+      duration: 250,
+      ease: 'Power1',
+  });
+
+  let donRendered: Phaser.GameObjects.Image[] = [];
+  // Render the Don!! card under the donAttachedBox
+
+  for (let i = 0; i < card.donAttached.size(); i++) {
+    let don = scene.add.image(1190 + (i * 60), 380, 'donCardAltArt').setScale(0.01).setOrigin(0, 0);
+    donRendered.push(don);
+    scene.add.tween({
+      targets: don,
+      scaleX: 0.16,
+      scaleY: 0.16,
+      duration: 250,
+      ease: 'Power1',
+  });
+  }
+
+  // Set the text in the middle of the donAttachedBox
+  donAttachedText.x = donAttachedBox.x + donAttachedBox.width / 2;
+  donAttachedText.y = donAttachedBox.y + donAttachedBox.height / 2;
   rect.on('pointerdown', () => {
     cardImg.destroy();
     rect.destroy();
-  });
-}
-
-// Display the number of cards in the deck
-export function displayDeckCount(scene: Phaser.Scene, deckList: string) {
-  this.deckList('pointerover', () => {
-    this.setTint(0xbebebe);
+    donAttachedBox.destroy();
+    donAttachedText.destroy();
+    for (let i = 0; i < donRendered.length; i++) {
+      donRendered[i].destroy();
+    }
   });
 }
 

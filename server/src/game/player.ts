@@ -113,9 +113,13 @@ export default class Player {
 
     this.client.on('refreshPhase', () => {
       console.log(`[INFO] Player ${this.username} requested to refresh their board (Refresh Phase))`);
-      // Unrest all cards
+      // Unrest all cards and return any attached dons to the don deck
       this.characterArea.list().forEach((card) => {
         card.isResting = false;
+        for (let i = 0; i < card.attachedDon.size(); i++) {
+          this.donArea.push(card.attachedDon.getElementByPos(i));
+        }
+        card.clearDon();
       });
       this.setSummoningSickness();
       this.characterArea.update(this.client);
@@ -135,6 +139,29 @@ export default class Player {
       let count = this.deck.size();
       console.log(`[INFO] Player ${this.username} requested to know the size of their deck`)
       callback(count);
+    });
+
+    this.client.on("attachDon", (cardIndex: number, callback: Function) => {
+      let cardAttachedTo = this.characterArea.get(cardIndex);
+      console.log(`[INFO] Player ${this.username} requested to attach a Don!! to character ${this.characterArea.get(cardIndex)?.name}`);
+      // Remove the last unrested don from the don area
+      for (let i = this.donArea.size() - 1; i >= 0; i--) {
+        let don = this.donArea.get(i);
+        if (!don.isResting) {
+          cardAttachedTo.addDon(don);
+          this.donArea.remove(don);
+          break;
+        }
+      }
+      callback(this.donArea.list());
+      this.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", { 
+        cards: this.donArea.list() 
+      }, this);
+      this.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", {
+        cards: this.characterArea.list()
+      }, this);
+      // Broadcast the don attached to the opponent
+      this.game?.broadcastChat(`${this.username} attached a Don!! \nto "${cardAttachedTo.name}"`);
     });
   }
 

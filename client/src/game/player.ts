@@ -155,6 +155,11 @@ export default class Player {
 
   updateCharacterArea(scene: GameBoard, cardList) {
     // Destroy all cards in donArea
+
+    // Unhighlight all cards
+    for (let i = 0; i < this.characterArea.size(); i++) {
+      this.characterArea.getElementByPos(i).boundingBox.destroy();
+    }
     this.characterArea.clear();
     scene.gameHandler.playerCharacterArea.removeAll(true);
     // Add new cards to hand
@@ -174,6 +179,9 @@ export default class Player {
       card.objectId = cards[i].objectId;
       card.summoningSickness = cards[i].summoningSickness;
       card.isInPlay = true;
+      if (cards[i].isResting) {
+        card.rest();
+      }
     }
   }
 
@@ -212,38 +220,37 @@ export default class Player {
   }
 
   setToAttackPhase(scene: GameBoard) {
-    let graphics: Phaser.GameObjects.Graphics[] = [];
     this.playerState = PlayerState.ATTACK_PHASE;
     // Give every attackable card in the opponent's character area a green lined border
     for (let i = 0; i < scene.gameHandler.opponent.characterArea.size(); i++) {
       let characterCard = scene.gameHandler.opponent.characterArea.getElementByPos(i);
       // TODO: Check if the card is attackable
       // Set a box around the characterCard's bounds
-      let boundingBox = characterCard.highlightBounds();
-      // Add animation to the bounding boxing so its pulsing
-      scene.tweens.add({
-        targets: boundingBox,
-        alpha: 1,
-        duration: 850,
-        ease: 'Sine.easeInOut',
-        yoyo: true,
-        repeat: -1
-      });
-      graphics.push(boundingBox);
+      characterCard.highlightBounds();
     }
     // Give the opponent's Leader card a green lined border
     if (scene.opponent.leader) {
-      let boundingBoxLeader = scene.opponent.leader.highlightBounds();
-      scene.tweens.add({
-        targets: boundingBoxLeader,
-        alpha: 1,
-        duration: 850,
-        ease: 'Sine.easeInOut',
-        yoyo: true,
-        repeat: -1
-      });
-      graphics.push(boundingBoxLeader);
+      scene.opponent.leader.highlightBounds();
     }
-    return graphics;
+  }
+
+  attachDon(gameBoard: GameBoard, donCard: Card, characterCard: Card) {
+    this.client.emit("attachDon", characterCard.indexInHand, (donArea) => {
+      // Add animation for the don card shrinking inside the card
+      gameBoard.tweens.add({
+        targets: donCard,
+        scaleX: 0,
+        scaleY: 0,
+        duration: 500,
+        ease: 'Power2',
+        onComplete: () => {
+          characterCard.highlightBounds(0xff0000); // Give the card a red highlight
+          characterCard.donAttached.pushBack(donCard);
+
+          // Remove don from donArea
+          this.updateDonArea(gameBoard, donArea);
+        }
+      });
+    });
   }
 }

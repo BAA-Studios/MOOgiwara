@@ -89,7 +89,7 @@ export default class GameBoard extends Phaser.Scene {
         card.category = 'LEADER';
         card.on('pointerdown', (pointer) => {
           if (pointer.rightButtonDown()) {
-            displayCardInHigherRes(this, cardId);
+            displayCardInHigherRes(this, card);
             return;
           }
         });

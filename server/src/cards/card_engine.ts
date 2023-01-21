@@ -10,6 +10,8 @@ export function playCard(player: Player, card: Card) {
         console.log("[ERROR] Potential Player Cheating/Desync: Not enough Don!! to play card");
         return;
     }
+    // Broadcast in chat that the player played this card
+    player.game?.broadcastChat(`${player.username} played: \n"${card.name}"`);
     // Rest the Don!! that was used to play this card
     player.restDon(card.cost);
     player.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", { 
