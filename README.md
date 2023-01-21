@@ -27,6 +27,7 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 ![splash_screen](https://user-images.githubusercontent.com/58405975/212563024-b4358915-3ef2-487f-adee-f7132469eaf7.png)
 ![mulligan](https://user-images.githubusercontent.com/58405975/212563096-c0d31127-ae75-4ccd-94d1-a70e310750da.png)
 ![game_board](https://user-images.githubusercontent.com/58405975/212563184-b8890c62-96a5-46a6-a5d7-299a64a901bf.png)
+![high_res_view_of_card](https://user-images.githubusercontent.com/58405975/213830997-7bc8813c-89b1-480a-b3e6-bcff8a17fee9.png)
 
 
 
