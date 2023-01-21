@@ -262,6 +262,7 @@ export default class GameHandler {
     this.client.on("opponentUpdateCharacterArea", (data: any) => {
       for (let i = 0; i < this.opponent.characterArea.length; i++) {
         this.opponent.characterArea.getElementByPos(i).boundingBox.destroy();
+        this.opponent.characterArea.getElementByPos(i).textOnCard.destroy();
       }
       this.opponentCharacterArea.removeAll(true);
       this.opponent.characterArea.clear();
@@ -287,6 +288,11 @@ export default class GameHandler {
             const don = new Card(this.opponent, this.scene, 'donCardAltArt');
             card.donAttached.pushBack(don);
           }
+          card.writeOnCard(this.opponentCharacterArea, "+" + card.calculateTotalAttack(), 35, 
+          { 
+            color: '#ff0000',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+          });
         }
       }
     });
@@ -312,6 +318,7 @@ export default class GameHandler {
 
     this.client.on("opponentUpdateLeader", (data: any) => {
       this.opponent.leader?.boundingBox.destroy();
+      this.opponent.leader?.textOnCard.destroy();
       this.opponentLeaderArea.removeAll(true);
       const newLeader = new Card(this.opponent, this.scene, data.card.id);
       newLeader.setOrigin(0, 0);
@@ -333,6 +340,11 @@ export default class GameHandler {
           const don = new Card(this.opponent, this.scene, 'donCardAltArt');
           newLeader.donAttached.pushBack(don);
         }
+          newLeader.writeOnCard(this.opponentLeaderArea, "+" + newLeader.calculateTotalAttack(), 35, 
+          { 
+            color: '#ff0000',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+          });
       }
     });
   }
@@ -348,6 +360,7 @@ export default class GameHandler {
 
       this.player.leader?.donAttached.clear();
       this.player.leader?.unHighlightBounds();
+      this.player.leader?.removeTextOnCard();
 
       if (data.turnNumber === 2 || data.turnNumber === 3) {
         if (this.player.leader) {

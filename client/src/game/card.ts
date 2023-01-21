@@ -47,7 +47,7 @@ export default class Card extends Phaser.GameObjects.Image {
     this.name = cardMetadata[cardId]['Name'];
     this.description = cardMetadata[cardId]['Effect'];
     this.cost = cardMetadata[cardId]['Cost'];
-    this.attack = cardMetadata[cardId]['Power'];
+    this.attack = parseInt(cardMetadata[cardId]['Power']);
     this.attribute = cardMetadata[cardId]['Attribute'];
     this.life = cardMetadata[cardId]['Life'];
     this.image = cardId + '.png';
@@ -148,6 +148,29 @@ export default class Card extends Phaser.GameObjects.Image {
 
   calculateBonusAttackFromDon() {
     return 1000 * this.donAttached.size();
+  }
+
+  calculateTotalAttack() {
+    return this.attack + this.calculateBonusAttackFromDon();
+  }
+
+  // Displays any text in the middle of the card, given a container
+  writeOnCard(container: Phaser.GameObjects.Container, text: string, fontSize: number, style?: any) {
+    this.textOnCard.setText(text);
+    this.textOnCard.setFontSize(fontSize);
+    this.textOnCard.setOrigin(0.5, 0.5);
+    this.textOnCard.setFontFamily('Merriweather');
+    this.textOnCard.setPosition(this.x + container.x + (this.displayWidth / 2), this.y + container.y + (this.displayHeight / 2));
+    if (style) {
+      this.textOnCard.setStyle(style);
+    }
+    this.scene.children.bringToTop(this.textOnCard);
+    this.textOnCard.setVisible(true);
+  }
+
+  // Removes the text on the card
+  removeTextOnCard() {
+    this.textOnCard.setVisible(false);
   }
 
   initInteractables(draggable: boolean = true) {

@@ -155,10 +155,10 @@ export default class Player {
 
   updateCharacterArea(scene: GameBoard, cardList) {
     // Destroy all cards in donArea
-
     // Unhighlight all cards
     for (let i = 0; i < this.characterArea.size(); i++) {
       this.characterArea.getElementByPos(i).boundingBox.destroy();
+      this.characterArea.getElementByPos(i).textOnCard.destroy();
     }
     this.characterArea.clear();
     scene.gameHandler.playerCharacterArea.removeAll(true);
@@ -181,6 +181,18 @@ export default class Player {
       card.isInPlay = true;
       if (cards[i].isResting) {
         card.rest();
+      }
+      if (cards[i].attachedDonCount > 0) {
+        card.highlightBounds(0xff0000);
+        for (let j = 0; j < cards[i].attachedDonCount; j++) {
+          const don = new Card(this, scene, 'donCardAltArt');
+          card.donAttached.pushBack(don);
+        }
+        card.writeOnCard(scene.gameHandler.playerCharacterArea, "+" + card.calculateTotalAttack(), 35, 
+        { 
+          color: '#ff0000',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+        });
       }
     }
   }
@@ -247,6 +259,17 @@ export default class Player {
           characterCard.highlightBounds(0xff0000); // Give the card a red highlight
           characterCard.donAttached.pushBack(donCard);
 
+          // Add a transparent black background and display the total power of the card
+          let container = gameBoard.gameHandler.playerCharacterArea;
+          if (characterCard.isLeaderCard()) {
+            container = gameBoard.gameHandler.playerLeaderArea;
+          }
+          characterCard.writeOnCard(container, "+" + characterCard.calculateTotalAttack().toString(), 35, 
+            { 
+              color: '#ff0000',
+              backgroundColor: 'rgba(0,0,0,0.7)'
+            }
+          );
           // Remove don from donArea
           this.updateDonArea(gameBoard, donArea);
         }
