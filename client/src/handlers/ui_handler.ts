@@ -68,4 +68,9 @@ export default class UiHandler {
     this.endTurnButton.buttonText.setText("END TURN");
     this.endTurnButton.buttonText.setFontSize(34);
   }
+
+  setEndButtonToRetire() {
+    this.endTurnButton.buttonText.setText("RETIRING...");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
 }

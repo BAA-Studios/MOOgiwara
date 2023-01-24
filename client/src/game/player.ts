@@ -12,6 +12,7 @@ export enum PlayerState {
   REFRESH_PHASE,
   DON_PHASE,
   DRAW_PHASE,
+  RETIRE,
 }
 
 export default class Player {
@@ -220,6 +221,11 @@ export default class Player {
       console.log("Not enough Don!!");
       return false;
     }
+    if (this.characterArea.length >= 1) {
+      console.log("Character area is full, must retire a card");
+      this.retireCard(card);
+      return true;
+    }
     // TODO: Add logic for when the characterArea is full, recycle a card
     this.client.emit("playCard", {
       index: card.indexInHand
@@ -243,6 +249,15 @@ export default class Player {
     // Give the opponent's Leader card a green lined border
     if (scene.opponent.leader) {
       scene.opponent.leader.highlightBounds();
+    }
+  }
+
+  setToRetireState(scene: GameBoard) {
+    this.playerState = PlayerState.RETIRE;
+    // Give every card in the player's character area a red lined border
+    for (let i = 0; i < this.characterArea.size(); i++) {
+      let characterCard = this.characterArea.getElementByPos(i);
+      characterCard.highlightBounds();
     }
   }
 
@@ -274,6 +289,107 @@ export default class Player {
           this.updateDonArea(gameBoard, donArea);
         }
       });
+    });
+  }
+
+  retireCard(card: Card) {
+    // Move the card to where the leader area would be
+    let scene = card.gameBoard
+    this.setToRetireState(scene);
+    scene.uiHandler.setEndButtonToRetire();
+    scene.tweens.add({
+      targets: card,
+      x: 4 * 100,
+      y: -300,
+      duration: 350,
+      ease: 'Power2',
+    });
+
+    // Inflate text to instruct the player to select a card to retire
+    let informativeText = scene.add.text(1920/2, 440, "SELECT A CARD TO REPLACE")
+      .setOrigin(0.5, 0.5);
+    informativeText.setStyle({
+      fontSize: '84px',
+      fontFamily: 'Merriweather',
+      color: '#ffffff',
+      backgroundColor: 'rgba(0,0,0,0.8)',
+    });
+    informativeText.setScale(0.01);
+    scene.tweens.add({
+      targets: informativeText,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 350,
+      ease: 'Power2',
+    });
+
+    let centerXOnCard = (scene.gameHandler.playerHandArea.x + 400) + (card.displayWidth / 2);
+    let centerYOnCard = (scene.gameHandler.playerHandArea.y + -300) + (card.displayHeight / 2);
+    let pointerX = scene.input.mousePointer.x
+    let pointerY = scene.input.mousePointer.y
+
+    let attackLine = scene.add.rectangle(centerXOnCard, centerYOnCard, 100, 6, 0xff0000)
+      .setOrigin(0, 0);
+    attackLine.width = Phaser.Math.Distance.Between(centerXOnCard, centerYOnCard, pointerX, pointerY);
+    attackLine.rotation = Phaser.Math.Angle.Between(centerXOnCard, centerYOnCard, pointerX, pointerY);
+    attackLine.setInteractive();
+    // Make the attack line follow and rotate towards the mouse
+    scene.input.on('pointermove', (pointer) => {
+      attackLine.x = centerXOnCard;
+      attackLine.y = centerYOnCard;
+      attackLine.width = Phaser.Math.Distance.Between(centerXOnCard, centerYOnCard, pointer.x, pointer.y);
+      attackLine.rotation = Phaser.Math.Angle.Between(centerXOnCard, centerYOnCard, pointer.x, pointer.y);
+    });
+
+    // If player right clicks, it cancels the attack
+    scene.input.on('pointerdown', (pointer) => {
+      if (pointer.rightButtonDown()) {
+        scene.gameHandler.playerCharacterArea.each((card: Card) => {
+          card.unHighlightBounds();
+        });
+        // Add animation of the attack line receding back to the card
+        scene.tweens.add({
+          targets: attackLine,
+          x: centerXOnCard,
+          y: centerYOnCard,
+          width: 0,
+          duration: 350,
+          ease: 'Power1',
+          onComplete: () => {
+            scene.tweens.add({
+              targets: card,
+              x: card.calculatePositionInHand(),
+              y: 0,
+              duration: 200,
+              ease: 'Power2',
+            })
+            attackLine.destroy();
+            this.playerState = PlayerState.MAIN_PHASE;
+            scene.uiHandler.setEndButtonToMainPhase();
+          }
+        });
+        // Remove the informative text
+        scene.tweens.add({
+          targets: informativeText,
+          scaleX: 0.01,
+          scaleY: 0.01,
+          duration: 350,
+          ease: 'Power2',
+          onComplete: () => {
+            informativeText.destroy();
+          }
+        });
+        scene.input.off('pointermove');
+        scene.input.off('pointerdown');
+      }
+      else {
+        // Check if the mouse clicked on an attackable card
+        scene.gameHandler.playerCharacterArea.each((card: Card) => {
+          if (Phaser.Geom.Rectangle.Contains(card.getBounds(), pointer.x, pointer.y)) {
+            console.log("Retiring character card with index:", card.indexInHand);
+          }
+        });
+      }
     });
   }
 }
