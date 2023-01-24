@@ -164,6 +164,9 @@ export function displayMulliganSelection(scene: GameBoard) {
 
   const keepButton = scene.add.existing(
     new StandardButton(scene, 960, 875, "KEEP", () => {
+      if (scene.player.playerState !== PlayerState.MULLIGAN) {
+        return;
+      }
       scene.client.emit("onMulligan", {
         lobbyId: scene.lobbyId,
         mulligan: "keep",
