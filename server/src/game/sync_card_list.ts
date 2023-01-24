@@ -42,6 +42,7 @@ export class SyncCardList {
 
     remove(card: Card) {
         this._cards.eraseElementByValue(card);
+        return card
     }
 
     shuffle() {
@@ -85,6 +86,10 @@ export class SyncCardList {
             }
         }
         return undefined;
+    }
+
+    insertAt(index: number, card: Card) {
+        this._cards.insert(index, card);
     }
 
     /*

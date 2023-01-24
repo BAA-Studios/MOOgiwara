@@ -180,6 +180,50 @@ export default class Player {
       // Broadcast the don attached to the opponent
       this.game?.broadcastChat(`${this.username} attached a Don!! \nto "${cardAttachedTo.name}"`);
     });
+
+    this.client.on("retireCard", (cardIndexInPlay: number, cardIndexInHand: number,  callback: Function) => {
+      let cardRetired: Card | undefined;
+      cardRetired = this.characterArea.get(cardIndexInPlay);
+      let cardInHand = this.hand.get(cardIndexInHand);
+
+      if (!cardInHand) {
+        console.log(`[ERROR] Player ${this.username} tried to replace a card with a card that doesn't exist`);
+        return;
+      }
+
+      if (!cardRetired) {
+        console.log(`[ERROR] Player ${this.username} tried to replace a card that doesn't exist`);
+        return;
+      }
+      console.log(`[INFO] Player ${this.username} requested to retire character: "${cardRetired?.name}" with character: "${cardInHand?.name}"`);
+      // Remove the card from player's hand
+      this.hand.remove(cardInHand);
+      // Insert this card into the character area
+      this.characterArea.insertAt(cardIndexInPlay, cardInHand);
+      // Remove the original card from the character area
+      this.characterArea.remove(cardRetired);
+      // Check for any attached Don!! and return it to the donArea rested
+      cardRetired.attachedDon.forEach((don) => {
+        don.isResting = true;
+        this.donArea.push(don);
+      });
+      cardRetired.clearDon();
+
+      this.restDon(cardInHand.cost, false);
+      cardInHand.summoningSickness = true;
+
+      // Add it to the trash
+      this.trash.push(cardRetired);
+
+      callback(this.characterArea.list(), this.donArea.list(), this.hand.list());
+
+      // Update every area for opponent
+      this.updateCharacterAreaForOpponent();
+      this.sendRemoveCardFromHandPacketToOpponent(1);
+      this.updateDonAreaForOpponent();
+
+      this.game?.broadcastChat(`${this.username} retired "${cardRetired.name}" \nand replaced it with "${cardInHand.name}"`);
+    });
   }
 
   drawCard(amount: number = 1) {
@@ -261,7 +305,7 @@ export default class Player {
     return this.donArea.size();
   }
 
-  restDon(amount: number = 1) {
+  restDon(amount: number = 1, update: boolean = true) {
     let unrestedDon = this.getUnrestedDonLeft();
     if (unrestedDon === 0) {
       return;
@@ -280,7 +324,9 @@ export default class Player {
         amount--;
       }
     }
-    this.donArea.update(this.client);
+    if (update) { 
+      this.donArea.update(this.client);
+     }
   }
 
   setSummoningSickness() {
@@ -304,6 +350,12 @@ export default class Player {
   updateDonAreaForOpponent() {
     this.game?.broadcastPacketExceptSelf("opponentUpdateDonArea", {
       cards: this.donArea.list()
+    }, this);
+  }
+
+  sendRemoveCardFromHandPacketToOpponent(amount: number) {
+    this.game?.broadcastPacketExceptSelf("opponentRemoveCardFromHand", {
+      amount: amount
     }, this);
   }
 }

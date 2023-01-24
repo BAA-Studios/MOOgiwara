@@ -221,7 +221,7 @@ export default class Player {
       console.log("Not enough Don!!");
       return false;
     }
-    if (this.characterArea.length >= 1) {
+    if (this.characterArea.length >= 5) {
       console.log("Character area is full, must retire a card");
       this.retireCard(card);
       return true;
@@ -368,28 +368,42 @@ export default class Player {
             scene.uiHandler.setEndButtonToMainPhase();
           }
         });
-        // Remove the informative text
-        scene.tweens.add({
-          targets: informativeText,
-          scaleX: 0.01,
-          scaleY: 0.01,
-          duration: 350,
-          ease: 'Power2',
-          onComplete: () => {
-            informativeText.destroy();
-          }
-        });
-        scene.input.off('pointermove');
-        scene.input.off('pointerdown');
       }
       else {
         // Check if the mouse clicked on an attackable card
-        scene.gameHandler.playerCharacterArea.each((card: Card) => {
-          if (Phaser.Geom.Rectangle.Contains(card.getBounds(), pointer.x, pointer.y)) {
-            console.log("Retiring character card with index:", card.indexInHand);
+        scene.gameHandler.playerCharacterArea.each((characterCard: Card) => {
+          if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), pointer.x, pointer.y) && this.playerState == PlayerState.RETIRE) {
+            console.log("Retiring character card with index:", characterCard.indexInHand);
+            this.playerState = PlayerState.LOADING;
+            attackLine.destroy();
+            this.sendRetirePacket(scene, characterCard.indexInHand, card.indexInHand);
+            card.destroy();
           }
         });
       }
+      // Remove the informative text
+      scene.tweens.add({
+        targets: informativeText,
+        scaleX: 0.01,
+        scaleY: 0.01,
+        duration: 350,
+        ease: 'Power2',
+        onComplete: () => {
+          informativeText.destroy();
+        }
+      });
+      scene.input.off('pointermove');
+      scene.input.off('pointerdown');
+    });
+  }
+
+  sendRetirePacket(scene:GameBoard, indexOfCardInPlay: number, indexOfCardInHand: number) {
+    this.client.emit("retireCard", indexOfCardInPlay, indexOfCardInHand, (cardList, donCardList, handCardList) => {
+      this.updateCharacterArea(scene, cardList);
+      this.updateDonArea(scene, donCardList);
+      this.updateHand(scene, handCardList)
+      this.playerState = PlayerState.MAIN_PHASE;
+      scene.uiHandler.setEndButtonToMainPhase();
     });
   }
 }
