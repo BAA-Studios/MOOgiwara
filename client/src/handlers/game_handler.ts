@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser, { Data } from 'phaser';
 import { Socket } from 'socket.io-client';
 import Card from '../game/card';
 import Player from "../game/player";
@@ -207,7 +207,7 @@ export default class GameHandler {
           ease: 'Power1',
           onComplete: () => {
             this.opponentHandArea.add(blankCard);
-            blankCard.setPosition(blankCard.calculatePositionInHand(), 0)
+            blankCard.setPosition(blankCard.calculatePositionInHand(), 0);
           }
         });
       }
@@ -393,7 +393,7 @@ export default class GameHandler {
   }
 
   mulligan(data: any) {
-    this.player.playerState = PlayerState.MULLIGAN;
+    this.player.playerState = PlayerState.LOADING;
     displayMulliganSelection(this.scene);
   }
 

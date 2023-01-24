@@ -12,6 +12,7 @@ import GameBoard from './game_board';
 import StandardButton from '../game/menu/buttons/standard_button';
 import LoadingButton from '../game/menu/buttons/loading_button';
 import Card from '../game/card';
+import { PlayerState } from '../game/player';
 
 // Used in game mechanics that require scrying the deck, or displaying something
 export function inflateTransparentBackground(scene: Phaser.Scene) {
@@ -112,11 +113,21 @@ export function displayMulliganSelection(scene: GameBoard) {
     });
   }
 
+  scene.time.addEvent({
+    delay: 1000,
+    callback: () => {
+      scene.player.playerState = PlayerState.MULLIGAN;
+    },
+  });
+
   let loadingButton: LoadingButton | undefined = undefined;
 
   // Add a button that will emit a mulligan event to the server
   const mulliganButton = scene.add.existing(
     new StandardButton(scene, 960, 800, "MULLIGAN", () => {
+      if (scene.player.playerState !== PlayerState.MULLIGAN) {
+        return;
+      }
       loadingButton = scene.add.existing(
         new LoadingButton(scene, 960, 800, "standardButton")
       );
