@@ -1,6 +1,7 @@
 import GameBoard from "../scenes/game_board";
 import Card from "./card";
 import { Vector } from "js-sdsl";
+import { displayTrash } from "../scenes/game_board_pop_ups";
 
 export enum PlayerState {
   LOADING,
@@ -397,13 +398,36 @@ export default class Player {
     });
   }
 
-  sendRetirePacket(scene:GameBoard, indexOfCardInPlay: number, indexOfCardInHand: number) {
-    this.client.emit("retireCard", indexOfCardInPlay, indexOfCardInHand, (cardList, donCardList, handCardList) => {
+  sendRetirePacket(scene: GameBoard, indexOfCardInPlay: number, indexOfCardInHand: number) {
+    this.client.emit("retireCard", indexOfCardInPlay, indexOfCardInHand, (cardList, donCardList, handCardList, trashCardList) => {
       this.updateCharacterArea(scene, cardList);
       this.updateDonArea(scene, donCardList);
       this.updateHand(scene, handCardList)
+      this.updateTrash(scene, trashCardList);
       this.playerState = PlayerState.MAIN_PHASE;
       scene.uiHandler.setEndButtonToMainPhase();
     });
+  }
+
+  updateTrash(scene: GameBoard, cardList) {
+    scene.gameHandler.playerTrashArea.removeAll(true);
+    this.trash.clear();
+    let cards = cardList.W;
+    for (let i = 0; i < cardList.i; i++) {
+      let card = new Card(this, scene, cards[i].id, i)
+        .setInteractive()
+        .setOrigin(0, 0)
+        .setScale(0.16);
+      card.initInteractables(false);
+      this.trash.pushBack(card);
+    }
+    // We only have to render the last card trashed
+    if (this.trash.length > 0) {
+      let card = this.trash.getElementByPos(this.trash.length - 1);
+      card.on("pointerdown", () => { 
+        displayTrash(scene, this.trash);
+      });
+      scene.gameHandler.playerTrashArea.add(card);
+    }
   }
 }

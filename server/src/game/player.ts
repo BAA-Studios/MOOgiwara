@@ -215,7 +215,7 @@ export default class Player {
       // Add it to the trash
       this.trash.push(cardRetired);
 
-      callback(this.characterArea.list(), this.donArea.list(), this.hand.list());
+      callback(this.characterArea.list(), this.donArea.list(), this.hand.list(), this.trash.list());
 
       // Update every area for opponent
       this.updateCharacterAreaForOpponent();

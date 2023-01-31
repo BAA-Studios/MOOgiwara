@@ -512,6 +512,24 @@ export default class GameHandler {
       cardYOnScreen = (card.y + this.playerCharacterArea.y) + (card.displayHeight / 2);
     }
 
+    // Inflate text to instruct the player to select a card to retire
+    let informativeText = this.scene.add.text(1920/2, 50, "SELECT A CARD TO ATTACK")
+      .setOrigin(0.5, 0.5);
+    informativeText.setStyle({
+      fontSize: '84px',
+      fontFamily: 'Merriweather',
+      color: '#ffffff',
+      backgroundColor: 'rgba(0,0,0,0.8)',
+    });
+    informativeText.setScale(0.01);
+    this.scene.tweens.add({
+      targets: informativeText,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 350,
+      ease: 'Power2',
+    });
+
     let attackLine = this.scene.add.rectangle(cardXOnScreen, cardYOnScreen, 100, 6, 0xff0000)
       .setOrigin(0, 0);
     attackLine.width = Phaser.Math.Distance.Between(cardXOnScreen, cardYOnScreen, pointerX, pointerY);
@@ -560,6 +578,17 @@ export default class GameHandler {
             attackLine.destroy();
             this.player.playerState = PlayerState.MAIN_PHASE;
             this.scene.uiHandler.setEndButtonToMainPhase();
+          }
+        });
+        // Remove the informative text
+        this.scene.tweens.add({
+          targets: informativeText,
+          scaleX: 0.01,
+          scaleY: 0.01,
+          duration: 350,
+          ease: 'Power2',
+          onComplete: () => {
+            informativeText.destroy();
           }
         });
         // Remove the graphics that were used to highlight the attackable cards
