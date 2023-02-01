@@ -221,6 +221,7 @@ export default class Player {
       this.updateCharacterAreaForOpponent();
       this.sendRemoveCardFromHandPacketToOpponent(1);
       this.updateDonAreaForOpponent();
+      this.updateTrashAreaForOpponent();
 
       this.game?.broadcastChat(`${this.username} retired "${cardRetired.name}" \nand replaced it with "${cardInHand.name}"`);
     });
@@ -356,6 +357,12 @@ export default class Player {
   sendRemoveCardFromHandPacketToOpponent(amount: number) {
     this.game?.broadcastPacketExceptSelf("opponentRemoveCardFromHand", {
       amount: amount
+    }, this);
+  }
+
+  updateTrashAreaForOpponent() {
+    this.game?.broadcastPacketExceptSelf("opponentUpdateTrash", {
+      cards: this.trash.list()
     }, this);
   }
 }

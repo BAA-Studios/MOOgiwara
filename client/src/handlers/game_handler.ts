@@ -4,7 +4,7 @@ import Card from '../game/card';
 import Player from "../game/player";
 import { PlayerState } from '../game/player';
 import GameBoard from '../scenes/game_board';
-import { displayMulliganSelection } from '../scenes/game_board_pop_ups';
+import { displayMulliganSelection, displayTrash } from '../scenes/game_board_pop_ups';
 
 export default class GameHandler {
   player: Player;
@@ -346,6 +346,29 @@ export default class GameHandler {
             backgroundColor: 'rgba(0,0,0,0.7)',
           });
       }
+    });
+
+    this.client.on("opponentUpdateTrash", (data: any) => {
+      this.opponentTrashArea.removeAll(true);
+      this.opponent.trash.clear();
+      for (let i = 0; i < data.cards.i; i++) {
+        const card = new Card(this.opponent, this.scene, data.cards.W[i].id);
+        card.setOrigin(0, 0);
+        card.setScale(0.16);
+        card.flipY = true;
+        card.flipX = true;
+        card.setInteractive();
+        card.initInteractables(false);
+        card.indexInHand = i;
+        card.setPosition(0, 0);
+        this.opponent.trash.pushBack(card);
+      }
+      // We only have to render the last card in the trash
+      const lastCard = this.opponent.trash.getElementByPos(this.opponent.trash.length - 1);
+      lastCard.on("pointerdown", () => {
+        displayTrash(this.scene, this.opponent.trash);
+      });
+      this.opponentTrashArea.add(lastCard);
     });
   }
 
