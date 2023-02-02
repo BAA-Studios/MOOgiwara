@@ -222,7 +222,7 @@ export default class Player {
       console.log("Not enough Don!!");
       return false;
     }
-    if (this.characterArea.length >= 1) {
+    if (this.characterArea.length >= 5) {
       console.log("Character area is full, must retire a card");
       this.retireCard(card);
       return true;
