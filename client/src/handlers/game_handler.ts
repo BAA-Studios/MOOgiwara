@@ -261,12 +261,11 @@ export default class GameHandler {
             this.opponentDonArea.add(donCard);
             donCard.setInteractive();
             donCard.initInteractables(false);
+            if (this.opponentDonArea.length === 10) {
+              this.opponentDonDeckArea.removeAll(true);
+            }
           }
         });
-
-        if (this.opponentDonArea.length === 10) {
-          this.opponentDonDeckArea.removeAll(true);
-        }
       }
     });
 
