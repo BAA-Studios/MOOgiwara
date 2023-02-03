@@ -191,9 +191,20 @@ export default class GameHandler {
           .setScale(0.16);
         blankCard.flipY = true;
         blankCard.flipX = true;
+        const cardBack = new Card(this.opponent, this.scene, 'optcg_card_back')
+            .setScale(0.25)
+            .setOrigin(0, 0)
+            .setVisible(false);
+        cardBack.flipY = true;
+        cardBack.flipX = true;
 
-        this.opponent.addToHand(blankCard);
+        this.opponent.addToHand(cardBack);
         blankCard.indexInHand = this.opponent.hand.length-1;
+        cardBack.indexInHand = this.opponent.hand.length-1;
+
+        this.opponentHandArea.add(cardBack);
+        blankCard.setPosition(blankCard.calculatePositionInHand(), 0);
+        cardBack.setPosition(cardBack.calculatePositionInHand(), 0);
 
         // Animate it going from the deck to the hand
         blankCard.setPosition(this.opponentDeckArea.x, this.opponentDeckArea.y);
@@ -206,8 +217,8 @@ export default class GameHandler {
           duration: 750,
           ease: 'Power1',
           onComplete: () => {
-            this.opponentHandArea.add(blankCard);
-            blankCard.setPosition(blankCard.calculatePositionInHand(), 0);
+            blankCard.destroy();
+            cardBack.setVisible(true);
           }
         });
       }
