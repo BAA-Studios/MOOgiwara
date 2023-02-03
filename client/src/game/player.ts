@@ -54,9 +54,9 @@ export default class Player {
   removeCardFromHand(index: number, scene: GameBoard) {
     const cardRemoved = this.hand.getElementByPos(index);
     this.hand.eraseElementByPos(index);
-    cardRemoved.indexInHand = -1;
+    cardRemoved.indexInContainer = -1;
     for (let i = index; i < this.hand.size(); i++) {
-      this.hand.getElementByPos(i).indexInHand = i;
+      this.hand.getElementByPos(i).indexInContainer = i;
     }
     scene.gameHandler.playerHandArea.remove(cardRemoved, true);
     return cardRemoved;
@@ -65,9 +65,9 @@ export default class Player {
   removeCardFromDonArea(index: number, scene: GameBoard) {
     const cardRemoved = this.donArea.getElementByPos(index);
     this.donArea.eraseElementByPos(index);
-    cardRemoved.indexInHand = -1;
+    cardRemoved.indexInContainer = -1;
     for (let i = index; i < this.hand.size(); i++) {
-      this.donArea.getElementByPos(i).indexInHand = i;
+      this.donArea.getElementByPos(i).indexInContainer = i;
     }
     scene.gameHandler.playerDonArea.remove(cardRemoved, true);
     return cardRemoved;
@@ -119,9 +119,10 @@ export default class Player {
 
       this.addToHand(card);
       scene.gameHandler.playerHandArea.add(card);
-      card.indexInHand = this.hand.size() - 1;
+      card.indexInContainer = this.hand.size() - 1;
       card.setPosition(card.calculatePositionInHand(), 0);
       card.objectId = cards[i].objectId;
+      card.isInHand = true;
     }
   }
 
@@ -146,7 +147,7 @@ export default class Player {
 
       this.donArea.pushBack(card);
       scene.gameHandler.playerDonArea.add(card);
-      card.indexInHand = this.donArea.size() - 1;
+      card.indexInContainer = this.donArea.size() - 1;
       card.setPosition(card.calculatePositionInHand(), 0);
       card.objectId = cards[i].objectId;
       if (cards[i].isResting) {
@@ -176,7 +177,7 @@ export default class Player {
 
       this.characterArea.pushBack(card);
       scene.gameHandler.playerCharacterArea.add(card);
-      card.indexInHand = this.characterArea.size() - 1;
+      card.indexInContainer = this.characterArea.size() - 1;
       card.setPosition(card.calculatePositionInHand(), 0);
       card.objectId = cards[i].objectId;
       card.summoningSickness = cards[i].summoningSickness;
@@ -229,7 +230,7 @@ export default class Player {
     }
     // TODO: Add logic for when the characterArea is full, recycle a card
     this.client.emit("playCard", {
-      index: card.indexInHand
+      index: card.indexInContainer
     });
     return true;
   }
@@ -263,7 +264,7 @@ export default class Player {
   }
 
   attachDon(gameBoard: GameBoard, donCard: Card, characterCard: Card) {
-    this.client.emit("attachDon", characterCard.indexInHand, (donArea) => {
+    this.client.emit("attachDon", characterCard.indexInContainer, (donArea) => {
       // Add animation for the don card shrinking inside the card
       gameBoard.tweens.add({
         targets: donCard,
@@ -374,10 +375,10 @@ export default class Player {
         // Check if the mouse clicked on an attackable card
         scene.gameHandler.playerCharacterArea.each((characterCard: Card) => {
           if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), pointer.x, pointer.y) && this.playerState == PlayerState.RETIRE) {
-            console.log("Retiring character card with index:", characterCard.indexInHand);
+            console.log("Retiring character card with index:", characterCard.indexInContainer);
             this.playerState = PlayerState.LOADING;
             attackLine.destroy();
-            this.sendRetirePacket(scene, characterCard.indexInHand, card.indexInHand);
+            this.sendRetirePacket(scene, characterCard.indexInContainer, card.indexInContainer);
             card.destroy();
           }
         });

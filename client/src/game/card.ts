@@ -19,7 +19,7 @@ export default class Card extends Phaser.GameObjects.Image {
   isResting: boolean;
   dragX: number;
   dragY: number;
-  indexInHand: number; // Misleading name, this is the index of the card, in their respective containers, field, hand, etc.
+  indexInContainer: number; // Indicates what position the card is in in their respective containers (trash, life, hand, etc.)
   isDragging: boolean;
   category: string;
   life: number;
@@ -29,12 +29,13 @@ export default class Card extends Phaser.GameObjects.Image {
   isInPlay: boolean;
   boundingBox: Phaser.GameObjects.Graphics; // Stores the outer ring highlights of a card
   donAttached: Vector<Card> = new Vector<Card>; // Cards that are attached to this card
+  isInHand: boolean;
 
   constructor(
     owner: Player,
     scene: GameBoard,
     cardId: string,
-    indexInHand = -1
+    indexInContainer = -1
   ) {
     // cardId is to keep this card unique from another card that has the same name and ID
     super(scene, 0, 0, cardId);
@@ -55,7 +56,7 @@ export default class Card extends Phaser.GameObjects.Image {
 
     this.owner = owner;
 
-    this.indexInHand = indexInHand;
+    this.indexInContainer = indexInContainer;
 
     this.dragX = 0;
     this.dragY = 0;
@@ -68,18 +69,15 @@ export default class Card extends Phaser.GameObjects.Image {
     this.isInPlay = false;
 
     this.boundingBox = this.scene.add.graphics();
+    this.isInHand = false;
   }
 
   calculatePositionInHand() {
     // TODO: Fix magic number 100
     if (this.isDonCard) {
-      return this.indexInHand * 75;
+      return this.indexInContainer * 75;
     }
-    return this.indexInHand * 100;
-  }
-
-  isInHand() {
-    return this.indexInHand !== -1;
+    return this.indexInContainer * 100;
   }
 
   isDraggable() {
@@ -87,7 +85,7 @@ export default class Card extends Phaser.GameObjects.Image {
     if (this.isResting) {
       return false;
     }
-    return this.isInHand() || this.isDonCard;
+    return this.isInHand || this.isDonCard;
   }
 
   isCharacterCard() {

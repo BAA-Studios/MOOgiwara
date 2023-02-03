@@ -181,10 +181,10 @@ export default class Player {
       this.game?.broadcastChat(`${this.username} attached a Don!! \nto "${cardAttachedTo.name}"`);
     });
 
-    this.client.on("retireCard", (cardIndexInPlay: number, cardIndexInHand: number,  callback: Function) => {
+    this.client.on("retireCard", (cardIndexInPlay: number, cardindexInContainer: number,  callback: Function) => {
       let cardRetired: Card | undefined;
       cardRetired = this.characterArea.get(cardIndexInPlay);
-      let cardInHand = this.hand.get(cardIndexInHand);
+      let cardInHand = this.hand.get(cardindexInContainer);
 
       if (!cardInHand) {
         console.log(`[ERROR] Player ${this.username} tried to replace a card with a card that doesn't exist`);

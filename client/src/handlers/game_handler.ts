@@ -163,7 +163,7 @@ export default class GameHandler {
       donCard.setScale(0.16);
       donCard.setInteractive();
       donCard.initInteractables();
-      donCard.indexInHand = this.playerDonArea.length;
+      donCard.indexInContainer = this.playerDonArea.length;
       // TODO: Animate a card going from the donDeckArea to the donArea in their respective location
       this.playerDonArea.add(donCard);
     });
@@ -199,8 +199,8 @@ export default class GameHandler {
         cardBack.flipX = true;
 
         this.opponent.addToHand(cardBack);
-        blankCard.indexInHand = this.opponent.hand.length-1;
-        cardBack.indexInHand = this.opponent.hand.length-1;
+        blankCard.indexInContainer = this.opponent.hand.length-1;
+        cardBack.indexInContainer = this.opponent.hand.length-1;
 
         this.opponentHandArea.add(cardBack);
         blankCard.setPosition(blankCard.calculatePositionInHand(), 0);
@@ -231,9 +231,9 @@ export default class GameHandler {
         this.opponentHandArea.removeAt(this.opponentHandArea.length - 1, true);
         this.opponent.hand.eraseElementByPos(this.opponent.hand.length - 1);
       }
-      // Readjust all the card's indexInHand
+      // Readjust all the card's indexInContainer
       for (let i = 0; i < this.opponent.hand.length; i++) {
-        this.opponent.hand.getElementByPos(i).indexInHand = i;
+        this.opponent.hand.getElementByPos(i).indexInContainer = i;
       }
     });
 
@@ -248,16 +248,16 @@ export default class GameHandler {
         donCard.setPosition(this.opponentDonDeckArea.x, this.opponentDonDeckArea.y);
 
         this.opponent.donArea.pushBack(donCard);
-        donCard.indexInHand = this.opponent.donArea.length-1;
+        donCard.indexInContainer = this.opponent.donArea.length-1;
 
         this.scene.tweens.add({
           targets: donCard,
-          x: this.opponentDonArea.x + donCard.indexInHand*75,
+          x: this.opponentDonArea.x + donCard.indexInContainer*75,
           y: this.opponentDonArea.y,
           duration: 750,
           ease: 'Power1',
           onComplete: () => {
-            donCard.setPosition(donCard.indexInHand*75, 0);
+            donCard.setPosition(donCard.indexInContainer*75, 0);
             this.opponentDonArea.add(donCard);
             donCard.setInteractive();
             donCard.initInteractables(false);
@@ -285,7 +285,7 @@ export default class GameHandler {
         card.flipX = true;
         card.setInteractive();
         card.initInteractables(false);
-        card.indexInHand = i;
+        card.indexInContainer = i;
         card.setPosition(card.calculatePositionInHand(), 0);
         this.opponentCharacterArea.add(card);
         this.opponent.characterArea.pushBack(card);
@@ -318,7 +318,7 @@ export default class GameHandler {
         card.flipX = true;
         card.setInteractive();
         card.initInteractables(false);
-        card.indexInHand = i;
+        card.indexInContainer = i;
         card.setPosition(card.calculatePositionInHand(), 0);
         this.opponentDonArea.add(card);
         if (data.cards.W[i].isResting) {
@@ -370,7 +370,7 @@ export default class GameHandler {
         card.flipX = true;
         card.setInteractive();
         card.initInteractables(false);
-        card.indexInHand = i;
+        card.indexInContainer = i;
         card.setPosition(0, 0);
         this.opponent.trash.pushBack(card);
       }
@@ -380,6 +380,14 @@ export default class GameHandler {
         displayTrash(this.scene, this.opponent.trash);
       });
       this.opponentTrashArea.add(lastCard);
+    });
+
+    this.client.on("opponentHoveredCard", (data: any) => {
+      this.opponent.hand.getElementByPos(data.indexInHand)?.highlightBounds(0xff0000);
+    });
+
+    this.client.on("opponentUnhoveredCard", (data: any) => {
+      this.opponent.hand.getElementByPos(data.indexInHand)?.unHighlightBounds();
     });
   }
 
@@ -633,7 +641,7 @@ export default class GameHandler {
         // Check if the mouse clicked on an attackable card
         this.opponentCharacterArea.each((card: Card) => {
           if (Phaser.Geom.Rectangle.Contains(card.getBounds(), pointer.x, pointer.y)) {
-            console.log("Attacking character card with index:", card.indexInHand);
+            console.log("Attacking character card with index:", card.indexInContainer);
           }
         });
         if (this.opponent.leader) {
