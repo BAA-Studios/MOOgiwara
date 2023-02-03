@@ -43,7 +43,7 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 | express | 4.17.14 |
 | cors | 2.8.5 |
 | vite | 3.2.5 |
-| phaser | 3.60.0-beta.15 |
+| phaser | 3.60.0-beta.18 |
 | shuffle-array | 1.0.1 |
 | gts | 4.0.0 |
 
