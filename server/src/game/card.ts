@@ -20,6 +20,7 @@ export class Card {
 
     isResting = false;
     summoningSickness = false;
+    isBlocker: boolean = false;
 
     attachedDon: Vector<Card> = new Vector<Card>();
     attachedDonCount = 0;
@@ -44,6 +45,7 @@ export class Card {
         this.cardSets = cardMetadata[cardId]['Card Set(s)'];
 
         this.summoningSickness = false;
+        this.isBlocker = this.effect.includes('[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.)');
     }
 
     isCharacterCard() {

@@ -73,4 +73,9 @@ export default class UiHandler {
     this.endTurnButton.buttonText.setText("RETIRING...");
     this.endTurnButton.buttonText.setFontSize(34);
   }
+
+  setEndButtonToBlockerPhase() {
+    this.endTurnButton.buttonText.setText("BLOCKING...");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
 }

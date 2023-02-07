@@ -99,6 +99,13 @@ export default class Game {
     return index === 1 ? this.playerOne : this.playerTwo;
   }
 
+  getOpponent(player: Player) {
+    if (player === this.playerOne) {
+      return this.playerTwo;
+    }
+    return this.playerOne;
+  }
+
   start() {
     // Assign each player's cards in their deck with a unique object Id
     if (!(this.playerOne?.deck && this.playerTwo?.deck)) {

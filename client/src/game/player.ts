@@ -9,6 +9,7 @@ export enum PlayerState {
   OPPONENTS_TURN,
   MAIN_PHASE,
   ATTACK_PHASE,
+  BLOCKER_PHASE,
   COUNTER_PHASE,
   REFRESH_PHASE,
   DON_PHASE,
@@ -245,8 +246,10 @@ export default class Player {
     for (let i = 0; i < scene.gameHandler.opponent.characterArea.size(); i++) {
       let characterCard = scene.gameHandler.opponent.characterArea.getElementByPos(i);
       // TODO: Check if the card is attackable
-      // Set a box around the characterCard's bounds
-      characterCard.highlightBounds();
+      if (characterCard.isResting) {
+        // Set a box around the characterCard's bounds
+        characterCard.highlightBounds();
+      }
     }
     // Give the opponent's Leader card a green lined border
     if (scene.opponent.leader) {
@@ -282,8 +285,8 @@ export default class Player {
             container = gameBoard.gameHandler.playerLeaderArea;
           }
           characterCard.writeOnCard(container, "+" + characterCard.calculateTotalAttack().toString(), 35, 
-            { 
-              color: '#ff0000',
+            {
+              color: '#00ff00',
               backgroundColor: 'rgba(0,0,0,0.7)'
             }
           );
@@ -430,5 +433,10 @@ export default class Player {
       });
       scene.gameHandler.playerTrashArea.add(card);
     }
+  }
+
+  setBlockerPhase(scene: GameBoard) {
+    this.playerState = PlayerState.BLOCKER_PHASE;
+    scene.uiHandler.setEndButtonToBlockerPhase();
   }
 }

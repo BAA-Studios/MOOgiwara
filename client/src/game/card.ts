@@ -23,6 +23,7 @@ export default class Card extends Phaser.GameObjects.Image {
   isDragging: boolean;
   category: string;
   life: number;
+  effect: string;
   isDonCard: boolean;
   summoningSickness: boolean;
   textOnCard: Phaser.GameObjects.Text;
@@ -30,6 +31,7 @@ export default class Card extends Phaser.GameObjects.Image {
   boundingBox: Phaser.GameObjects.Graphics; // Stores the outer ring highlights of a card
   donAttached: Vector<Card> = new Vector<Card>; // Cards that are attached to this card
   isInHand: boolean;
+  isBlocker: boolean;
 
   constructor(
     owner: Player,
@@ -51,6 +53,7 @@ export default class Card extends Phaser.GameObjects.Image {
     this.attack = parseInt(cardMetadata[cardId]['Power']);
     this.attribute = cardMetadata[cardId]['Attribute'];
     this.life = cardMetadata[cardId]['Life'];
+    this.effect = cardMetadata[cardId]['Effect'];
     this.image = cardId + '.png';
     this.isResting = false;
 
@@ -70,6 +73,8 @@ export default class Card extends Phaser.GameObjects.Image {
 
     this.boundingBox = this.scene.add.graphics();
     this.isInHand = false;
+
+    this.isBlocker = this.effect.includes('[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.)');
   }
 
   calculatePositionInHand() {
@@ -169,6 +174,11 @@ export default class Card extends Phaser.GameObjects.Image {
   // Removes the text on the card
   removeTextOnCard() {
     this.textOnCard.setVisible(false);
+  }
+
+  isAttackable() {
+    // TODO: Finish all conditionals
+    return this.isResting;
   }
 
   initInteractables(draggable: boolean = true) {

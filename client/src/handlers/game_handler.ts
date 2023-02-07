@@ -300,7 +300,7 @@ export default class GameHandler {
           }
           card.writeOnCard(this.opponentCharacterArea, "+" + card.calculateTotalAttack(), 35, 
           { 
-            color: '#ff0000',
+            color: '#00ff00',
             backgroundColor: 'rgba(0,0,0,0.7)',
           });
         }
@@ -352,7 +352,7 @@ export default class GameHandler {
         }
           newLeader.writeOnCard(this.opponentLeaderArea, "+" + newLeader.calculateTotalAttack(), 35, 
           { 
-            color: '#ff0000',
+            color: '#00ff00',
             backgroundColor: 'rgba(0,0,0,0.7)',
           });
       }
@@ -381,12 +381,127 @@ export default class GameHandler {
       this.opponentTrashArea.add(lastCard);
     });
 
-    this.client.on("opponentHoveredCard", (data: any) => {
-      this.opponent.hand.getElementByPos(data.indexInHand)?.highlightBounds(0xff0000);
-    });
+    this.client.on("opponentInitiateAttack", (data: any, callback: Function) => {
+      this.player.setBlockerPhase(this.scene);
+      let attackingCard = this.opponent.leader;
+      if (!data.cardAttackingIsLeader) {
+        attackingCard = this.opponent.characterArea.getElementByPos(data.cardAttackingIndex);
+      }
+      let defendingCard = this.player.leader;
+      if (!data.cardDefendingIsLeader) {
+        defendingCard = this.player.characterArea.getElementByPos(data.cardDefendingIndex);
+      }
+      if (!attackingCard || !defendingCard) {
+        return;
+      }
+      // calculate screen coord
+      let attackingCardXOnScreen = attackingCard.x;
+      let attackingCardYOnScreen = attackingCard.y;
 
-    this.client.on("opponentUnhoveredCard", (data: any) => {
-      this.opponent.hand.getElementByPos(data.indexInHand)?.unHighlightBounds();
+      if (data.cardAttackingIsLeader) {
+        attackingCardXOnScreen += this.opponentLeaderArea.x;
+        attackingCardYOnScreen += this.opponentLeaderArea.y;
+      } else {
+        attackingCardXOnScreen += this.opponentCharacterArea.x;
+        attackingCardYOnScreen += this.opponentCharacterArea.y;
+      }
+
+      attackingCardXOnScreen += attackingCard.displayWidth / 2;
+      attackingCardYOnScreen += attackingCard.displayHeight / 2;
+
+      let defendingCardXOnScreen = defendingCard.x;
+      let defendingCardYOnScreen = defendingCard.y;
+
+      if (data.cardDefendingIsLeader) {
+        defendingCardXOnScreen += this.playerLeaderArea.x;
+        defendingCardYOnScreen += this.playerLeaderArea.y;
+      } else {
+        defendingCardXOnScreen += this.playerCharacterArea.x;
+        defendingCardYOnScreen += this.playerCharacterArea.y;
+      }
+
+      defendingCardXOnScreen += defendingCard.displayWidth / 2;
+      defendingCardYOnScreen += defendingCard.displayHeight / 2;
+
+      // Render a red line from the attacking card to the defending card
+      let attackLine = this.scene.add.rectangle(attackingCardXOnScreen, attackingCardYOnScreen, 100, 6, 0xff0000)
+        .setOrigin(0, 0);
+      // Set the end of the attackLine to the defending card
+      attackLine.width = Phaser.Math.Distance.Between(attackingCardXOnScreen, attackingCardYOnScreen, defendingCardXOnScreen, defendingCardYOnScreen);
+      attackLine.rotation = Phaser.Math.Angle.Between(attackingCardXOnScreen, attackingCardYOnScreen, defendingCardXOnScreen, defendingCardYOnScreen);
+
+      let damageText = this.scene.add.text(attackingCardXOnScreen, attackingCardYOnScreen, attackingCard.calculateTotalAttack().toString(), {
+        fontFamily: 'Merriweather',
+        fontSize: "55px",
+        color: '#00ff00',
+        backgroundColor: 'rgba(0,0,0,0.7)',
+      }).setOrigin(0.5, 0.5).setScale(0.01);
+
+      let defendingText = this.scene.add.text(defendingCardXOnScreen, defendingCardYOnScreen, defendingCard.attack.toString(), {
+        fontFamily: 'Merriweather',
+        fontSize: "55px",
+        color: '#ff0000',
+        backgroundColor: 'rgba(0,0,0,0.7)',
+      }).setOrigin(0.5, 0.5).setScale(0.01);
+
+      let informativeText = this.scene.add.text(1920/2, 50, 
+      `Opponent is attacking your ${defendingCard.name}`, 
+      {
+        fontFamily: 'Merriweather',
+        fontSize: "84px",
+        color: '#ffffff',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+      }).setOrigin(0.5, 0.5).setScale(0.01);
+
+      this.scene.tweens.add({
+        targets: [damageText, defendingText, informativeText],
+        scaleX: 1,
+        scaleY: 1,
+        ease: 'Power1',
+        duration: 350,
+      });
+
+      // Allow player to click on any blockers to take place of the attack
+      // BLOCK PHASE
+      let totalBlockers = 0;
+      this.player.characterArea.forEach((card: Card) => {
+        if (!card.isBlocker) {
+          return;
+        }
+        card.highlightBounds();
+        card.on("pointerdown", () => {
+          if (this.player.playerState === PlayerState.BLOCKER_PHASE) {
+            // Move the attackLine to the blocker
+            let blockerXOnScreen = card.x + this.playerCharacterArea.x + card.displayWidth / 2;
+            let blockerYOnScreen = card.y + this.playerCharacterArea.y + card.displayHeight / 2;
+  
+            attackLine.width = Phaser.Math.Distance.Between(attackingCardXOnScreen, attackingCardYOnScreen, blockerXOnScreen, blockerYOnScreen);
+            attackLine.rotation = Phaser.Math.Angle.Between(attackingCardXOnScreen, attackingCardYOnScreen, blockerXOnScreen, blockerYOnScreen);
+            
+            // Move defender text to the blocker
+            defendingText.x = blockerXOnScreen;
+            defendingText.y = blockerYOnScreen;
+            defendingText.text = card.attack.toString();
+
+            callback(card.indexInContainer);
+            this.player.playerState = PlayerState.COUNTER_PHASE;
+          }
+        });
+        totalBlockers++;
+      });
+
+      if (totalBlockers > 0) {
+        informativeText.setText(informativeText.text + "\n                            Select a Blocker");
+        informativeText.y = 100;
+      }
+
+      // TODO: Add a skip blocker button
+
+      if (totalBlockers == 0) {
+        // TODO: Go to Counter Phase
+        this.player.playerState = PlayerState.COUNTER_PHASE;
+        console.log("Go to Counter Phase")
+      }
     });
   }
 
@@ -578,8 +693,6 @@ export default class GameHandler {
     attackLine.setInteractive();
     // Make the attack line follow and rotate towards the mouse
     this.scene.input.on('pointermove', (pointer) => {
-      attackLine.x = cardXOnScreen;
-      attackLine.y = cardYOnScreen;
       attackLine.width = Phaser.Math.Distance.Between(cardXOnScreen, cardYOnScreen, pointer.x, pointer.y);
       attackLine.rotation = Phaser.Math.Angle.Between(cardXOnScreen, cardYOnScreen, pointer.x, pointer.y);
       // Check if mouse is over an attackable card and add a green tint to it
@@ -638,16 +751,84 @@ export default class GameHandler {
       }
       else { // if the player left clicks
         // Check if the mouse clicked on an attackable card
-        this.opponentCharacterArea.each((card: Card) => {
-          if (Phaser.Geom.Rectangle.Contains(card.getBounds(), pointer.x, pointer.y)) {
+        let cardToAttack = this.opponent.leader
+        let cardToAttackExists = false;
+        this.opponentCharacterArea.each((oppCard: Card) => {
+          if (Phaser.Geom.Rectangle.Contains(card.getBounds(), pointer.x, pointer.y) && card.isAttackable()) {
             console.log("Attacking character card with index:", card.indexInContainer);
+            // Make the end of the attack line point to the middle of the selected card
+            cardToAttack = oppCard;
+            cardToAttackExists = true;
           }
         });
         if (this.opponent.leader) {
           if (Phaser.Geom.Rectangle.Contains(this.opponent.leader.getBounds(), pointer.x, pointer.y)) {
             console.log("Attacking leader card");
+            cardToAttack = this.opponent.leader;
+            cardToAttackExists = true;
           }
         }
+        
+        if (!cardToAttackExists || !cardToAttack) {
+          return;
+        }
+
+        // Clean up events
+        this.scene.input.off('pointermove');
+        this.scene.input.off('pointerdown');
+
+        let oppCardXOnScreen = (cardToAttack.x + this.opponentLeaderArea.x) + (cardToAttack.displayWidth / 2);
+        let oppCardYOnScreen = (cardToAttack.y + this.opponentLeaderArea.y) + (cardToAttack.displayHeight / 2);
+        attackLine.width = Phaser.Math.Distance.Between(cardXOnScreen, cardYOnScreen, oppCardXOnScreen, oppCardYOnScreen);
+        attackLine.rotation = Phaser.Math.Angle.Between(cardXOnScreen, cardYOnScreen, oppCardXOnScreen, oppCardYOnScreen);
+        // Write how much damage the attack will do, and how much the opponent's defense stat is
+        let opponentLeaderX = (cardToAttack.x + this.opponentLeaderArea.x) + (cardToAttack.displayWidth / 2);
+        let opponentLeaderY = (cardToAttack.y + this.opponentLeaderArea.y) + (cardToAttack.displayHeight / 2);
+
+        let damageText = this.scene.add.text(cardXOnScreen, cardYOnScreen, card.calculateTotalAttack().toString())
+          .setOrigin(0.5, 0.5);
+        damageText.setStyle({
+          fontSize: '55px',
+          fontFamily: 'Merriweather',
+          color: '#00ff00',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+        });
+
+        let defendText = this.scene.add.text(opponentLeaderX, opponentLeaderY, cardToAttack.attack.toString());
+        defendText.setOrigin(0.5, 0.5);
+        defendText.setStyle({
+          fontSize: '55px',
+          fontFamily: 'Merriweather',
+          color: '#ff0000',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+        });
+        informativeText.setText("Attacking " + cardToAttack.name + " for " + card.calculateTotalAttack() + " damage");
+
+        this.client.emit('initiateAttack',
+          card.isLeaderCard(),
+          card.indexInContainer,
+          cardToAttack.isLeaderCard(),
+          cardToAttack.indexInContainer, (blockerIndex: number) => {
+          // If opponent chose a blocker
+          if (blockerIndex === -1) {
+            return;
+          }
+          // Move attack line to the blocker
+          let blocker = this.opponent.characterArea.getElementByPos(blockerIndex);
+          let blockerXOnScreen = (blocker.x + this.opponentCharacterArea.x) + (blocker.displayWidth / 2);
+          let blockerYOnScreen = (blocker.y + this.opponentCharacterArea.y) + (blocker.displayHeight / 2);
+
+          attackLine.width = Phaser.Math.Distance.Between(cardXOnScreen, cardYOnScreen, blockerXOnScreen, blockerYOnScreen);
+          attackLine.rotation = Phaser.Math.Angle.Between(cardXOnScreen, cardYOnScreen, blockerXOnScreen, blockerYOnScreen);
+
+          // Move defend text to the blocker
+          defendText.x = blockerXOnScreen;
+          defendText.y = blockerYOnScreen;
+          defendText.setText(blocker.attack.toString());
+
+          // Rewrite the informative text
+          informativeText.setText("Attacking " + blocker.name + " for " + card.calculateTotalAttack() + " damage");
+        });
       }
     });
   }

@@ -225,6 +225,35 @@ export default class Player {
 
       this.game?.broadcastChat(`${this.username} retired "${cardRetired.name}" \nand replaced it with "${cardInHand.name}"`);
     });
+
+    this.client.on("initiateAttack", (
+      cardAttackingisLeader: boolean, 
+      cardAttackingIndex: number,
+      cardDefendingisLeader: boolean,
+      cardDefendingIndex: number,
+      sendBlockerIndex: Function) => {
+        console.log(`[INFO] Player ${this.username} requested to initiate an attack on card ${cardDefendingIndex}`);
+        let cardDefending = this.game?.getOpponent(this)?.leader;
+        if (!cardDefendingisLeader) {
+          cardDefending = this.game?.getOpponent(this)?.characterArea.get(cardDefendingIndex);
+        }
+        if (!cardDefending) {
+          console.log(`[ERROR] Player ${this.username} tried to initiate an attack on a card that doesn't exist`);
+          return;
+        }
+        this.game?.broadcastChat(`${this.username} initiated an attack\non card "${cardDefending.name}"`);
+        let opponent = this.game?.getOpponent(this);
+        opponent?.client.emit("opponentInitiateAttack", {
+          cardAttackingIsLeader: cardAttackingisLeader,
+          cardAttackingIndex: cardAttackingIndex,
+          cardDefendingIsLeader: cardDefendingisLeader,
+          cardDefendingIndex: cardDefendingIndex
+        }, (blockerIndex: number) => {
+
+          sendBlockerIndex(blockerIndex);
+        });
+
+    });
   }
 
   drawCard(amount: number = 1) {
@@ -363,6 +392,18 @@ export default class Player {
   updateTrashAreaForOpponent() {
     this.game?.broadcastPacketExceptSelf("opponentUpdateTrash", {
       cards: this.trash.list()
+    }, this);
+  }
+
+  sendOpponentAttackingPacket(cardAttackingIsLeader: boolean, 
+    cardAttackingIndex: number, 
+    cardDefendingIsLeader: boolean,
+    cardDefendingIndex: number) {
+    this.game?.broadcastPacketExceptSelf("opponentInitiateAttack", {
+      cardAttackingIsLeader: cardAttackingIsLeader,
+      cardAttackingIndex: cardAttackingIndex,
+      cardDefendingIsLeader: cardDefendingIsLeader,
+      cardDefendingIndex: cardDefendingIndex
     }, this);
   }
 }
