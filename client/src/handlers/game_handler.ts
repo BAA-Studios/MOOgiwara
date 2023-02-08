@@ -1,6 +1,7 @@
 import Phaser, { Data } from 'phaser';
 import { Socket } from 'socket.io-client';
 import Card from '../game/card';
+import StandardButton from '../game/menu/buttons/standard_button';
 import Player from "../game/player";
 import { PlayerState } from '../game/player';
 import GameBoard from '../scenes/game_board';
@@ -394,6 +395,16 @@ export default class GameHandler {
       if (!attackingCard || !defendingCard) {
         return;
       }
+      // Check if the attacking card has any don!! attached
+      if (attackingCard.donAttached.length > 0) {
+        attackingCard.unHighlightBounds();
+      }
+      attackingCard.rest();
+
+      if (attackingCard.donAttached.length > 0) {
+        attackingCard.highlightBounds(0xff0000);
+      }
+
       // calculate screen coord
       let attackingCardXOnScreen = attackingCard.x;
       let attackingCardYOnScreen = attackingCard.y;
@@ -463,9 +474,28 @@ export default class GameHandler {
 
       // Allow player to click on any blockers to take place of the attack
       // BLOCK PHASE
+
+      // Add a skip blocker button
+      let skipBlockerButton = this.scene.add.existing(new StandardButton(this.scene, 250, (1080/2)+75, 'SKIP BLOCK', () => {
+        skipBlockerButton.setInteractive(false);
+        if (this.player.playerState === PlayerState.BLOCKER_PHASE) {
+          console.log("Skipped block, going to counter phase");
+          callback(-3); // The code to inform server that user skipped block
+          this.player.playerState = PlayerState.COUNTER_PHASE;
+        }
+        // Unhighlight all blockers
+        this.player.characterArea.forEach((cardInField: Card) => {
+          cardInField.unHighlightBounds();
+        });
+        informativeText.setText(`Opponent is attacking your ${defendingCard?.name}`);
+        informativeText.y = 50;
+        skipBlockerButton.destroy();
+      }));
+      skipBlockerButton.buttonText.setFontSize(34);
+
       let totalBlockers = 0;
       this.player.characterArea.forEach((card: Card) => {
-        if (!card.isBlocker) {
+        if (!card.isBlocker || card.isResting) {
           return;
         }
         card.highlightBounds();
@@ -484,7 +514,18 @@ export default class GameHandler {
             defendingText.text = card.attack.toString();
 
             callback(card.indexInContainer);
+
+            card.rest();
+            // Unhighlight all blockers
+            this.player.characterArea.forEach((cardInField: Card) => {
+              cardInField.unHighlightBounds();
+            });
+
+            informativeText.setText(`Opponent is attacking your ${card.name}`);
+            informativeText.y = 50;
+
             this.player.playerState = PlayerState.COUNTER_PHASE;
+            skipBlockerButton.destroy();
           }
         });
         totalBlockers++;
@@ -495,12 +536,12 @@ export default class GameHandler {
         informativeText.y = 100;
       }
 
-      // TODO: Add a skip blocker button
-
       if (totalBlockers == 0) {
         // TODO: Go to Counter Phase
+        skipBlockerButton.destroy();
         this.player.playerState = PlayerState.COUNTER_PHASE;
-        console.log("Go to Counter Phase")
+        console.log("Go to Counter Phase");
+        return;
       }
     });
   }
@@ -803,6 +844,11 @@ export default class GameHandler {
           backgroundColor: 'rgba(0,0,0,0.7)',
         });
         informativeText.setText("Attacking " + cardToAttack.name + " for " + card.calculateTotalAttack() + " damage");
+        
+        // Set the attacker to resting
+        card.unHighlightBounds();
+        card.rest();
+        card.highlightBounds(0xff0000);
 
         this.client.emit('initiateAttack',
           card.isLeaderCard(),
@@ -825,6 +871,8 @@ export default class GameHandler {
           defendText.x = blockerXOnScreen;
           defendText.y = blockerYOnScreen;
           defendText.setText(blocker.attack.toString());
+
+          blocker.rest();
 
           // Rewrite the informative text
           informativeText.setText("Attacking " + blocker.name + " for " + card.calculateTotalAttack() + " damage");

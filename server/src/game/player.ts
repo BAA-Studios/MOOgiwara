@@ -126,6 +126,11 @@ export default class Player {
         this.donArea.push(don);
       });
 
+      // unrest leader
+      if (this.leader !== undefined) {
+        this.leader.isResting = false;
+      }
+
       this.leader?.clearDon();
       this.updateLeaderForOpponent();
 
@@ -241,6 +246,21 @@ export default class Player {
           console.log(`[ERROR] Player ${this.username} tried to initiate an attack on a card that doesn't exist`);
           return;
         }
+
+        // Set the attacking card to resting
+        if (!cardAttackingisLeader) {
+          let cardAttacking = this.characterArea.get(cardAttackingIndex);
+          if (!cardAttacking) {
+            console.log(`[ERROR] Player ${this.username} tried to initiate an attack with a card that doesn't exist`);
+            return;
+          }
+          cardAttacking.isResting = true;
+        } else {
+          if (this.leader) {
+            this.leader.isResting = true;
+          }
+        }
+
         this.game?.broadcastChat(`${this.username} initiated an attack\non card "${cardDefending.name}"`);
         let opponent = this.game?.getOpponent(this);
         opponent?.client.emit("opponentInitiateAttack", {
@@ -249,7 +269,17 @@ export default class Player {
           cardDefendingIsLeader: cardDefendingisLeader,
           cardDefendingIndex: cardDefendingIndex
         }, (blockerIndex: number) => {
-
+          if (blockerIndex === -3) {
+            this.game?.broadcastChat(`${opponent?.username} skipped block.`);
+            return;
+          }
+          let cardDefending = opponent?.characterArea.get(blockerIndex);
+          if (!cardDefending) {
+            console.log(`[ERROR] Player ${opponent?.username} tried to block an attack with a card that doesn't exist`);
+            return;
+          }
+          cardDefending.isResting = true;
+          this.game?.broadcastChat(`${opponent?.username} blocked the attack\nwith card "${cardDefending.name}"`);
           sendBlockerIndex(blockerIndex);
         });
 
