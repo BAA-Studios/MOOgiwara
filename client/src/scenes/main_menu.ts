@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import PlayButton from '../game/menu/buttons/play_button';
 import HollowShortButton from '../game/menu/buttons/hollow_short_button';
 import LoadingButton from '../game/menu/buttons/loading_button';
-import { connectToServer } from '../network/connection';
+import { connectToServer, waitForGame } from '../network/connection';
 
 export default class MainMenu extends Phaser.Scene {
   constructor() {
@@ -20,6 +20,10 @@ export default class MainMenu extends Phaser.Scene {
 
   // TODO: Groupings + dynamic relative coordinate resolution
   create() {
+    // Start socket connection to server -----------------------------
+    // TODO: Inherit the socket connection from previous game, if exists
+    const socket = connectToServer();
+    
     // Sign In With Google -------------------------------------------
     // Inject button div
     signInButton: Phaser.GameObjects.DOMElement = this.add
@@ -77,7 +81,7 @@ export default class MainMenu extends Phaser.Scene {
       // TODO: While loading, the other buttoons should be disabled (Create Deck, Options)
       playButton.disableInteractive();
       // Create a loading button over the original play button to show the loading animation
-      connectToServer(this);
+      waitForGame(this, socket);  // Passes the socket instance to the next scene
       this.add.existing(new LoadingButton(this, 360, 900));
     });
 

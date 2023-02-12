@@ -1,15 +1,15 @@
 /*
     for all connections related packets
 */
-import io from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 import Phaser from 'phaser';
 import Player from '../game/player';
 
 // The initial connection to the server
-export function connectToServer(scene: Phaser.Scene) {
+export function connectToServer(): Socket {
   const socket = io('http://localhost:3000');
   // TODO: Tell server what the user put in the username field
-  waitForGame(scene, socket);
+  return socket;
 }
 
 // The server sends a packet to the client to match the client with another player
