@@ -28,11 +28,8 @@ const games = new Map<string, Game>();
  * @returns     Lobby ID of game instance, if a match has been found; else null
  */
 function findOpenGame(games: Map<string, Game>): string | null {
-  console.log("LOOKING FOR OPEN GAMES");
   for (const [lobbyId, game] of games) {
-    console.log('ID: ' + lobbyId);
     if (!game.isFull()) {
-      console.log("FOUND!");
       return lobbyId; // Short-circuit if found
     }
   }
@@ -61,15 +58,12 @@ function findMatch(socketId: string): string {
   return openGame;
 }
 
-io.on('connection', (socket: Socket) => {
-  console.log('User: ' + socket.id + ' connected');
-  users.push(socket.id); // TODO: Remove on disconnect - might need to use Set instead of Array?
-
-  const userId = socket.id; // temporary - to convert this to database PK if not guest
+function startQueuing(socket: Socket): Player {
+  console.log('[LOG] User: ' + socket.id + ' has started queuing');
   const lobbyId = findMatch(socket.id);
   const game = games.get(lobbyId);
   console.log('[LOG] USER: ' + socket.id + ' joined game: ' + lobbyId);
-  const player = new Player(socket, userId, lobbyId, testDeck);
+  const player = new Player(socket, socket.id, lobbyId, testDeck);
   game?.push(player);
   player.game = game;
   if (game?.isFull()) {
@@ -89,10 +83,31 @@ io.on('connection', (socket: Socket) => {
     game.start();
     console.log("[LOG] Game started: " + lobbyId);
   }
+  return player;
+}
+
+io.on('connection', (socket: Socket) => {
+  console.log('[LOG] User: ' + socket.id + ' connected');
+  const userId = socket.id; // temporary - to convert this to database PK if not guest
+  users.push(userId); // TODO: Remove on disconnect - might need to use Set instead of Array?
+  let player: Player;
+  let game: Game;
+  let lobbyId: string;
 
   // Packets Received Start ----------------------------
 
-  player.initListeners();
+  socket.on('queue', () => {
+    player = startQueuing(socket);
+    if (player.game) {
+      game = player.game;
+    } else {
+      console.log('[Error] User ' + userId + ' has no associated game instance!')
+      return;
+    }
+    lobbyId = player.lobbyId;    
+
+    player.initListeners();
+  })
   
   socket.once('boardFullyLoaded', () => {
     player.boardReady = true;
