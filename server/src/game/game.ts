@@ -37,8 +37,15 @@ export default class Game {
   }
 
   clearPlayers() {
-    this.playerOne = undefined;
-    this.playerTwo = undefined;
+    if (this.playerOne) {
+      this.playerOne.game = undefined;
+      this.playerOne = undefined;
+      return;
+    }
+    if (this.playerTwo) {
+      this.playerTwo.game = undefined;
+      this.playerTwo = undefined;
+    }
   }
 
   push(player: Player) {
@@ -90,6 +97,13 @@ export default class Game {
 
   getPlayer(index: number) {
     return index === 1 ? this.playerOne : this.playerTwo;
+  }
+
+  getOpponent(player: Player) {
+    if (player === this.playerOne) {
+      return this.playerTwo;
+    }
+    return this.playerOne;
   }
 
   start() {

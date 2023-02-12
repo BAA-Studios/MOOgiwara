@@ -1,7 +1,7 @@
 # MOOgiwara
 
 [![Code Style: Google](https://img.shields.io/badge/code%20style-google-blueviolet.svg)](https://github.com/google/gts)
-![MVP](https://progress-bar.dev/5/?title=Minimum%20Viable%20Product)
+![MVP](https://progress-bar.dev/30/?title=Minimum%20Viable%20Product)
 
 MOOgiwara is a multiplayer online browser ONE PIECE TCG game simulator, written in TypeScript, that relies on [`Phaser`](https://github.com/photonstorm/phaser) and `Node.js`.
 
@@ -23,6 +23,14 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 1. Change directories to `./MOOgiwara/server`
 2. `npm run start`
 
+## Gallery
+![splash_screen](https://user-images.githubusercontent.com/58405975/212563024-b4358915-3ef2-487f-adee-f7132469eaf7.png)
+![mulligan](https://user-images.githubusercontent.com/58405975/212563096-c0d31127-ae75-4ccd-94d1-a70e310750da.png)
+![game_board](https://user-images.githubusercontent.com/58405975/212563184-b8890c62-96a5-46a6-a5d7-299a64a901bf.png)
+![high_res_view_of_card](https://user-images.githubusercontent.com/58405975/213830997-7bc8813c-89b1-480a-b3e6-bcff8a17fee9.png)
+
+
+
 ## Tech Stack
 | Software Tool | Target Version |
 | --- | --- |
@@ -35,7 +43,7 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 | express | 4.17.14 |
 | cors | 2.8.5 |
 | vite | 3.2.5 |
-| phaser | 3.60.0-beta.15 |
+| phaser | 3.60.0-beta.18 |
 | shuffle-array | 1.0.1 |
 | gts | 4.0.0 |
 

@@ -41,6 +41,7 @@ export default class GameBoard extends Phaser.Scene {
     this.load.image('loading', './images/mugiwara_logo_temp.png');
     this.load.image('optcg_card_back', './cards/optcg_card_back.jpg');
     this.load.image('donCardAltArt', './cards/donCardAltArt.png');
+    this.load.image('moogiwara', './images/MOOgiwara.png');
 
     const cardsToRender = new Set(this.deckList);
     const opponentCardsToRender = new Set(this.opponentDeckList);
@@ -70,6 +71,8 @@ export default class GameBoard extends Phaser.Scene {
         card.initInteractables();
         card.setScale(0.16);
         this.player.leader = card;
+        this.player.leader.isInPlay = true;
+        this.player.leader.summoningSickness = true;
         continue;
       }
     }
@@ -86,7 +89,7 @@ export default class GameBoard extends Phaser.Scene {
         card.category = 'LEADER';
         card.on('pointerdown', (pointer) => {
           if (pointer.rightButtonDown()) {
-            displayCardInHigherRes(this, cardId);
+            displayCardInHigherRes(this, card);
             return;
           }
         });

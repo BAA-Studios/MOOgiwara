@@ -1,9 +1,14 @@
+import StandardButton from "../game/menu/buttons/standard_button";
 import GameBoard from "../scenes/game_board";
+import { PlayerState } from "../game/player";
 
 export default class UiHandler {
   scene: GameBoard;
+  endTurnButton: StandardButton;
   constructor(scene: GameBoard) {
     this.scene = scene;
+    this.endTurnButton = this.scene.add.existing(new StandardButton(this.scene, 250, 1080/2, 'LOADING...', this.onEndTurn));
+    this.endTurnButton.buttonText.setFontSize(34);
   }
 
   initUi = () => {
@@ -27,7 +32,6 @@ export default class UiHandler {
       backButton.setStyle({ fill: '#000000' });
     });
 
-    // TODO: Create a button to go back to end turn in the middle of the screen
 
     // TODO: Replace this with the player's username once its implemented
     // Add the player's ID to the bottom left of the screen
@@ -37,9 +41,41 @@ export default class UiHandler {
       'Player ID: ' + this.scene.player.getUniqueId()
     );
     playerText.setStyle({ fontSize: '16px', fill: '#000000' });
+
   };
 
   onEndTurn = () => {
-    console.log("End this player's turn");
+    // Make it so if they right click the button, it will do nothing
+    console.log("[INFO] End Turn Button Clicked");
+    if (this.scene.player.playerState !== PlayerState.MAIN_PHASE) {
+      return;
+    }
+    this.scene.player.playerState = PlayerState.LOADING;
+    this.scene.client.emit("endTurn", { player: this.scene.player.getUniqueId() });
   };
+
+  setEndButtonToAttack() {
+    this.endTurnButton.buttonText.setText("ATTACKING...");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
+
+  setEndButtonToOpponentsTurn() {
+    this.endTurnButton.buttonText.setText("OPPONENT'S TURN");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
+
+  setEndButtonToMainPhase() {
+    this.endTurnButton.buttonText.setText("END TURN");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
+
+  setEndButtonToRetire() {
+    this.endTurnButton.buttonText.setText("RETIRING...");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
+
+  setEndButtonToBlockerPhase() {
+    this.endTurnButton.buttonText.setText("BLOCKING...");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
 }

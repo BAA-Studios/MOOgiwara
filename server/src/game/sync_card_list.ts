@@ -40,6 +40,11 @@ export class SyncCardList {
         return cardRemoved;
     }
 
+    remove(card: Card) {
+        this._cards.eraseElementByValue(card);
+        return card
+    }
+
     shuffle() {
         shuffle(this._cards);
     }
@@ -68,6 +73,23 @@ export class SyncCardList {
 
     get(index: number) {
         return this._cards.getElementByPos(index);
+    }
+
+    cards() {
+        return this._cards;
+    }
+
+    getCardFromObjectId(objectId: number) {
+        for (let card of this._cards) {
+            if (card.objectId === objectId) {
+                return card;
+            }
+        }
+        return undefined;
+    }
+
+    insertAt(index: number, card: Card) {
+        this._cards.insert(index, card);
     }
 
     /*

@@ -104,12 +104,12 @@ io.on('connection', (socket: Socket) => {
 
   socket.once('onMulligan', (data) => {
     player.mulligan = true;
+    player.setLifeCards();
     console.log(
       '[INFO] Player ' + player.client.id + ' mulliganed: ' + data.mulligan
     );
     if (game?.bothPlayersMulliganed()) {
       game?.broadcastPacket("mulliganDone", {});
-      player.setLifeCards();
       const personWhoGoesFirst = game?.getPlayer(game.whoseTurn)?.client.id;
       game?.broadcastChat(
         "Server: Game started! \nPlayer " + personWhoGoesFirst + " goes first."
