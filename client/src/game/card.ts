@@ -85,6 +85,10 @@ export default class Card extends Phaser.GameObjects.Image {
     return this.indexInContainer * 100;
   }
 
+  calculatePositionInCharacterArea() {
+    return this.indexInContainer * 120;
+  }
+
   isDraggable() {
     // TODO: Finish all conditionals
     if (this.isResting) {

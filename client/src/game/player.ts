@@ -179,7 +179,7 @@ export default class Player {
       this.characterArea.pushBack(card);
       scene.gameHandler.playerCharacterArea.add(card);
       card.indexInContainer = this.characterArea.size() - 1;
-      card.setPosition(card.calculatePositionInHand(), 0);
+      card.setPosition(card.calculatePositionInCharacterArea(), 0);
       card.objectId = cards[i].objectId;
       card.summoningSickness = cards[i].summoningSickness;
       card.isInPlay = true;

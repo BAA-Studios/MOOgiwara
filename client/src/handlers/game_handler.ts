@@ -54,11 +54,11 @@ export default class GameHandler {
     this.playerHandArea = this.scene.add.container(515, 996).setInteractive();
     this.opponentHandArea = this.scene.add.container(515, -123);
 
-    this.playerDeckArea = this.scene.add.container(1253, 704);
-    this.opponentDeckArea = this.scene.add.container(1253, 242);
+    this.playerDeckArea = this.scene.add.container(1309, 706);
+    this.opponentDeckArea = this.scene.add.container(1309, 244);
 
-    this.playerTrashArea = this.scene.add.container(1254, 555);
-    this.opponentTrashArea = this.scene.add.container(1254, 391);
+    this.playerTrashArea = this.scene.add.container(1309, 556);
+    this.opponentTrashArea = this.scene.add.container(1309, 392);
 
     this.playerLeaderArea = this.scene.add.container(947, 704);
     this.opponentLeaderArea = this.scene.add.container(947, 243);
@@ -75,11 +75,11 @@ export default class GameHandler {
     // This is the location of the character area in a rectangle
     this.playableCharacterArea = this.scene.add.graphics();
     this.playableCharacterArea.fillStyle(0x00ff00, 0.3);
-    this.playableCharacterArea.fillRoundedRect(717, 552, 519, 141, 18);
+    this.playableCharacterArea.fillRoundedRect(717, 552, 570, 141, 18);
     this.playableCharacterArea.setVisible(false);
 
     // Used to do hit detection
-    this.playableCharacterAreaHitBox = this.scene.add.rectangle(717, 552, 519, 141, 0x000000);
+    this.playableCharacterAreaHitBox = this.scene.add.rectangle(717, 552, 570, 141, 0x000000);
     this.playableCharacterAreaHitBox.setOrigin(0, 0);
     this.playableCharacterAreaHitBox.setVisible(false);
 
@@ -286,7 +286,7 @@ export default class GameHandler {
         card.setInteractive();
         card.initInteractables(false);
         card.indexInContainer = i;
-        card.setPosition(card.calculatePositionInHand(), 0);
+        card.setPosition(card.calculatePositionInCharacterArea(), 0);
         this.opponentCharacterArea.add(card);
         this.opponent.characterArea.pushBack(card);
         if (data.cards.W[i].isResting) {
