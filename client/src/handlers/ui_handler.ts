@@ -78,4 +78,9 @@ export default class UiHandler {
     this.endTurnButton.buttonText.setText("BLOCKING...");
     this.endTurnButton.buttonText.setFontSize(34);
   }
+
+  setEndButtonToCounterPhase() {
+    this.endTurnButton.buttonText.setText("COUNTERING...");
+    this.endTurnButton.buttonText.setFontSize(34);
+  }
 }

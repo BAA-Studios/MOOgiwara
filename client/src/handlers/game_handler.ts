@@ -395,15 +395,7 @@ export default class GameHandler {
       if (!attackingCard || !defendingCard) {
         return;
       }
-      // Check if the attacking card has any don!! attached
-      if (attackingCard.donAttached.length > 0) {
-        attackingCard.unHighlightBounds();
-      }
       attackingCard.rest();
-
-      if (attackingCard.donAttached.length > 0) {
-        attackingCard.highlightBounds(0xff0000);
-      }
 
       // calculate screen coord
       let attackingCardXOnScreen = attackingCard.x;
@@ -481,7 +473,7 @@ export default class GameHandler {
         if (this.player.playerState === PlayerState.BLOCKER_PHASE) {
           console.log("Skipped block, going to counter phase");
           callback(-3); // The code to inform server that user skipped block
-          this.player.playerState = PlayerState.COUNTER_PHASE;
+          this.player.setCounterPhase(this.scene)
         }
         // Unhighlight all blockers
         this.player.characterArea.forEach((cardInField: Card) => {
@@ -524,7 +516,7 @@ export default class GameHandler {
             informativeText.setText(`Opponent is attacking your ${card.name}`);
             informativeText.y = 50;
 
-            this.player.playerState = PlayerState.COUNTER_PHASE;
+            this.player.setCounterPhase(this.scene);
             skipBlockerButton.destroy();
           }
         });
@@ -537,9 +529,8 @@ export default class GameHandler {
       }
 
       if (totalBlockers == 0) {
-        // TODO: Go to Counter Phase
         skipBlockerButton.destroy();
-        this.player.playerState = PlayerState.COUNTER_PHASE;
+        this.player.setCounterPhase(this.scene);
         console.log("Go to Counter Phase");
         return;
       }

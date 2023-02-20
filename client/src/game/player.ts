@@ -439,4 +439,9 @@ export default class Player {
     this.playerState = PlayerState.BLOCKER_PHASE;
     scene.uiHandler.setEndButtonToBlockerPhase();
   }
+
+  setCounterPhase(scene: GameBoard) {
+    this.playerState = PlayerState.COUNTER_PHASE;
+    scene.uiHandler.setEndButtonToCounterPhase();
+  }
 }
