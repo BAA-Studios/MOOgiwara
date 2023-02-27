@@ -351,6 +351,7 @@ export default class Player {
     // If player right clicks, it cancels the attack
     scene.input.on('pointerdown', (pointer) => {
       if (pointer.rightButtonDown()) {
+        clickedValidTarget = true;
         scene.gameHandler.playerCharacterArea.each((card: Card) => {
           card.unHighlightBounds();
         });
