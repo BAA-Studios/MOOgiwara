@@ -346,6 +346,8 @@ export default class Player {
       attackLine.rotation = Phaser.Math.Angle.Between(centerXOnCard, centerYOnCard, pointer.x, pointer.y);
     });
 
+    let clickedValidTarget = false;
+
     // If player right clicks, it cancels the attack
     scene.input.on('pointerdown', (pointer) => {
       if (pointer.rightButtonDown()) {
@@ -379,12 +381,16 @@ export default class Player {
         scene.gameHandler.playerCharacterArea.each((characterCard: Card) => {
           if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), pointer.x, pointer.y) && this.playerState == PlayerState.RETIRE) {
             console.log("Retiring character card with index:", characterCard.indexInContainer);
+            clickedValidTarget = true;
             this.playerState = PlayerState.LOADING;
             attackLine.destroy();
             this.sendRetirePacket(scene, characterCard.indexInContainer, card.indexInContainer);
             card.destroy();
           }
         });
+      }
+      if (!clickedValidTarget) {
+        return;
       }
       // Remove the informative text
       scene.tweens.add({
