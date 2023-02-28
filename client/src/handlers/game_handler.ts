@@ -1,4 +1,4 @@
-import Phaser, { Data } from 'phaser';
+import Phaser from 'phaser';
 import { Socket } from 'socket.io-client';
 import Card from '../game/card';
 import StandardButton from '../game/menu/buttons/standard_button';
@@ -61,13 +61,13 @@ export default class GameHandler {
     this.opponentTrashArea = this.scene.add.container(1309, 392);
 
     this.playerLeaderArea = this.scene.add.container(947, 704);
-    this.opponentLeaderArea = this.scene.add.container(947, 243);
+    this.opponentLeaderArea = this.scene.add.container(947, 246);
 
-    this.playerDonArea = this.scene.add.container(630, 858);
-    this.opponentDonArea = this.scene.add.container(630, 93);
+    this.playerDonArea = this.scene.add.container(630, 856);
+    this.opponentDonArea = this.scene.add.container(630, 95);
 
     this.playerDonDeckArea = this.scene.add.container(722, 705);
-    this.opponentDonDeckArea = this.scene.add.container(722, 241);
+    this.opponentDonDeckArea = this.scene.add.container(722, 246);
 
     this.playerLifeArea = this.scene.add.container(572, 555);
     this.opponentLifeArea = this.scene.add.container(572, 247);
