@@ -670,6 +670,7 @@ export default class GameHandler {
       this.player.characterArea.forEach((characterCard: Card) => {
         if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
           res = true;
+          this.player.playerState = PlayerState.LOADING;
           console.log("Don!! Attachment to card:", characterCard.name);
           this.player.attachDon(this.scene, card, characterCard);
         }
@@ -677,6 +678,7 @@ export default class GameHandler {
       if (this.player.leader) {
         if (Phaser.Geom.Rectangle.Contains(this.player.leader.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
           res = true;
+          this.player.playerState = PlayerState.LOADING;
           console.log("Don!! Attachment to card:", this.player.leader.name);
           this.player.attachDon(this.scene, card, this.player.leader);
         }

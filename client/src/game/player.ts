@@ -277,6 +277,7 @@ export default class Player {
         duration: 500,
         ease: 'Power2',
         onComplete: () => {
+          this.playerState = PlayerState.MAIN_PHASE;
           characterCard.highlightBounds(0xff0000); // Give the card a red highlight
           characterCard.donAttached.pushBack(donCard);
 
