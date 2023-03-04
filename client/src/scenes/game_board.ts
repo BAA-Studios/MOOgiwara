@@ -42,6 +42,7 @@ export default class GameBoard extends Phaser.Scene {
     this.load.image('optcg_card_back', './cards/optcg_card_back.jpg');
     this.load.image('donCardAltArt', './cards/donCardAltArt.png');
     this.load.image('moogiwara', './images/MOOgiwara.png');
+    this.load.image('whiteMoreRoundedButton', './buttons/White More Rounded Square.png');
 
     const cardsToRender = new Set(this.deckList);
     const opponentCardsToRender = new Set(this.opponentDeckList);
