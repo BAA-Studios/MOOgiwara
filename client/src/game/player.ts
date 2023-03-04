@@ -2,6 +2,7 @@ import GameBoard from "../scenes/game_board";
 import Card from "./card";
 import { Vector } from "js-sdsl";
 import { displayTrash } from "../scenes/game_board_pop_ups";
+import CounterStack from "./counter_stack";
 
 export enum PlayerState {
   LOADING,
@@ -276,6 +277,7 @@ export default class Player {
         duration: 500,
         ease: 'Power2',
         onComplete: () => {
+          this.playerState = PlayerState.MAIN_PHASE;
           characterCard.highlightBounds(0xff0000); // Give the card a red highlight
           characterCard.donAttached.pushBack(donCard);
 
@@ -450,5 +452,9 @@ export default class Player {
   setCounterPhase(scene: GameBoard) {
     this.playerState = PlayerState.COUNTER_PHASE;
     scene.uiHandler.setEndButtonToCounterPhase();
+
+    // Instantiate a counter stack
+    const counterStack = new CounterStack(scene);
+    counterStack.inflate();
   }
 }
