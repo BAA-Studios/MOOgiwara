@@ -1,4 +1,4 @@
-import Phaser, { Data } from 'phaser';
+import Phaser from 'phaser';
 import { Socket } from 'socket.io-client';
 import Card from '../game/card';
 import StandardButton from '../game/menu/buttons/standard_button';
@@ -54,20 +54,20 @@ export default class GameHandler {
     this.playerHandArea = this.scene.add.container(515, 996).setInteractive();
     this.opponentHandArea = this.scene.add.container(515, -123);
 
-    this.playerDeckArea = this.scene.add.container(1253, 704);
-    this.opponentDeckArea = this.scene.add.container(1253, 242);
+    this.playerDeckArea = this.scene.add.container(1309, 706);
+    this.opponentDeckArea = this.scene.add.container(1309, 244);
 
-    this.playerTrashArea = this.scene.add.container(1254, 555);
-    this.opponentTrashArea = this.scene.add.container(1254, 391);
+    this.playerTrashArea = this.scene.add.container(1309, 556);
+    this.opponentTrashArea = this.scene.add.container(1309, 392);
 
     this.playerLeaderArea = this.scene.add.container(947, 704);
-    this.opponentLeaderArea = this.scene.add.container(947, 243);
+    this.opponentLeaderArea = this.scene.add.container(947, 246);
 
-    this.playerDonArea = this.scene.add.container(630, 858);
-    this.opponentDonArea = this.scene.add.container(630, 93);
+    this.playerDonArea = this.scene.add.container(630, 856);
+    this.opponentDonArea = this.scene.add.container(630, 95);
 
     this.playerDonDeckArea = this.scene.add.container(722, 705);
-    this.opponentDonDeckArea = this.scene.add.container(722, 241);
+    this.opponentDonDeckArea = this.scene.add.container(722, 246);
 
     this.playerLifeArea = this.scene.add.container(572, 555);
     this.opponentLifeArea = this.scene.add.container(572, 247);
@@ -75,11 +75,11 @@ export default class GameHandler {
     // This is the location of the character area in a rectangle
     this.playableCharacterArea = this.scene.add.graphics();
     this.playableCharacterArea.fillStyle(0x00ff00, 0.3);
-    this.playableCharacterArea.fillRoundedRect(717, 552, 519, 141, 18);
+    this.playableCharacterArea.fillRoundedRect(717, 552, 570, 141, 18);
     this.playableCharacterArea.setVisible(false);
 
     // Used to do hit detection
-    this.playableCharacterAreaHitBox = this.scene.add.rectangle(717, 552, 519, 141, 0x000000);
+    this.playableCharacterAreaHitBox = this.scene.add.rectangle(717, 552, 570, 141, 0x000000);
     this.playableCharacterAreaHitBox.setOrigin(0, 0);
     this.playableCharacterAreaHitBox.setVisible(false);
 
@@ -286,7 +286,7 @@ export default class GameHandler {
         card.setInteractive();
         card.initInteractables(false);
         card.indexInContainer = i;
-        card.setPosition(card.calculatePositionInHand(), 0);
+        card.setPosition(card.calculatePositionInCharacterArea(), 0);
         this.opponentCharacterArea.add(card);
         this.opponent.characterArea.pushBack(card);
         if (data.cards.W[i].isResting) {
@@ -395,15 +395,7 @@ export default class GameHandler {
       if (!attackingCard || !defendingCard) {
         return;
       }
-      // Check if the attacking card has any don!! attached
-      if (attackingCard.donAttached.length > 0) {
-        attackingCard.unHighlightBounds();
-      }
       attackingCard.rest();
-
-      if (attackingCard.donAttached.length > 0) {
-        attackingCard.highlightBounds(0xff0000);
-      }
 
       // calculate screen coord
       let attackingCardXOnScreen = attackingCard.x;
@@ -481,7 +473,7 @@ export default class GameHandler {
         if (this.player.playerState === PlayerState.BLOCKER_PHASE) {
           console.log("Skipped block, going to counter phase");
           callback(-3); // The code to inform server that user skipped block
-          this.player.playerState = PlayerState.COUNTER_PHASE;
+          this.player.setCounterPhase(this.scene)
         }
         // Unhighlight all blockers
         this.player.characterArea.forEach((cardInField: Card) => {
@@ -524,7 +516,7 @@ export default class GameHandler {
             informativeText.setText(`Opponent is attacking your ${card.name}`);
             informativeText.y = 50;
 
-            this.player.playerState = PlayerState.COUNTER_PHASE;
+            this.player.setCounterPhase(this.scene);
             skipBlockerButton.destroy();
           }
         });
@@ -537,9 +529,8 @@ export default class GameHandler {
       }
 
       if (totalBlockers == 0) {
-        // TODO: Go to Counter Phase
         skipBlockerButton.destroy();
-        this.player.playerState = PlayerState.COUNTER_PHASE;
+        this.player.setCounterPhase(this.scene);
         console.log("Go to Counter Phase");
         return;
       }
@@ -679,6 +670,7 @@ export default class GameHandler {
       this.player.characterArea.forEach((characterCard: Card) => {
         if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
           res = true;
+          this.player.playerState = PlayerState.LOADING;
           console.log("Don!! Attachment to card:", characterCard.name);
           this.player.attachDon(this.scene, card, characterCard);
         }
@@ -686,6 +678,7 @@ export default class GameHandler {
       if (this.player.leader) {
         if (Phaser.Geom.Rectangle.Contains(this.player.leader.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
           res = true;
+          this.player.playerState = PlayerState.LOADING;
           console.log("Don!! Attachment to card:", this.player.leader.name);
           this.player.attachDon(this.scene, card, this.player.leader);
         }

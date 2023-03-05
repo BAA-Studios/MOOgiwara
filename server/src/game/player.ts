@@ -218,7 +218,9 @@ export default class Player {
       cardInHand.summoningSickness = true;
 
       // Add it to the trash
-      this.trash.push(cardRetired);
+      for (let i = 0; i < 24; i++) {
+        this.trash.push(cardRetired);
+      }
 
       callback(this.characterArea.list(), this.donArea.list(), this.hand.list(), this.trash.list());
 

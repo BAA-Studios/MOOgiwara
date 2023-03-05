@@ -14,6 +14,7 @@ import LoadingButton from '../game/menu/buttons/loading_button';
 import Card from '../game/card';
 import { PlayerState } from '../game/player';
 import { Vector } from 'js-sdsl';
+import WhiteMoreRoundedButton from '../game/menu/buttons/white_more_rounded_button';
 
 // Used in game mechanics that require scrying the deck, or displaying something
 export function inflateTransparentBackground(scene: Phaser.Scene) {
@@ -42,7 +43,7 @@ export function displayCardInHigherRes(scene: Phaser.Scene, card: Card) {
       ease: 'Power1',
   });
   // Create another box to the right of the card to display the amount of Don!! Attached
-  const donAttachedBox = scene.add.rectangle(1190, 224, 200, 150, 0x000000, 0.6).setOrigin(0, 0).setScale(0.01);
+  const donAttachedBox = scene.add.rectangle(1290, 302, 200, 150, 0x000000, 0.6).setOrigin(0.5, 0.5).setScale(0.01);
   // Create a text object to display the amount of Don!! Attached
   const donAttachedText = scene.add
     .text(1400, 540, '0')
@@ -76,8 +77,8 @@ export function displayCardInHigherRes(scene: Phaser.Scene, card: Card) {
   }
 
   // Set the text in the middle of the donAttachedBox
-  donAttachedText.x = donAttachedBox.x + donAttachedBox.width / 2;
-  donAttachedText.y = donAttachedBox.y + donAttachedBox.height / 2;
+  donAttachedText.x = donAttachedBox.x;
+  donAttachedText.y = donAttachedBox.y;
   rect.on('pointerdown', () => {
     cardImg.destroy();
     rect.destroy();
@@ -222,28 +223,53 @@ export function displayMulliganSelection(scene: GameBoard) {
 // Whenever players click on the trash, it'll display every card in their trash in a grid
 export function displayTrash(scene: GameBoard, cardList: Vector<Card>) {
   const rect = inflateTransparentBackground(scene);
-  const listOfCards: Phaser.GameObjects.Image[][] = []; // 2D array of cards to render, each row is 5 cards
-  const trashText = scene.add.text(960, 50, "TRASH").setOrigin(0.5, 0.5).setFontSize(86).setFontFamily("Merriweather");
+  const listOfCards: Phaser.GameObjects.Image[][] = []; // 2D array of cards to render, each row is 6 cards
+  let totalRow = 0;
   // Populate the listOfCards in the array
   for (let i = 0; i < cardList.length; i++) {
     let card = scene.add.image(0, 0, cardList.getElementByPos(i).cardId)
+      .setVisible(false)
       .setScale(0.01)
-      .setOrigin(0, 0);
+      .setOrigin(0.5, 0.5);
 
     if (i % 6 === 0) {
       listOfCards.push([]);
+      totalRow++;
     }
-    listOfCards[Math.floor(i / 6)].push(card);
-    card.setPosition(200 + (i % 6) * 250, 125 + Math.floor(i / 6) * 350);
 
-    scene.add.tween({
-      targets: card,
-      scaleX: 0.40,
-      scaleY: 0.40,
-      duration: 250,
-      ease: 'Power1',
-    });
+    listOfCards[Math.floor(i / 6)].push(card);
+    card.setPosition(335 + (i % 6) * 250, 315 + Math.floor(i / 6) * 350);
   }
+
+  // Rendering first page
+  for (let row = 0; row < 2; row++) {
+    for (let column = 0; column < 6; column++){
+      let card = listOfCards[row][column]
+      card.setVisible(true);
+      scene.add.tween({
+        targets: card,
+        scaleX: 0.40,
+        scaleY: 0.40,
+        duration: 250,
+        ease: 'Power1',
+      });
+    }
+  }
+
+  const trashText = scene.add.text(960, 50, `TRASH #${totalRow / 2}`).setOrigin(0.5, 0.5).setFontSize(86).setFontFamily("Merriweather");
+
+  const leftButton = scene.add.existing(
+    new WhiteMoreRoundedButton(scene, 900, 950, "<", () => {
+      console.log("Left button clicked!")
+    })
+  );
+
+
+  const rightButton = scene.add.existing(
+    new WhiteMoreRoundedButton(scene, 1020, 950, ">", () => {
+      console.log("Right button clicked!")
+    })
+  );
 
   // Clean up the trash display
   rect.on('pointerdown', () => {
@@ -254,5 +280,7 @@ export function displayTrash(scene: GameBoard, cardList: Vector<Card>) {
     }
     rect.destroy();
     trashText.destroy();
+    leftButton.destroy();
+    rightButton.destroy();
   });
 }

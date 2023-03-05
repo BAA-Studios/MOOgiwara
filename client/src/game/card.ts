@@ -85,6 +85,10 @@ export default class Card extends Phaser.GameObjects.Image {
     return this.indexInContainer * 100;
   }
 
+  calculatePositionInCharacterArea() {
+    return this.indexInContainer * 120;
+  }
+
   isDraggable() {
     // TODO: Finish all conditionals
     if (this.isResting) {
@@ -102,9 +106,17 @@ export default class Card extends Phaser.GameObjects.Image {
   }
 
   rest() {
+    // Check if there any don cards attached to this card
+    if (this.hasDonAttached()) {
+      this.unHighlightBounds();
+    }
     this.setOrigin(0, 1)
     this.isResting = true;
     this.setRotation(Math.PI / 2);
+
+    if(this.hasDonAttached()) {
+      this.highlightBounds(0xff0000);
+    }
   }
 
   unRest() {

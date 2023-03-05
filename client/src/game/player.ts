@@ -2,6 +2,7 @@ import GameBoard from "../scenes/game_board";
 import Card from "./card";
 import { Vector } from "js-sdsl";
 import { displayTrash } from "../scenes/game_board_pop_ups";
+import CounterStack from "./counter_stack";
 
 export enum PlayerState {
   LOADING,
@@ -179,7 +180,7 @@ export default class Player {
       this.characterArea.pushBack(card);
       scene.gameHandler.playerCharacterArea.add(card);
       card.indexInContainer = this.characterArea.size() - 1;
-      card.setPosition(card.calculatePositionInHand(), 0);
+      card.setPosition(card.calculatePositionInCharacterArea(), 0);
       card.objectId = cards[i].objectId;
       card.summoningSickness = cards[i].summoningSickness;
       card.isInPlay = true;
@@ -276,6 +277,7 @@ export default class Player {
         duration: 500,
         ease: 'Power2',
         onComplete: () => {
+          this.playerState = PlayerState.MAIN_PHASE;
           characterCard.highlightBounds(0xff0000); // Give the card a red highlight
           characterCard.donAttached.pushBack(donCard);
 
@@ -346,9 +348,12 @@ export default class Player {
       attackLine.rotation = Phaser.Math.Angle.Between(centerXOnCard, centerYOnCard, pointer.x, pointer.y);
     });
 
+    let clickedValidTarget = false;
+
     // If player right clicks, it cancels the attack
     scene.input.on('pointerdown', (pointer) => {
       if (pointer.rightButtonDown()) {
+        clickedValidTarget = true;
         scene.gameHandler.playerCharacterArea.each((card: Card) => {
           card.unHighlightBounds();
         });
@@ -379,12 +384,16 @@ export default class Player {
         scene.gameHandler.playerCharacterArea.each((characterCard: Card) => {
           if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), pointer.x, pointer.y) && this.playerState == PlayerState.RETIRE) {
             console.log("Retiring character card with index:", characterCard.indexInContainer);
+            clickedValidTarget = true;
             this.playerState = PlayerState.LOADING;
             attackLine.destroy();
             this.sendRetirePacket(scene, characterCard.indexInContainer, card.indexInContainer);
             card.destroy();
           }
         });
+      }
+      if (!clickedValidTarget) {
+        return;
       }
       // Remove the informative text
       scene.tweens.add({
@@ -438,5 +447,14 @@ export default class Player {
   setBlockerPhase(scene: GameBoard) {
     this.playerState = PlayerState.BLOCKER_PHASE;
     scene.uiHandler.setEndButtonToBlockerPhase();
+  }
+
+  setCounterPhase(scene: GameBoard) {
+    this.playerState = PlayerState.COUNTER_PHASE;
+    scene.uiHandler.setEndButtonToCounterPhase();
+
+    // Instantiate a counter stack
+    const counterStack = new CounterStack(scene);
+    counterStack.inflate();
   }
 }

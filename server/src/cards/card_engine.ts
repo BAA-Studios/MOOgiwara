@@ -20,6 +20,8 @@ export function playCard(player: Player, card: Card) {
 
     if (card.isCharacterCard()) {
         player.characterArea.push(card);
+    } else {
+        player.trash.push(card);
     }
     // TODO: Check if the card has RUSH attribute, if so, then set summoningSickness to false
     card.summoningSickness = true;
