@@ -13,6 +13,8 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 3. `npm install`
 4. Change directories to `./MOOgiwara/server`
 5. `npm install`
+6. Install MongoDB (instructions linked under tech stack section below)
+7. Use `mongorestore` to initialise the test database (detailed instructions pending)
 
 ## Running the web app
 1. Change directories to `./MOOgiwara/client`
@@ -46,4 +48,8 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 | phaser | 3.60.0-beta.18 |
 | shuffle-array | 1.0.1 |
 | gts | 4.0.0 |
-
+| google auth library | 8.7.0 |
+| mongoose | 7.0.0 |
+| [MongoDB Community Edition](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-windows/) | 6.0.4 |
+| [MongoDB Shell](https://www.mongodb.com/docs/mongodb-shell/install/) | 1.8.0 |
+| [MongoDB Database Tools](https://www.mongodb.com/docs/database-tools/installation/installation-windows/) | 100.7.0 |
