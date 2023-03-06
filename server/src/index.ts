@@ -6,6 +6,7 @@ import Player from './game/player';
 import testDeck from './cards/test_deck.json' assert { type: "json" };
 
 import Game from './game/game';
+import { verify } from './util/jwt';
 
 const app: Express = express();
 const server = createServer(app);
@@ -96,6 +97,18 @@ io.on('connection', (socket: Socket) => {
 
   // Packets Received Start ----------------------------
 
+  // Login-related packets -----------------------------
+  socket.once('token', (token) => {
+      const payload = verify(token);
+      console.log('[DEBUG] JWT Token verification result:')
+      console.log(payload);
+      // IF: New email flow:
+      //    send a packet to the client to let the user agree to create an account, and subsequently log them in
+      // ELSE:
+      //    Send a packet to the client to log the user in
+  });
+
+  // Game-related packets ------------------------------
   socket.on('queue', () => {
     player = startQueuing(socket);
     if (player.game) {
@@ -107,7 +120,7 @@ io.on('connection', (socket: Socket) => {
     lobbyId = player.lobbyId;    
 
     player.initListeners();
-  })
+  });
   
   socket.once('boardFullyLoaded', () => {
     player.boardReady = true;

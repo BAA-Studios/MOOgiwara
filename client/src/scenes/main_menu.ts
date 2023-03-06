@@ -32,7 +32,7 @@ export default class MainMenu extends Phaser.Scene {
     
     // Handle Google's response
     function handleCredentialResponse(response) {
-      console.log("Encoded JWT ID token: " + response.credential);
+      socket.emit('token', response.credential);
     }
 
     // Render the actual button
