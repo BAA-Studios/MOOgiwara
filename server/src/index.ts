@@ -99,9 +99,17 @@ io.on('connection', (socket: Socket) => {
 
   // Login-related packets -----------------------------
   socket.once('token', (token) => {
-      const payload = verify(token);
-      console.log('[DEBUG] JWT Token verification result:')
-      console.log(payload);
+    verify(token).then(
+      function(value) {
+        console.log('[DEBUG] JWT Token verification result:');
+        console.log(value);
+      },
+      function(error) {
+        console.log('[ERROR] ' + error);
+      }
+    );
+
+      
       // IF: New email flow:
       //    send a packet to the client to let the user agree to create an account, and subsequently log them in
       // ELSE:
