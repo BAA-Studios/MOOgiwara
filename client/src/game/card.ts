@@ -105,6 +105,14 @@ export default class Card extends Phaser.GameObjects.Image {
     return this.category == 'LEADER';
   }
 
+  isEventCard() {
+    return this.category == 'EVENT';
+  }
+
+  isCounterEventCard() {
+    return this.isEventCard() && this.effect.startsWith('[Counter]');
+  }
+
   rest() {
     // Check if there any don cards attached to this card
     if (this.hasDonAttached()) {
