@@ -6,6 +6,7 @@ import Player from './game/player';
 import testDeck from './cards/test_deck.json' assert { type: "json" };
 
 import Game from './game/game';
+import { Vector } from 'js-sdsl';
 
 const app: Express = express();
 const server = createServer(app);
@@ -19,7 +20,7 @@ const io = new Server(server, {
 });
 
 const PORT = 3000;
-const users: string[] = [];
+const users: Vector<string> = new Vector<string>();
 const games = new Map<string, Game>();
 
 /**
@@ -63,7 +64,7 @@ function findMatch(socketId: string): string {
 
 io.on('connection', (socket: Socket) => {
   console.log('User: ' + socket.id + ' connected');
-  users.push(socket.id); // TODO: Remove on disconnect - might need to use Set instead of Array?
+  users.pushBack(socket.id);
 
   const userId = socket.id; // temporary - to convert this to database PK if not guest
   const lobbyId = findMatch(socket.id);
@@ -120,6 +121,7 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('disconnect', () => {
     console.log('User ' + userId + ' disconnected');
+    users.eraseElementByValue(userId);
     if (game?.isEmpty()) {
       game?.clearPlayers();
       console.log("Game instance cleared: " + games.delete(lobbyId));
