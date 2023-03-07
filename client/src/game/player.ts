@@ -225,12 +225,11 @@ export default class Player {
       console.log("Not enough Don!!");
       return false;
     }
-    if (this.characterArea.length >= 5) {
+    if (card.isCharacterCard() && this.characterArea.length >= 5) {
       console.log("Character area is full, must retire a card");
       this.retireCard(card);
       return true;
     }
-    // TODO: Add logic for when the characterArea is full, recycle a card
     this.client.emit("playCard", {
       index: card.indexInContainer
     });
