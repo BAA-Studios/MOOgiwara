@@ -224,27 +224,31 @@ export function displayMulliganSelection(scene: GameBoard) {
 export function displayTrash(scene: GameBoard, cardList: Vector<Card>) {
   const rect = inflateTransparentBackground(scene);
   const listOfCards: Phaser.GameObjects.Image[][] = []; // 2D array of cards to render, each row is 6 cards
-  let totalRow = 0;
-  // Populate the listOfCards in the array
-  for (let i = 0; i < cardList.length; i++) {
+  // Populate the listOfCards in the array in reverse order
+  let cardCounter = 0;
+  for (let i = cardList.length - 1; i >= 0; i--) {
     let card = scene.add.image(0, 0, cardList.getElementByPos(i).cardId)
       .setVisible(false)
       .setScale(0.01)
       .setOrigin(0.5, 0.5);
 
-    if (i % 6 === 0) {
+    if (cardCounter % 6 === 0) {
       listOfCards.push([]);
-      totalRow++;
     }
 
-    listOfCards[Math.floor(i / 6)].push(card);
-    card.setPosition(335 + (i % 6) * 250, 315 + Math.floor(i / 6) * 350);
+    listOfCards[Math.floor(cardCounter / 6)].push(card);
+    card.setPosition(335 + (cardCounter % 6) * 250, 315 + Math.floor(cardCounter / 6) * 350);
+    cardCounter++;
   }
 
   // Rendering first page
   for (let row = 0; row < 2; row++) {
-    for (let column = 0; column < 6; column++){
-      let card = listOfCards[row][column]
+    for (let column = 0; column < 6; column++) {
+      // In the case we have less than 12 cards in the trash
+      if (row * 6 + column >= cardList.length) {
+        break;
+      }
+      let card = listOfCards[row][column];
       card.setVisible(true);
       scene.add.tween({
         targets: card,
@@ -256,7 +260,7 @@ export function displayTrash(scene: GameBoard, cardList: Vector<Card>) {
     }
   }
 
-  const trashText = scene.add.text(960, 50, `TRASH #${totalRow / 2}`).setOrigin(0.5, 0.5).setFontSize(86).setFontFamily("Merriweather");
+  const trashText = scene.add.text(960, 50, `TRASH (1/${Math.floor(cardList.length / 12) + 1})`).setOrigin(0.5, 0.5).setFontSize(86).setFontFamily("Merriweather");
 
   const leftButton = scene.add.existing(
     new WhiteMoreRoundedButton(scene, 900, 950, "<", () => {
