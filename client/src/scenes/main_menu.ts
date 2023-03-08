@@ -33,7 +33,8 @@ export default class MainMenu extends Phaser.Scene {
     // Handle Google's response
     function handleCredentialResponse(response) {
       console.log('handling credentials')
-      socket.emit('token', response.credential);
+      socket.emit('token', response.credential);  // send to game server for validation
+      // TODO: toast feedback for login result
     }
 
     // Render the actual button

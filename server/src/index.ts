@@ -60,14 +60,15 @@ function findMatch(socketId: string): string {
   return openGame;
 }
 
-function startQueuing(socket: Socket): Player {
-  console.log('[LOG] User: ' + socket.id + ' has started queuing');
-  const lobbyId = findMatch(socket.id);
+function startQueuing(player: Player): void {
+  console.log(`[LOG] User: ${player.playerId ? player.playerId : player.socketId} has started queuing`);
+  const lobbyId = findMatch(player.socketId);
+  player.setLobbyId(lobbyId);
   const game = games.get(lobbyId);
-  console.log('[LOG] USER: ' + socket.id + ' joined game: ' + lobbyId);
-  const player = new Player(socket, socket.id, lobbyId, testDeck);
+  console.log(`[LOG] USER: ${player.playerId ? player.playerId : player.socketId} joined game: ${lobbyId}`);
   game?.push(player);
   player.game = game;
+
   if (game?.isFull()) {
     // Start the game
     const playerWhoStartsFirst = Math.floor(Math.random() * 2) + 1;
@@ -85,14 +86,18 @@ function startQueuing(socket: Socket): Player {
     game.start();
     console.log("[LOG] Game started: " + lobbyId);
   }
-  return player;
+  
+  if (!player.username) {  // guests' usernames are not initialised
+    // insert code to automatically generate names for guest:
+    player.username = `Guest ${player.socketId}`  // temporary until we set up name generation
+  }
 }
 
 io.on('connection', (socket: Socket) => {
   const userId = socket.id; // temporary - to convert this to database PK if not guest
   console.log(`[LOG] User: ${userId} connected`);
   users.pushBack(userId); // TODO: Remove on disconnect - might need to use Set instead of Array?
-  let player: Player;
+  let player: Player = new Player(socket, socket.id, testDeck);
   let game: Game;
   let lobbyId: string;
 
@@ -104,29 +109,31 @@ io.on('connection', (socket: Socket) => {
       function(value) {
         console.log('[DEBUG] JWT Token verification result:');
         console.log(value);
+        // requires DB set up
+        // TODO: IF email not recognised, save as new user in DB, alongside `fullName`
+        // TODO: Send a toast to the user to let them know that an account has been created, and they're being logged in
+        // TODO: ELSE Send a packet to the server to display their name + logging in message
+        // "Logging in"
+        // TODO: set username (from DB)
+        // TODO: set playerId (from DB)
       },
       function(error) {
         console.log('[ERROR] ' + error);
+        // TODO: Send a packet to the server to display an error toast
       }
     );
-
-      
-      // IF: New email flow:
-      //    send a packet to the client to let the user agree to create an account, and subsequently log them in
-      // ELSE:
-      //    Send a packet to the client to log the user in
   });
 
   // Game-related packets ------------------------------
   socket.on('queue', () => {
-    player = startQueuing(socket);
+    startQueuing(player);
     if (player.game) {
       game = player.game;
     } else {
       console.log('[Error] User ' + userId + ' has no associated game instance!')
       return;
     }
-    lobbyId = player.lobbyId;    
+    lobbyId = player.lobbyId ? player.lobbyId : "";    
 
     player.initListeners();
   });
