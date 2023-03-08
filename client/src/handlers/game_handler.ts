@@ -215,7 +215,7 @@ export default class GameHandler {
           x: this.opponentHandArea.x + blankCard.calculatePositionInHand(),
           y: this.opponentHandArea.y,
           scale: 0.25,
-          duration: 750,
+          duration: 500,
           ease: 'Power1',
           onComplete: () => {
             blankCard.destroy();
@@ -255,7 +255,7 @@ export default class GameHandler {
           targets: donCard,
           x: this.opponentDonArea.x + donCard.indexInContainer*75,
           y: this.opponentDonArea.y,
-          duration: 750,
+          duration: 500,
           ease: 'Power1',
           onComplete: () => {
             donCard.setPosition(donCard.indexInContainer*75, 0);
