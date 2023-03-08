@@ -13,13 +13,19 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 3. `npm install`
 4. Change directories to `./MOOgiwara/server`
 5. `npm install`
-6. Install MongoDB (instructions linked under tech stack section below)
+6. Install MongoDB (instructions [here](https://github.com/BAA-Studios/MOOgiwara/wiki/MongoDB-Installation))
 7. Use `mongorestore` to initialise the test database (detailed instructions pending)
 
 ## Running the web app
 1. Change directories to `./MOOgiwara/client`
 2. `npm run start` (use `build` instead of `start` to build a production version in `dist/`)
 3. Visit link: http://localhost:8000
+    - To open dual-client, just open up the same link in another tab/window for a new instance
+
+## Deploying the web app
+1. Change directories to `./MOOgiwara/client`
+2. `npm run build`
+3. `npm run production`
 
 ## Running Server
 1. Change directories to `./MOOgiwara/server`
@@ -42,9 +48,10 @@ Given how new the ONE PIECE TCG is, there aren't many options for players to tra
 | TypeScript| 4.9.3 |
 | socket.io | 4.5.4 |
 | socket.io-client | 4.5.4 |
-| express | 4.17.14 |
+| express | 4.18.2 |
+| express-session | 1.17.3 |
 | cors | 2.8.5 |
-| vite | 3.2.5 |
+| vite | 4.1.4 |
 | phaser | 3.60.0-beta.18 |
 | shuffle-array | 1.0.1 |
 | gts | 4.0.0 |
