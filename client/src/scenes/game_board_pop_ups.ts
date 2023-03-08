@@ -224,50 +224,94 @@ export function displayMulliganSelection(scene: GameBoard) {
 export function displayTrash(scene: GameBoard, cardList: Vector<Card>) {
   const rect = inflateTransparentBackground(scene);
   const listOfCards: Phaser.GameObjects.Image[][] = []; // 2D array of cards to render, each row is 6 cards
-  let totalRow = 0;
-  // Populate the listOfCards in the array
-  for (let i = 0; i < cardList.length; i++) {
+  // Populate the listOfCards in the array in reverse order
+  let cardCounter = 0;
+  for (let i = cardList.length - 1; i >= 0; i--) {
     let card = scene.add.image(0, 0, cardList.getElementByPos(i).cardId)
       .setVisible(false)
       .setScale(0.01)
       .setOrigin(0.5, 0.5);
 
-    if (i % 6 === 0) {
+    if (cardCounter % 6 === 0) {
       listOfCards.push([]);
-      totalRow++;
     }
 
-    listOfCards[Math.floor(i / 6)].push(card);
-    card.setPosition(335 + (i % 6) * 250, 315 + Math.floor(i / 6) * 350);
+    listOfCards[Math.floor(cardCounter / 6)].push(card);
+    card.setPosition(335 + (cardCounter % 6) * 250, 315 + Math.floor(cardCounter / 6) * 350);
+    cardCounter++;
+  }
+
+  // Given a pageNumber render that page from the listOfCards 2D Array
+  // every two rows is a page
+  function renderPage(pageNum) {
+    let startingPoint = (pageNum - 1) * 2;
+    let endingPoint = pageNum * 2;
+    for (let row = startingPoint; row < endingPoint; row++) {
+      for (let column = 0; column < 6; column++) {
+        // Check if the page we are on is rendering out of bounds
+        if (row * 6 + column >= cardList.length) {
+          break;
+        }
+        let card = listOfCards[row][column];
+        card.setPosition(335 + column * 250, 315 + (row - startingPoint) * 350);
+        card.setVisible(true);
+        scene.add.tween({
+          targets: card,
+          scaleX: 0.40,
+          scaleY: 0.40,
+          duration: 250,
+          ease: 'Power1',
+        });
+      }
+    }
+  }
+
+  function cleanUpPage(pageNum) {
+    let startingPoint = (pageNum - 1) * 2;
+    let endingPoint = pageNum * 2;
+    for (let row = startingPoint; row < endingPoint; row++) {
+      for (let column = 0; column < 6; column++) {
+        // Check if the page we are on is rendering out of bounds
+        if (row * 6 + column >= cardList.length) {
+          break;
+        }
+        let card = listOfCards[row][column];
+        card.setVisible(false);
+        card.setScale(0.01);
+      }
+    }
   }
 
   // Rendering first page
-  for (let row = 0; row < 2; row++) {
-    for (let column = 0; column < 6; column++){
-      let card = listOfCards[row][column]
-      card.setVisible(true);
-      scene.add.tween({
-        targets: card,
-        scaleX: 0.40,
-        scaleY: 0.40,
-        duration: 250,
-        ease: 'Power1',
-      });
-    }
-  }
+  renderPage(1);
 
-  const trashText = scene.add.text(960, 50, `TRASH #${totalRow / 2}`).setOrigin(0.5, 0.5).setFontSize(86).setFontFamily("Merriweather");
+  let currentPage = 1;
+  const totalPages = Math.ceil(cardList.length / 12);
+
+  const trashText = scene.add.text(960, 50, `TRASH (${currentPage}/${totalPages})`).setOrigin(0.5, 0.5).setFontSize(86).setFontFamily("Merriweather");
 
   const leftButton = scene.add.existing(
     new WhiteMoreRoundedButton(scene, 900, 950, "<", () => {
-      console.log("Left button clicked!")
+      if (currentPage === 1) {
+        return;
+      }
+      cleanUpPage(currentPage);
+      currentPage--;
+      trashText.setText(`TRASH (${currentPage}/${totalPages})`);
+      renderPage(currentPage);
     })
   );
 
 
   const rightButton = scene.add.existing(
     new WhiteMoreRoundedButton(scene, 1020, 950, ">", () => {
-      console.log("Right button clicked!")
+      if (currentPage === totalPages) {
+        return;
+      }
+      cleanUpPage(currentPage);
+      currentPage++;
+      trashText.setText(`TRASH (${currentPage}/${totalPages})`);
+      renderPage(currentPage);
     })
   );
 

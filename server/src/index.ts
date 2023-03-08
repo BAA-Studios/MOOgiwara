@@ -7,6 +7,7 @@ import testDeck from './cards/test_deck.json' assert { type: "json" };
 
 import Game from './game/game';
 import { verify } from './util/jwt';
+import { Vector } from 'js-sdsl';
 
 const app: Express = express();
 const server = createServer(app);
@@ -20,7 +21,7 @@ const io = new Server(server, {
 });
 
 const PORT = 3000;
-const users: string[] = [];
+const users: Vector<string> = new Vector<string>();
 const games = new Map<string, Game>();
 
 /**
@@ -88,9 +89,9 @@ function startQueuing(socket: Socket): Player {
 }
 
 io.on('connection', (socket: Socket) => {
-  console.log('[LOG] User: ' + socket.id + ' connected');
   const userId = socket.id; // temporary - to convert this to database PK if not guest
-  users.push(userId); // TODO: Remove on disconnect - might need to use Set instead of Array?
+  console.log(`[LOG] User: ${userId} connected`);
+  users.pushBack(userId); // TODO: Remove on disconnect - might need to use Set instead of Array?
   let player: Player;
   let game: Game;
   let lobbyId: string;
@@ -156,6 +157,7 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('disconnect', () => {
     console.log('User ' + userId + ' disconnected');
+    users.eraseElementByValue(userId);
     if (game?.isEmpty()) {
       game?.clearPlayers();
       console.log("Game instance cleared: " + games.delete(lobbyId));

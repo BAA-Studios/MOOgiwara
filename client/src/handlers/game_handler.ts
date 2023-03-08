@@ -215,7 +215,7 @@ export default class GameHandler {
           x: this.opponentHandArea.x + blankCard.calculatePositionInHand(),
           y: this.opponentHandArea.y,
           scale: 0.25,
-          duration: 750,
+          duration: 500,
           ease: 'Power1',
           onComplete: () => {
             blankCard.destroy();
@@ -255,7 +255,7 @@ export default class GameHandler {
           targets: donCard,
           x: this.opponentDonArea.x + donCard.indexInContainer*75,
           y: this.opponentDonArea.y,
-          duration: 750,
+          duration: 500,
           ease: 'Power1',
           onComplete: () => {
             donCard.setPosition(donCard.indexInContainer*75, 0);
@@ -596,11 +596,14 @@ export default class GameHandler {
       case 'characterArea':
         this.player.updateCharacterArea(this.scene, cards);
         break;
+      case 'trash':
+        this.player.updateTrash(this.scene, cards);
+        break;
     }
   }
 
   highlightValidZones(card: Card) {
-    if (card.isCharacterCard()) {
+    if (card.isCharacterCard() || (card.isEventCard() && !card.isCounterEventCard())) {
       // For some reason, setting alpha anything that isn't 0 doesn't work
       if (this.playableCharacterArea.visible) {
         return;
@@ -654,7 +657,7 @@ export default class GameHandler {
   }
 
   checkIfCardWasDroppedInValidZone(card: Card) {
-    if (card.isCharacterCard()) {
+    if (card.isCharacterCard() || (card.isEventCard() && !card.isCounterEventCard())) {
       // Check if the card is currently within the playableCharacterArea, assuming both are rectangles
       if (Phaser.Geom.Rectangle.Overlaps(card.getBounds(), this.playableCharacterAreaHitBox.getBounds())) {
           return true;

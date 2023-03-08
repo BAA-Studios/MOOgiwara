@@ -191,6 +191,11 @@ export default class Player {
       cardRetired = this.characterArea.get(cardIndexInPlay);
       let cardInHand = this.hand.get(cardindexInContainer);
 
+      if (this.characterArea.size() !== 5) {
+        console.log(`[ERROR] Player ${this.username} tried to retire a card when they don't have 5 cards in play`);
+        return;
+      }
+
       if (!cardInHand) {
         console.log(`[ERROR] Player ${this.username} tried to replace a card with a card that doesn't exist`);
         return;
@@ -200,6 +205,12 @@ export default class Player {
         console.log(`[ERROR] Player ${this.username} tried to replace a card that doesn't exist`);
         return;
       }
+
+      if (cardInHand.isEventCard()) {
+        console.log(`[ERROR] Player ${this.username} tried to replace a card with an event card`);
+        return;
+      }
+
       console.log(`[INFO] Player ${this.username} requested to retire character: "${cardRetired?.name}" with character: "${cardInHand?.name}"`);
       // Remove the card from player's hand
       this.hand.remove(cardInHand);
@@ -218,9 +229,7 @@ export default class Player {
       cardInHand.summoningSickness = true;
 
       // Add it to the trash
-      for (let i = 0; i < 24; i++) {
-        this.trash.push(cardRetired);
-      }
+      this.trash.push(cardRetired);
 
       callback(this.characterArea.list(), this.donArea.list(), this.hand.list(), this.trash.list());
 

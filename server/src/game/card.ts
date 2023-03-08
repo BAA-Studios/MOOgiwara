@@ -52,6 +52,14 @@ export class Card {
         return this.category === 'CHARACTER';
     }
 
+    isEventCard() {
+        return this.category === 'EVENT';
+    }
+
+    isEventCounterCard() {
+        return this.isEventCard() && this.effect.startsWith('[Counter]');
+    }
+
     calculateBonusAttackFromDon() {
         return 0 * this.attachedDon.size();
     }

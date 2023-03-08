@@ -18,26 +18,31 @@ export function playCard(player: Player, card: Card) {
         cards: player.donArea.list() 
     }, player);
 
+    // Check if the card is a character card
     if (card.isCharacterCard()) {
         player.characterArea.push(card);
-    } else {
+
+        // TODO: Check if the card has RUSH attribute, if so, then set summoningSickness to false
+        card.summoningSickness = true;
+
+        // Update the player's and opponent's character area
+        player.characterArea.update(player.client);
+
+        // TODO: Add logic for onPlay effects, etc...
+
+        player.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", { 
+            cards: player.characterArea.list(),
+        }, player);
+    } 
+    else { // If an Event Card was played
         player.trash.push(card);
+        player.trash.update(player.client);
+        player.updateTrashAreaForOpponent();
     }
-    // TODO: Check if the card has RUSH attribute, if so, then set summoningSickness to false
-    card.summoningSickness = true;
-    
-    // TODO: Add logic for onPlay effects, etc...
 
     // Remove the card from the player's hand
     player.hand.remove(card);
     // Update player's hand and opponent's view
     player.hand.update(player.client);
     player.game?.broadcastPacketExceptSelf("opponentRemoveCardFromHand", { amount: 1 }, player);
-
-    // Update the player's and opponent's character area
-    player.characterArea.update(player.client);
-    // Create an array of cardIds from the player's character area
-    player.game?.broadcastPacketExceptSelf("opponentUpdateCharacterArea", { 
-        cards: player.characterArea.list(),
-    }, player);
 }
