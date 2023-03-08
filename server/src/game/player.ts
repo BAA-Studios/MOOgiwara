@@ -191,6 +191,11 @@ export default class Player {
       cardRetired = this.characterArea.get(cardIndexInPlay);
       let cardInHand = this.hand.get(cardindexInContainer);
 
+      if (this.characterArea.size() !== 1) {
+        console.log(`[ERROR] Player ${this.username} tried to retire a card when they don't have 5 cards in play`);
+        return;
+      }
+
       if (!cardInHand) {
         console.log(`[ERROR] Player ${this.username} tried to replace a card with a card that doesn't exist`);
         return;
