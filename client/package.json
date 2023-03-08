@@ -23,11 +23,14 @@
     "@types/node": "^16.0.0",
     "gts": "^4.0.0",
     "typescript": "^4.9.3",
-    "vite": "^3.2.5"
+    "vite": "^4.1.4"
   },
   "dependencies": {
-    "socket.io-client": "^4.5.4",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "js-sdsl": "^4.2.0",
     "phaser": "^3.60.0-beta.18",
-    "js-sdsl": "^4.2.0"
+    "socket.io-client": "^4.5.4",
+    "vite-express": "^0.4.1"
   }
 }

@@ -1,3 +1,4 @@
+// TDOO: Migrate consumption of JWT tokens to server
 /**
  * Extracts the user's email address from a given JWT token
  * @param jwtToken JWT token received via GSI
