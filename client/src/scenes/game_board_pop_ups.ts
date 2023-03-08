@@ -241,37 +241,77 @@ export function displayTrash(scene: GameBoard, cardList: Vector<Card>) {
     cardCounter++;
   }
 
-  // Rendering first page
-  for (let row = 0; row < 2; row++) {
-    for (let column = 0; column < 6; column++) {
-      // In the case we have less than 12 cards in the trash
-      if (row * 6 + column >= cardList.length) {
-        break;
+  // Given a pageNumber render that page from the listOfCards 2D Array
+  // every two rows is a page
+  function renderPage(pageNum) {
+    let startingPoint = (pageNum - 1) * 2;
+    let endingPoint = pageNum * 2;
+    for (let row = startingPoint; row < endingPoint; row++) {
+      for (let column = 0; column < 6; column++) {
+        // Check if the page we are on is rendering out of bounds
+        if (row * 6 + column >= cardList.length) {
+          break;
+        }
+        let card = listOfCards[row][column];
+        card.setPosition(335 + column * 250, 315 + (row - startingPoint) * 350);
+        card.setVisible(true);
+        scene.add.tween({
+          targets: card,
+          scaleX: 0.40,
+          scaleY: 0.40,
+          duration: 250,
+          ease: 'Power1',
+        });
       }
-      let card = listOfCards[row][column];
-      card.setVisible(true);
-      scene.add.tween({
-        targets: card,
-        scaleX: 0.40,
-        scaleY: 0.40,
-        duration: 250,
-        ease: 'Power1',
-      });
     }
   }
 
-  const trashText = scene.add.text(960, 50, `TRASH (1/${Math.floor(cardList.length / 12) + 1})`).setOrigin(0.5, 0.5).setFontSize(86).setFontFamily("Merriweather");
+  function cleanUpPage(pageNum) {
+    let startingPoint = (pageNum - 1) * 2;
+    let endingPoint = pageNum * 2;
+    for (let row = startingPoint; row < endingPoint; row++) {
+      for (let column = 0; column < 6; column++) {
+        // Check if the page we are on is rendering out of bounds
+        if (row * 6 + column >= cardList.length) {
+          break;
+        }
+        let card = listOfCards[row][column];
+        card.setVisible(false);
+        card.setScale(0.01);
+      }
+    }
+  }
+
+  // Rendering first page
+  renderPage(1);
+
+  let currentPage = 1;
+  const totalPages = Math.ceil(cardList.length / 12);
+
+  const trashText = scene.add.text(960, 50, `TRASH (${currentPage}/${totalPages})`).setOrigin(0.5, 0.5).setFontSize(86).setFontFamily("Merriweather");
 
   const leftButton = scene.add.existing(
     new WhiteMoreRoundedButton(scene, 900, 950, "<", () => {
-      console.log("Left button clicked!")
+      if (currentPage === 1) {
+        return;
+      }
+      cleanUpPage(currentPage);
+      currentPage--;
+      trashText.setText(`TRASH (${currentPage}/${totalPages})`);
+      renderPage(currentPage);
     })
   );
 
 
   const rightButton = scene.add.existing(
     new WhiteMoreRoundedButton(scene, 1020, 950, ">", () => {
-      console.log("Right button clicked!")
+      if (currentPage === totalPages) {
+        return;
+      }
+      cleanUpPage(currentPage);
+      currentPage++;
+      trashText.setText(`TRASH (${currentPage}/${totalPages})`);
+      renderPage(currentPage);
     })
   );
 

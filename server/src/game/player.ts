@@ -191,7 +191,7 @@ export default class Player {
       cardRetired = this.characterArea.get(cardIndexInPlay);
       let cardInHand = this.hand.get(cardindexInContainer);
 
-      if (this.characterArea.size() !== 1) {
+      if (this.characterArea.size() !== 5) {
         console.log(`[ERROR] Player ${this.username} tried to retire a card when they don't have 5 cards in play`);
         return;
       }
