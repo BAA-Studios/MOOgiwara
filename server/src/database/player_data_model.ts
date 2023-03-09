@@ -1,12 +1,12 @@
 import { Schema, Model, model, Types } from 'mongoose';
-import Decks from './deck_model';
+import IDecks from './deck_model';
 
 // Document definition:
-interface PlayerData {
-    google_id: string;
-    name: string;
+export interface IPlayerData {
+    google_id?: string;
+    name?: string;
     email: string;
-    decks: Decks[];
+    decks: IDecks[];
     createdAt: Date;
 }
 
@@ -15,27 +15,25 @@ type PlayerDataDocumentProps = {
     google_id: string;
     name: string;
     email: string;
-    decks: Types.DocumentArray<Decks>;
+    decks: Types.DocumentArray<IDecks>;
     createdAt: Date;
 };
-type PlayerDataModelType = Model<PlayerData, {}, PlayerDataDocumentProps>;
+type PlayerDataModelType = Model<IPlayerData, {}, PlayerDataDocumentProps>;
 
 // Create model
-const PlayerDataModel = model<PlayerData, PlayerDataModelType>('PlayerData', new Schema<PlayerData, PlayerDataModelType>({
+export const PlayerData = model<IPlayerData, PlayerDataModelType>('PlayerData', new Schema<IPlayerData, PlayerDataModelType>({
     google_id: String,
     name: String,
     email: {
         type: String,
         required: true,
     },
-    decks: [new Schema<Decks>({
-        deck_string: String
-    }, {
-        timestamps: { createdAt: true, updatedAt: false }
+    decks: [new Schema<IDecks>({
+        deck_string: { type: String, required: true}
     })]
+}, {
+    timestamps: { createdAt: true, updatedAt: false }
 }));
-
-export default PlayerDataModel;
 
 /* const playerDataSchema = new Schema({
     google_id: String,

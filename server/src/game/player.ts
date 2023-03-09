@@ -9,6 +9,7 @@ import { Card } from "../game/card";
 import { identifyLeaderCard } from "../util/utils";
 import Game from "../game/game";
 import { playCard } from "../cards/card_engine";
+import { IPlayerData } from "../database/player_data_model";
 
 
 export default class Player {
@@ -17,6 +18,7 @@ export default class Player {
   socketId: string;  
   lobbyId: string | undefined;  // socketId of the player that started the game
   playerId: Types.ObjectId | undefined;
+  playerData: IPlayerData | undefined;
   
   game: Game | undefined = undefined;
   boardReady = false; // Stores information about whether the client has finished rendering the board
@@ -312,6 +314,10 @@ export default class Player {
 
   setPlayerId(playerId: Types.ObjectId): void {
     this.playerId = playerId;
+  }
+
+  setPlayerData(playerData: IPlayerData): void {
+    this.playerData = playerData;
   }
 
   drawCard(amount: number = 1) {

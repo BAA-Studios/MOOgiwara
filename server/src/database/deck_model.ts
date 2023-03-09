@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 // Subdocument definition:
-export default interface Decks {
+export default interface IDecks {
     _id: Types.ObjectId;
     deck_string: string;
 }

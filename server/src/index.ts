@@ -6,8 +6,10 @@ import Player from './game/player';
 import testDeck from './cards/test_deck.json' assert { type: "json" };
 
 import Game from './game/game';
+import connectToDB from './database/connection';
 import { verify } from './util/jwt';
 import { Vector } from 'js-sdsl';
+import { PlayerData } from './database/player_data_model';
 
 const app: Express = express();
 const server = createServer(app);
@@ -23,6 +25,33 @@ const io = new Server(server, {
 const PORT = 3000;
 const users: Vector<string> = new Vector<string>();
 const games = new Map<string, Game>();
+
+connectToDB();
+
+/* async function setTestDB() {
+  const pData = new PlayerData({
+    google_id: 's0me4lphanumer1cstr1ng',
+    name: 'somestring',
+    email: 'some@address.here',
+    decks: []
+  })
+  pData.decks.push({ deck_string: "some string of text 1" });
+  pData.decks.push({ deck_string: "some string of text 2" });
+
+  await pData.save();
+} */
+
+async function readFromTestDB() {
+  const pData = await PlayerData.findOne({ google_id: 's0me4lphanumer1cstr1ng' });
+  if (pData) {
+    console.log(pData.email);
+    console.log(pData.decks);
+    console.log(pData.decks[0].deck_string);
+  }
+  else {
+    console.log('UNABLE TO FETCH DUMMY PLAYER DATA FROM DB');
+  }
+}
 
 /**
  * Find a game that has an open player slot
@@ -187,3 +216,5 @@ io.on('connection', (socket: Socket) => {
 server.listen(PORT, () => {
   console.log('Server is now listening on port: ' + PORT);
 });
+// setTestDB()
+readFromTestDB()
