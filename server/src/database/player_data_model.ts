@@ -1,8 +1,43 @@
-import mongoose from 'mongoose';
-import { deckSchema } from './deck_model';
+import { Schema, Model, model, Types } from 'mongoose';
+import Decks from './deck_model';
 
-const { Schema } = mongoose;
-const playerDataSchema = new Schema({
+// Document definition:
+interface PlayerData {
+    google_id: string;
+    name: string;
+    email: string;
+    decks: Decks[];
+    createdAt: Date;
+}
+
+// TMethodsAndOverrides
+type PlayerDataDocumentProps = {
+    google_id: string;
+    name: string;
+    email: string;
+    decks: Types.DocumentArray<Decks>;
+    createdAt: Date;
+};
+type PlayerDataModelType = Model<PlayerData, {}, PlayerDataDocumentProps>;
+
+// Create model
+const PlayerDataModel = model<PlayerData, PlayerDataModelType>('PlayerData', new Schema<PlayerData, PlayerDataModelType>({
+    google_id: String,
+    name: String,
+    email: {
+        type: String,
+        required: true,
+    },
+    decks: [new Schema<Decks>({
+        deck_string: String
+    }, {
+        timestamps: { createdAt: true, updatedAt: false }
+    })]
+}));
+
+export default PlayerDataModel;
+
+/* const playerDataSchema = new Schema({
     google_id: String,
     name: String,
     email: {
@@ -14,4 +49,4 @@ const playerDataSchema = new Schema({
     timestamps: { createdAt: true, updatedAt: false }
 });
 
-export const PlayerData = mongoose.model("PlayerData", playerDataSchema);
+export const PlayerData = model("PlayerData", playerDataSchema); */

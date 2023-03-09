@@ -1,8 +1,12 @@
-import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 
-const { Schema } = mongoose;
-export const deckSchema = new Schema({
+// Subdocument definition:
+export default interface Decks {
+    _id: Types.ObjectId;
+    deck_string: string;
+}
+/* export const deckSchema = new Schema({
     deck_string: String,
 });
 
-export const Deck = mongoose.model("Deck", deckSchema);
+export const Deck = model("Deck", deckSchema); */

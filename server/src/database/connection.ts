@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import { connect } from 'mongoose';
 
 // Omitting users/authentication, authorisation/privileges setting for testbench:
 const mongoDB = "mongodb://127.0.0.1:27017/moogiwara_test";
@@ -6,7 +6,7 @@ const mongoDB = "mongodb://127.0.0.1:27017/moogiwara_test";
 
 export default async function connectToDB() {
     try {
-        await mongoose.connect(mongoDB);
+        await connect(mongoDB);
     } catch (error) {
         console.log('[ERROR] UNABLE TO CONNECT TO DATABASE');
         console.error(error);
