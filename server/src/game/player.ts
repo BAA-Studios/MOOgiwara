@@ -109,18 +109,30 @@ export default class Player {
       console.log(`[INFO] Player ${this.username} requested to play card ${cardPlayed.name}`);
       // send card to the card engine to determine how it should be played.
       playCard(this, cardPlayed);
-    });
+      });
 
     this.client.on('refreshPhase', () => {
       console.log(`[INFO] Player ${this.username} requested to refresh their board (Refresh Phase))`);
+      // Check the game if it is the player's turn
+      if (!this.game?.playersTurn(this)) {
+        return;
+      }
       // Unrest all cards and return any attached dons to the don deck
       this.characterArea.list().forEach((card) => {
         card.isResting = false;
+        card.summoningSickness = false;
         for (let i = 0; i < card.attachedDon.size(); i++) {
           this.donArea.push(card.attachedDon.getElementByPos(i));
         }
         card.clearDon();
       });
+
+      if (this.game?.turnNumber === 2 || this.game?.turnNumber === 3) {
+        if (this.leader) {
+          this.leader.summoningSickness = false;
+        }
+      }
+
       // Return dons from leader to don area
       this.leader?.attachedDon.forEach((don) => {
         this.donArea.push(don);
@@ -133,8 +145,7 @@ export default class Player {
 
       this.leader?.clearDon();
       this.updateLeaderForOpponent();
-
-      this.setSummoningSickness();
+      
       this.characterArea.update(this.client);
       this.updateCharacterAreaForOpponent()
       this.donArea.list().forEach((card) => {

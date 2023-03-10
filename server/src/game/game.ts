@@ -106,6 +106,13 @@ export default class Game {
     return this.playerOne;
   }
 
+  playersTurn(player: Player) {
+    if (this.playerOne === player) {
+      return this.whoseTurn === 1;
+    }
+    return this.whoseTurn === 2;
+  }
+
   start() {
     // Assign each player's cards in their deck with a unique object Id
     if (!(this.playerOne?.deck && this.playerTwo?.deck)) {
