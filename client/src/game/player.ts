@@ -195,7 +195,7 @@ export default class Player {
         }
         card.writeOnCard(scene.gameHandler.playerCharacterArea, "+" + card.calculateTotalAttack(), 35, 
         { 
-          color: '#ff0000',
+          color: '#00ff00',
           backgroundColor: 'rgba(0,0,0,0.7)',
         });
       }
