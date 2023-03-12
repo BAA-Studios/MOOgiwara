@@ -6,7 +6,7 @@ import Player from './game/player';
 import testDeck from './cards/test_deck.json' assert { type: "json" };
 
 import Game from './game/game';
-import connectToDB from './database/connection';
+import * as db from './database/connection';
 import { verify } from './util/jwt';
 import { Vector } from 'js-sdsl';
 import { PlayerData } from './database/player_data_model';
@@ -26,11 +26,11 @@ const PORT = 3000;
 const users: Vector<string> = new Vector<string>();
 const games = new Map<string, Game>();
 
-connectToDB();
+db.connectToDB();
 
 /* async function setTestDB() {
   const pData = new PlayerData({
-    google_id: 's0me4lphanumer1cstr1ng',
+    googleId: 's0me4lphanumer1cstr1ng',
     name: 'somestring',
     email: 'some@address.here',
     decks: []
@@ -42,10 +42,11 @@ connectToDB();
 } */
 
 async function readFromTestDB() {
-  const pData = await PlayerData.findOne({ google_id: 's0me4lphanumer1cstr1ng' });
+  const pData = await PlayerData.findOne({ googleId: 's0me4lphanumer1cstr1ng' });
   if (pData) {
+    console.log(pData.id);
+    console.log(typeof pData);
     console.log(pData.email);
-    console.log(pData.decks);
     console.log(pData.decks[0].deck_string);
   }
   else {
@@ -135,16 +136,24 @@ io.on('connection', (socket: Socket) => {
   // Login-related packets -----------------------------
   socket.once('token', (token) => {
     verify(token).then(
-      function(value) {
+      async function(value) {
         console.log('[DEBUG] JWT Token verification result:');
         console.log(value);
-        // requires DB set up
-        // TODO: IF email not recognised, save as new user in DB, alongside `fullName`
-        // TODO: Send a toast to the user to let them know that an account has been created, and they're being logged in
-        // TODO: ELSE Send a packet to the server to display their name + logging in message
-        // "Logging in"
+        if (!await db.isRegisteredUser(value?.email)) {
+          // Save in DB
+          // Send toast to client "Account successfully created, we're now logging you in!"
+        } else {
+          // Fetch player data and populate Player object
+          // Send toast to client $`Welcome back {name}!`
+        }
+        //
         // TODO: set username (from DB)
         // TODO: set playerId (from DB)
+        /* const credentials = {
+          'googleID': payload['sub'],
+          'fullName': payload['name'],
+          'email': payload['email']
+        }; */
       },
       function(error) {
         console.log('[ERROR] ' + error);

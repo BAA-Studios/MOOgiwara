@@ -3,7 +3,7 @@ import IDecks from './deck_model';
 
 // Document definition:
 export interface IPlayerData {
-    google_id?: string;
+    googleId?: string;
     name?: string;
     email: string;
     decks: IDecks[];
@@ -12,7 +12,7 @@ export interface IPlayerData {
 
 // TMethodsAndOverrides
 type PlayerDataDocumentProps = {
-    google_id: string;
+    googleId: string;
     name: string;
     email: string;
     decks: Types.DocumentArray<IDecks>;
@@ -22,7 +22,7 @@ type PlayerDataModelType = Model<IPlayerData, {}, PlayerDataDocumentProps>;
 
 // Create model
 export const PlayerData = model<IPlayerData, PlayerDataModelType>('PlayerData', new Schema<IPlayerData, PlayerDataModelType>({
-    google_id: String,
+    googleId: String,
     name: String,
     email: {
         type: String,
@@ -36,7 +36,7 @@ export const PlayerData = model<IPlayerData, PlayerDataModelType>('PlayerData', 
 }));
 
 /* const playerDataSchema = new Schema({
-    google_id: String,
+    googleId: String,
     name: String,
     email: {
         type: String,
