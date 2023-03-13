@@ -42,7 +42,7 @@ export function notification(scene: Phaser.Scene, description: string, color: nu
 
     scene.tweens.add({
         targets: desc,
-        y: 21,
+        y: 22,
         ease: 'Power1',
         duration: 600,
         repeat: 0,
