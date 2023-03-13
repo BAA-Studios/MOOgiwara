@@ -206,7 +206,10 @@ io.on('connection', (socket: Socket) => {
     console.log("Socket ID: " + socket.id);
     game?.broadcastChat(data.message);
   });
-  
+
+  socket.on('deckManager', (callback) => {
+    callback(player.playerData?.decks);
+  })
   // Packets Received End ----------------------------
 });
 
