@@ -134,10 +134,13 @@ io.on('connection', (socket: Socket) => {
         if (!playerData) {
           console.error(`[ERROR] Failed to fetch player data for ${value?.email}`);
           // TODO: Error message to user
+          return;
         }
         player.setPlayerData(playerData);
-        player.playerId = playerData.id;  // undefined if not found
-        player.username = playerData.name;  // undefined if not found
+        player.playerId = playerData.id;
+        player.username = playerData.name;
+
+        socket.emit('loginSuccess', { name: playerData.name });
       },
       function(error) {
         console.log('[ERROR] ' + error);

@@ -26,7 +26,7 @@ export default class MainMenu extends Phaser.Scene {
     
     // Sign In With Google -------------------------------------------
     // Inject button div
-    signInButton: Phaser.GameObjects.DOMElement = this.add
+    const signInButton: Phaser.GameObjects.DOMElement = this.add
       .dom(1690, 80)
       .createFromCache('signin').setOrigin(0.5);
     
@@ -36,6 +36,15 @@ export default class MainMenu extends Phaser.Scene {
       socket.emit('token', response.credential);  // send to game server for validation
       // TODO: toast feedback for login result
     }
+    socket.once('loginSuccess', (response) => {
+      signInButton.destroy();
+      // TODO: Convert into button for profile management
+      this.add.text(1690, 80, response.name, {
+        fontFamily: 'Georgia',
+        fontSize: '28px',
+        color: '#222',
+      })
+    })
 
     // Render the actual button
     window.google.accounts.id.initialize({
