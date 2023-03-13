@@ -123,17 +123,17 @@ io.on('connection', (socket: Socket) => {
           });
           await playerData.save();
           console.debug(`Unregistered user ${value?.email} encountered! Saving to DB...`);
-          socket.emit('accountCreated');
+          player.sendNotification('We are now logging you in!', 0x00ff00);
         } else {  // Existing user:
           // Fetch player data
           playerData = await db.fetchPlayerDataByEmail(value?.email);
-          socket.emit('loginSuccess', { name: playerData.name });
+          player.sendNotification(`Welcome back! ${playerData.name}`, 0x00ff00);
         }
 
         // Populate the Player instance
         if (!playerData) {
           console.error(`[ERROR] Failed to fetch player data for ${value?.email}`);
-          socket.emit('noPlayerData', { email: value?.email });
+          player.sendNotification(`Unable load/save your account for ${value?.email}`, 0xff0000);
           return;
         }
         player.setPlayerData(playerData);
@@ -144,7 +144,7 @@ io.on('connection', (socket: Socket) => {
       },
       function(error) {
         console.error('[ERROR] ' + error);
-        socket.emit('failVerification');
+        player.sendNotification('Failed to verify your account!', 0xff0000);
       }
     );
   });

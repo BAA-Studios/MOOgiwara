@@ -38,23 +38,9 @@ export default class MainMenu extends Phaser.Scene {
     }
 
     // Login result -------------------------
-    // New User
-    socket.once('accountCreated', () => {
-      notification(this, 'Account successfully created', 'We are now logging you in!');
-    });
 
-    // Existing User
-    socket.once('loginSuccess', (response) => {
-      notification(this, 'Login success!', `Welcome back, ${response.name}!`);
-    });
-
-    // Generic failure messages -------------
-    socket.once('noPlayerData', (response) => {
-      notification(this, 'Oops!', `Something went wrong! We were unable to load/save your account for ${response.email}.`);
-    });
-
-    socket.once('failVerification', () => {
-      notification(this, 'Uh oh...', 'Your Google Identity sign-in has failed at the verification step.')
+    socket.on('notification', (description, color) => {
+      notification(this, description, color);
     });
 
     socket.once('removeSignInButton', (response) => {

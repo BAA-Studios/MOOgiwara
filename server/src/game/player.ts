@@ -479,4 +479,8 @@ export default class Player {
       cardDefendingIndex: cardDefendingIndex
     }, this);
   }
+
+  sendNotification(message: string, color: number) {
+    this.client?.emit("notification", message, color);
+  }
 }
