@@ -8,6 +8,7 @@ export interface IPlayerData extends Document {
     email: string;
     decks: IDecks[];
     createdAt: Date;
+    bannedTill: Date;
 }
 
 // TMethodsAndOverrides
@@ -17,6 +18,7 @@ type PlayerDataDocumentProps = {
     email: string;
     decks: Types.DocumentArray<IDecks>;
     createdAt: Date;
+    bannedTill: Date;
 };
 type PlayerDataModelType = Model<IPlayerData, {}, PlayerDataDocumentProps>;
 
@@ -30,21 +32,8 @@ export const PlayerData = model<IPlayerData, PlayerDataModelType>('PlayerData', 
     },
     decks: [new Schema<IDecks>({
         deck_string: { type: String, required: true}
-    })]
+    })],
+    bannedTill: Date
 }, {
     timestamps: { createdAt: true, updatedAt: false }
 }));
-
-/* const playerDataSchema = new Schema({
-    googleId: String,
-    name: String,
-    email: {
-        type: String,
-        required: true,
-    },
-    decks: [deckSchema],  // opt for embed instead of reference because 1-to-Many
-}, {
-    timestamps: { createdAt: true, updatedAt: false }
-});
-
-export const PlayerData = model("PlayerData", playerDataSchema); */

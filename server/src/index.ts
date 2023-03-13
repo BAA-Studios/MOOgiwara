@@ -206,6 +206,7 @@ io.on('connection', (socket: Socket) => {
     console.log("Socket ID: " + socket.id);
     game?.broadcastChat(data.message);
   });
+  
   // Packets Received End ----------------------------
 });
 
