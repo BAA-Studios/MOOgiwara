@@ -37,6 +37,6 @@ export async function isRegisteredUser(email: string): Promise<boolean> {
     return false;
 }
 
-export async function fetchPlayerDataByEmail(email: string): Promise<IPlayerData> {
-    return await PlayerData.find({ email: email }).exec()[0];
+export async function fetchPlayerDataByEmail(email: string): Promise<IPlayerData | undefined> {
+    return await (await PlayerData.find({ email: email })).at(0);
 }

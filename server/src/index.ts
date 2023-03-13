@@ -111,7 +111,7 @@ io.on('connection', (socket: Socket) => {
   socket.once('token', (token) => {
     verify(token).then(
       async function(value) {
-        let playerData: IPlayerData;
+        let playerData: IPlayerData | undefined;
         // New user:
         if (!await db.isRegisteredUser(value?.email)) {
           // Save player data extracted from JWT into DB:
@@ -127,13 +127,15 @@ io.on('connection', (socket: Socket) => {
         } else {  // Existing user:
           // Fetch player data
           playerData = await db.fetchPlayerDataByEmail(value?.email);
-          player.sendNotification(`Welcome back! ${playerData.name}`, 0x00ff00);
+          if (playerData != undefined) {
+            player.sendNotification(`Welcome back! ${value?.fullName}`, 0x00ff00);
+          }
         }
 
         // Populate the Player instance
         if (!playerData) {
           console.error(`[ERROR] Failed to fetch player data for ${value?.email}`);
-          player.sendNotification(`Unable load/save your account for ${value?.email}`, 0xff0000);
+          player.sendNotification(`Unable to load account ${value?.email}`, 0xff0000);
           return;
         }
         player.setPlayerData(playerData);
