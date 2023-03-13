@@ -27,6 +27,8 @@
     "vite": "^4.1.4"
   },
   "dependencies": {
+    "@types/google-one-tap": "^1.2.2",
+    "@types/google.accounts": "^0.0.7",
     "express": "^4.18.2",
     "js-sdsl": "^4.2.0",
     "phaser": "^3.60.0-beta.18",
