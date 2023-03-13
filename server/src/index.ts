@@ -9,7 +9,7 @@ import Game from './game/game';
 import * as db from './database/connection';
 import { verify } from './util/jwt';
 import { Vector } from 'js-sdsl';
-import { PlayerData } from './database/player_data_model';
+import { IPlayerData, PlayerData } from './database/player_data_model';
 
 const app: Express = express();
 const server = createServer(app);
@@ -27,32 +27,6 @@ const users: Vector<string> = new Vector<string>();
 const games = new Map<string, Game>();
 
 db.connectToDB();
-
-/* async function setTestDB() {
-  const pData = new PlayerData({
-    googleId: 's0me4lphanumer1cstr1ng',
-    name: 'somestring',
-    email: 'some@address.here',
-    decks: []
-  })
-  pData.decks.push({ deck_string: "some string of text 1" });
-  pData.decks.push({ deck_string: "some string of text 2" });
-
-  await pData.save();
-} */
-
-async function readFromTestDB() {
-  const pData = await PlayerData.findOne({ googleId: 's0me4lphanumer1cstr1ng' });
-  if (pData) {
-    console.log(pData.id);
-    console.log(typeof pData);
-    console.log(pData.email);
-    console.log(pData.decks[0].deck_string);
-  }
-  else {
-    console.log('UNABLE TO FETCH DUMMY PLAYER DATA FROM DB');
-  }
-}
 
 /**
  * Find a game that has an open player slot
@@ -137,23 +111,33 @@ io.on('connection', (socket: Socket) => {
   socket.once('token', (token) => {
     verify(token).then(
       async function(value) {
-        console.log('[DEBUG] JWT Token verification result:');
-        console.log(value);
+        let playerData: IPlayerData;
+        // New user:
         if (!await db.isRegisteredUser(value?.email)) {
-          // Save in DB
-          // Send toast to client "Account successfully created, we're now logging you in!"
-        } else {
-          // Fetch player data and populate Player object
-          // Send toast to client $`Welcome back {name}!`
+          // Save player data extracted from JWT into DB:
+          playerData = await PlayerData.create({
+            googleId: value?.googleID,
+            name: value?.fullName,
+            email: value?.email,
+            decks: []
+          });
+          await playerData.save();
+          console.debug(`Unregistered user ${value?.email} encountered! Saving to DB...`);
+          // TODO: Send toast to client "Account successfully created, we're now logging you in!"
+        } else {  // Existing user:
+          // Fetch player data
+          playerData = await db.fetchPlayerDataByEmail(value?.email);
+          // TODO: Send toast to client $`Welcome back {name}!`
         }
-        //
-        // TODO: set username (from DB)
-        // TODO: set playerId (from DB)
-        /* const credentials = {
-          'googleID': payload['sub'],
-          'fullName': payload['name'],
-          'email': payload['email']
-        }; */
+
+        // Populate the Player instance
+        if (!playerData) {
+          console.error(`[ERROR] Failed to fetch player data for ${value?.email}`);
+          // TODO: Error message to user
+        }
+        player.setPlayerData(playerData);
+        player.playerId = playerData.id;  // undefined if not found
+        player.username = playerData.name;  // undefined if not found
       },
       function(error) {
         console.log('[ERROR] ' + error);
@@ -225,5 +209,3 @@ io.on('connection', (socket: Socket) => {
 server.listen(PORT, () => {
   console.log('Server is now listening on port: ' + PORT);
 });
-// setTestDB()
-readFromTestDB()

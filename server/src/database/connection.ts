@@ -25,18 +25,18 @@ export async function fetchPlayerDataByUuidString(uuid: string): Promise<IPlayer
  * @param email Gmail address that the user registered with
  * @returns Array of matching accounts
  */
-export async function fetchPlayerDataArrayByEmail(email: string): Promise<Array<IPlayerData> | null> {
+export async function fetchPlayerDataArrayByEmail(email: string): Promise<Array<IPlayerData>> {
     return await PlayerData.find({ googleId: email }).exec();
 }
 
 export async function isRegisteredUser(email: string): Promise<boolean> {
-    const result: Array<IPlayerData> | null = await fetchPlayerDataArrayByEmail(email);
+    const result: Array<IPlayerData> = await fetchPlayerDataArrayByEmail(email);
     if (Array.isArray(result) && result.length > 0) {
         return true;
     }
     return false;
 }
 
-export async function fetchPlayerDataByEmail(email: string): Promise<IPlayerData | null> {
+export async function fetchPlayerDataByEmail(email: string): Promise<IPlayerData> {
     return await PlayerData.find({ googleId: email }).exec()[0];
 }

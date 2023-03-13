@@ -1,8 +1,8 @@
-import { Schema, Model, model, Types } from 'mongoose';
+import { Schema, Model, model, Types, Document } from 'mongoose';
 import IDecks from './deck_model';
 
 // Document definition:
-export interface IPlayerData {
+export interface IPlayerData extends Document {
     googleId?: string;
     name?: string;
     email: string;
