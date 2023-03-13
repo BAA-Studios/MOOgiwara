@@ -26,7 +26,7 @@ export async function fetchPlayerDataByUuidString(uuid: string): Promise<IPlayer
  * @returns Array of matching accounts
  */
 export async function fetchPlayerDataArrayByEmail(email: string): Promise<Array<IPlayerData>> {
-    return await PlayerData.find({ googleId: email }).exec();
+    return await PlayerData.find({ email: email }).exec();
 }
 
 export async function isRegisteredUser(email: string): Promise<boolean> {
@@ -38,5 +38,5 @@ export async function isRegisteredUser(email: string): Promise<boolean> {
 }
 
 export async function fetchPlayerDataByEmail(email: string): Promise<IPlayerData> {
-    return await PlayerData.find({ googleId: email }).exec()[0];
+    return await PlayerData.find({ email: email }).exec()[0];
 }
