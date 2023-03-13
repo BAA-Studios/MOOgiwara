@@ -47,14 +47,18 @@ export default class MainMenu extends Phaser.Scene {
     })
 
     // Render the actual button
-    window.google.accounts.id.initialize({
+    google.accounts.id.initialize({
       client_id: "137166021162-mp5r4oe8edrn94tlfrjglr66m7bib2m4.apps.googleusercontent.com",
       callback: handleCredentialResponse
     });
-    window.google.accounts.id.renderButton(
-      document.getElementById("buttonDiv"),
-      { theme: "outline", size: "large" }  // customization attributes
-    );
+
+    const signInButtonDiv = document.getElementById("buttonDiv");
+    if (signInButtonDiv) {
+      google.accounts.id.renderButton(
+        signInButtonDiv,
+        { theme: "outline", size: "large" }  // customization attributes
+      );
+    }
 
     // Logo ----------------------------------------------------------
     this.add.text(10, 80, 'PLACEHOLDER FOR LOGO', {
