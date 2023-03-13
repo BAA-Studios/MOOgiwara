@@ -6,7 +6,10 @@ import Player from './game/player';
 import testDeck from './cards/test_deck.json' assert { type: "json" };
 
 import Game from './game/game';
+import * as db from './database/connection';
+import { verify } from './util/jwt';
 import { Vector } from 'js-sdsl';
+import { IPlayerData, PlayerData } from './database/player_data_model';
 
 const app: Express = express();
 const server = createServer(app);
@@ -23,17 +26,16 @@ const PORT = 3000;
 const users: Vector<string> = new Vector<string>();
 const games = new Map<string, Game>();
 
+db.connectToDB();
+
 /**
  * Find a game that has an open player slot
  * @param games list of open games
  * @returns     Lobby ID of game instance, if a match has been found; else null
  */
 function findOpenGame(games: Map<string, Game>): string | null {
-  console.log("LOOKING FOR OPEN GAMES");
   for (const [lobbyId, game] of games) {
-    console.log('ID: ' + lobbyId);
     if (!game.isFull()) {
-      console.log("FOUND!");
       return lobbyId; // Short-circuit if found
     }
   }
@@ -62,17 +64,15 @@ function findMatch(socketId: string): string {
   return openGame;
 }
 
-io.on('connection', (socket: Socket) => {
-  console.log('User: ' + socket.id + ' connected');
-  users.pushBack(socket.id);
-
-  const userId = socket.id; // temporary - to convert this to database PK if not guest
-  const lobbyId = findMatch(socket.id);
+function startQueuing(player: Player): void {
+  console.log(`[LOG] User: ${player.playerId ? player.playerId : player.socketId} has started queuing`);
+  const lobbyId = findMatch(player.socketId);
+  player.setLobbyId(lobbyId);
   const game = games.get(lobbyId);
-  console.log('[LOG] USER: ' + socket.id + ' joined game: ' + lobbyId);
-  const player = new Player(socket, userId, lobbyId, testDeck);
+  console.log(`[LOG] USER: ${player.playerId ? player.playerId : player.socketId} joined game: ${lobbyId}`);
   game?.push(player);
   player.game = game;
+
   if (game?.isFull()) {
     // Start the game
     const playerWhoStartsFirst = Math.floor(Math.random() * 2) + 1;
@@ -90,10 +90,78 @@ io.on('connection', (socket: Socket) => {
     game.start();
     console.log("[LOG] Game started: " + lobbyId);
   }
+  
+  if (!player.username) {  // guests' usernames are not initialised
+    // insert code to automatically generate names for guest:
+    player.username = `Guest ${player.socketId}`  // temporary until we set up name generation
+  }
+}
+
+io.on('connection', (socket: Socket) => {
+  const userId = socket.id; // temporary - to convert this to database PK if not guest
+  console.log(`[LOG] User: ${userId} connected`);
+  users.pushBack(userId); // TODO: Remove on disconnect - might need to use Set instead of Array?
+  let player: Player = new Player(socket, socket.id, testDeck);
+  let game: Game;
+  let lobbyId: string;
 
   // Packets Received Start ----------------------------
 
-  player.initListeners();
+  // Login-related packets -----------------------------
+  socket.once('token', (token) => {
+    verify(token).then(
+      async function(value) {
+        let playerData: IPlayerData;
+        // New user:
+        if (!await db.isRegisteredUser(value?.email)) {
+          // Save player data extracted from JWT into DB:
+          playerData = await PlayerData.create({
+            googleId: value?.googleID,
+            name: value?.fullName,
+            email: value?.email,
+            decks: []
+          });
+          await playerData.save();
+          console.debug(`Unregistered user ${value?.email} encountered! Saving to DB...`);
+          socket.emit('accountCreated');
+        } else {  // Existing user:
+          // Fetch player data
+          playerData = await db.fetchPlayerDataByEmail(value?.email);
+          socket.emit('loginSuccess', { name: playerData.name });
+        }
+
+        // Populate the Player instance
+        if (!playerData) {
+          console.error(`[ERROR] Failed to fetch player data for ${value?.email}`);
+          socket.emit('noPlayerData', { email: value?.email });
+          return;
+        }
+        player.setPlayerData(playerData);
+        player.playerId = playerData.id;
+        player.username = playerData.name;
+
+        socket.emit('removeSignInButton', { name: playerData.name });
+      },
+      function(error) {
+        console.error('[ERROR] ' + error);
+        socket.emit('failVerification');
+      }
+    );
+  });
+
+  // Game-related packets ------------------------------
+  socket.on('queue', () => {
+    startQueuing(player);
+    if (player.game) {
+      game = player.game;
+    } else {
+      console.log('[Error] User ' + userId + ' has no associated game instance!')
+      return;
+    }
+    lobbyId = player.lobbyId ? player.lobbyId : "";    
+
+    player.initListeners();
+  });
   
   socket.once('boardFullyLoaded', () => {
     player.boardReady = true;
@@ -138,6 +206,10 @@ io.on('connection', (socket: Socket) => {
     console.log("Socket ID: " + socket.id);
     game?.broadcastChat(data.message);
   });
+
+  socket.on('deckManager', (callback) => {
+    callback(player.playerData?.decks);
+  })
   // Packets Received End ----------------------------
 });
 

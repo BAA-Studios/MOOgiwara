@@ -8,9 +8,9 @@
     "lint": "gts lint",
     "clean": "gts clean",
     "fix": "gts fix",
-    "start": "vite",
+    "start": "node --loader ts-node/esm src/server.ts",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "production": "NODE_ENV=production node --loader ts-node/esm src/server.ts"
   },
   "author": "BAA Studios",
   "license": "AGPL v3",
@@ -22,12 +22,17 @@
   "devDependencies": {
     "@types/node": "^16.0.0",
     "gts": "^4.0.0",
+    "ts-node": "^10.9.1",
     "typescript": "^4.9.3",
-    "vite": "^3.2.5"
+    "vite": "^4.1.4"
   },
   "dependencies": {
+    "@types/google-one-tap": "^1.2.2",
+    "@types/google.accounts": "^0.0.7",
+    "express": "^4.18.2",
+    "js-sdsl": "^4.2.0",
+    "phaser": "^3.60.0-beta.19",
     "socket.io-client": "^4.5.4",
-    "phaser": "^3.60.0-beta.18",
-    "js-sdsl": "^4.2.0"
+    "vite-express": "^0.4.1"
   }
 }

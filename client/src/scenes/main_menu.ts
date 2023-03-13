@@ -3,7 +3,8 @@ import Phaser from 'phaser';
 import PlayButton from '../game/menu/buttons/play_button';
 import HollowShortButton from '../game/menu/buttons/hollow_short_button';
 import LoadingButton from '../game/menu/buttons/loading_button';
-import { connectToServer } from '../network/connection';
+import { connectToServer, waitForGame } from '../network/connection';
+import { notification } from '../handlers/toast';
 
 export default class MainMenu extends Phaser.Scene {
   constructor() {
@@ -12,6 +13,7 @@ export default class MainMenu extends Phaser.Scene {
 
   // TODO: https://blog.ourcade.co/posts/2020/phaser-3-google-fonts-webfontloader/
   preload() {
+    this.load.html('signin', './src/login/signin.html');
     this.load.image('tallButton', './buttons/Tall Button.png');
     this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
     this.load.image('loading', './images/mugiwara_logo_temp.png');
@@ -19,6 +21,66 @@ export default class MainMenu extends Phaser.Scene {
 
   // TODO: Groupings + dynamic relative coordinate resolution
   create() {
+    // Start socket connection to server -----------------------------
+    // TODO: Inherit the socket connection from previous game, if exists
+    const socket = connectToServer();
+    
+    // Sign In With Google -------------------------------------------
+    // Inject button div
+    const signInButton: Phaser.GameObjects.DOMElement = this.add
+      .dom(1690, 80)
+      .createFromCache('signin').setOrigin(0.5);
+    
+    // Handle Google's response
+    function handleCredentialResponse(response) {
+      console.log('handling credentials')
+      socket.emit('token', response.credential);  // send to game server for validation
+    }
+
+    // Login result -------------------------
+    // New User
+    socket.once('accountCreated', () => {
+      notification(this, 'Account successfully created', 'We are now logging you in!');
+    });
+
+    // Existing User
+    socket.once('loginSuccess', (response) => {
+      notification(this, 'Login success!', `Welcome back, ${response.name}!`);
+    });
+
+    // Generic failure messages -------------
+    socket.once('noPlayerData', (response) => {
+      notification(this, 'Oops!', `Something went wrong! We were unable to load/save your account for ${response.email}.`);
+    });
+
+    socket.once('failVerification', () => {
+      notification(this, 'Uh oh...', 'Your Google Identity sign-in has failed at the verification step.')
+    });
+
+    socket.once('removeSignInButton', (response) => {
+      signInButton.destroy();
+      // TODO: Convert into button for profile management
+      this.add.text(1690, 80, response.name, {
+        fontFamily: 'Georgia',
+        fontSize: '28px',
+        color: '#222',
+      })
+    })
+
+    // Render the actual button
+    google.accounts.id.initialize({
+      client_id: "137166021162-mp5r4oe8edrn94tlfrjglr66m7bib2m4.apps.googleusercontent.com",
+      callback: handleCredentialResponse
+    });
+
+    const signInButtonDiv = document.getElementById("buttonDiv");
+    if (signInButtonDiv) {
+      google.accounts.id.renderButton(
+        signInButtonDiv,
+        { theme: "outline", size: "large" }  // customization attributes
+      );
+    }
+
     // Logo ----------------------------------------------------------
     this.add.text(10, 80, 'PLACEHOLDER FOR LOGO', {
       fontFamily: 'Georgia Bold',
@@ -55,7 +117,7 @@ export default class MainMenu extends Phaser.Scene {
       // TODO: While loading, the other buttoons should be disabled (Create Deck, Options)
       playButton.disableInteractive();
       // Create a loading button over the original play button to show the loading animation
-      connectToServer(this);
+      waitForGame(this, socket);  // Passes the socket instance to the next scene
       this.add.existing(new LoadingButton(this, 360, 900));
     });
 
