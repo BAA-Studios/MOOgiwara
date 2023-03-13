@@ -123,28 +123,28 @@ io.on('connection', (socket: Socket) => {
           });
           await playerData.save();
           console.debug(`Unregistered user ${value?.email} encountered! Saving to DB...`);
-          // TODO: Send toast to client "Account successfully created, we're now logging you in!"
+          socket.emit('accountCreated');
         } else {  // Existing user:
           // Fetch player data
           playerData = await db.fetchPlayerDataByEmail(value?.email);
-          // TODO: Send toast to client $`Welcome back {name}!`
+          socket.emit('loginSuccess', { name: playerData.name });
         }
 
         // Populate the Player instance
         if (!playerData) {
           console.error(`[ERROR] Failed to fetch player data for ${value?.email}`);
-          // TODO: Error message to user
+          socket.emit('noPlayerData', { email: value?.email });
           return;
         }
         player.setPlayerData(playerData);
         player.playerId = playerData.id;
         player.username = playerData.name;
 
-        socket.emit('loginSuccess', { name: playerData.name });
+        socket.emit('removeSignInButton', { name: playerData.name });
       },
       function(error) {
-        console.log('[ERROR] ' + error);
-        // TODO: Send a packet to the server to display an error toast
+        console.error('[ERROR] ' + error);
+        socket.emit('failVerification');
       }
     );
   });

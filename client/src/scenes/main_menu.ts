@@ -4,6 +4,7 @@ import PlayButton from '../game/menu/buttons/play_button';
 import HollowShortButton from '../game/menu/buttons/hollow_short_button';
 import LoadingButton from '../game/menu/buttons/loading_button';
 import { connectToServer, waitForGame } from '../network/connection';
+import { notification } from '../handlers/toast';
 
 export default class MainMenu extends Phaser.Scene {
   constructor() {
@@ -34,9 +35,29 @@ export default class MainMenu extends Phaser.Scene {
     function handleCredentialResponse(response) {
       console.log('handling credentials')
       socket.emit('token', response.credential);  // send to game server for validation
-      // TODO: toast feedback for login result
     }
+
+    // Login result -------------------------
+    // New User
+    socket.once('accountCreated', () => {
+      notification(this, 'Account successfully created', 'We are now logging you in!');
+    });
+
+    // Existing User
     socket.once('loginSuccess', (response) => {
+      notification(this, 'Login success!', `Welcome back, ${response.name}!`);
+    });
+
+    // Generic failure messages -------------
+    socket.once('noPlayerData', (response) => {
+      notification(this, 'Oops!', `Something went wrong! We were unable to load/save your account for ${response.email}.`);
+    });
+
+    socket.once('failVerification', () => {
+      notification(this, 'Uh oh...', 'Your Google Identity sign-in has failed at the verification step.')
+    });
+
+    socket.once('removeSignInButton', (response) => {
       signInButton.destroy();
       // TODO: Convert into button for profile management
       this.add.text(1690, 80, response.name, {
