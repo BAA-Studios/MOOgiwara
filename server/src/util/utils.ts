@@ -26,8 +26,7 @@ export function identifyLeaderCard(cardId: string) {
 // TODO: swap the colour+animals for One Piece character names, and reduce length to 3
 const numberDictionary = NumberDictionary.generate({ length: 4 });
 const nameFormat: Config = {
-  dictionaries: [adjectives, colors, animals, numberDictionary],
-  length: 4,
+  dictionaries: [adjectives, animals, numberDictionary],
   separator: '',
   style: 'capital',
 };
