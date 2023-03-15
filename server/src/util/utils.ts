@@ -1,5 +1,5 @@
 import { Vector } from 'js-sdsl';
-import { uniqueNamesGenerator, NumberDictionary, Config, adjectives, colors, animals } from 'unique-names-generator';
+import { uniqueNamesGenerator, NumberDictionary, Config, adjectives, animals } from 'unique-names-generator';
 // @ts-ignore
 import cardMetadata from '../cards/metadata.json' assert { type: 'json' };
 

@@ -132,12 +132,12 @@ io.on('connection', (socket: Socket) => {
           });
           await playerData.save();
           console.debug(`Unregistered user ${value?.email} encountered! Saving to DB...`);
-          player.sendNotification('We are now logging you in!', 0x00ff00);
+          player.sendNotification('Account created!', 0x00ff00);
         } else {  // Existing user:
           // Fetch player data
           playerData = await db.fetchPlayerDataByEmail(value?.email);
           if (playerData != undefined) {
-            player.sendNotification(`Welcome back! ${value?.fullName}`, 0x00ff00);
+            player.sendNotification(`Welcome back, ${value?.fullName}!`, 0x00ff00);
           }
         }
 

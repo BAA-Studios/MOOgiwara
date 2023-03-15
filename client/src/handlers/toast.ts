@@ -6,13 +6,13 @@ export function notification(scene: Phaser.Scene, description: string, color: nu
     popup.fillRoundedRect(0, 0, 600, 70, 18);
     popup.setPosition(685, -200);
 
-    let desc = scene.add.text(705, -200, description);
+    let desc = scene.add.text(985, -200, description);
     desc.setStyle({
-        fontSize: '24px',
+        fontSize: '26px',
         fontFamily: 'Merriweather',
         color: '#000000',
       });
-    desc.setOrigin(0, 0);
+    desc.setOrigin(0.5);
 
     // let icon = scene.add.image(800, 540, iconPath);
     let closeButton = scene.add.text(1220, -200, "X");
@@ -34,15 +34,15 @@ export function notification(scene: Phaser.Scene, description: string, color: nu
                 targets: popup,
                 y: -200,
                 ease: 'Power1',
-                duration: 600,
-                delay: 2000,
+                duration: 700,
+                delay: 1000,
             });
         }
     });
 
     scene.tweens.add({
         targets: desc,
-        y: 22,
+        y: 35,
         ease: 'Power1',
         duration: 600,
         repeat: 0,
@@ -51,8 +51,8 @@ export function notification(scene: Phaser.Scene, description: string, color: nu
                 targets: desc,
                 y: -200,
                 ease: 'Power1',
-                duration: 600,
-                delay: 2000,
+                duration: 700,
+                delay: 1000,
             });
         }
     });
