@@ -11,6 +11,7 @@ import { verify } from './util/jwt';
 import { Vector } from 'js-sdsl';
 import { IPlayerData, PlayerData } from './database/player_data_model';
 import { getRandomName } from './util/utils';
+// import logger from './util/logger';
 
 const app: Express = express();
 const server = createServer(app);
