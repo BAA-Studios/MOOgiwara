@@ -1,4 +1,5 @@
 import { Vector } from 'js-sdsl';
+import { uniqueNamesGenerator, NumberDictionary, Config, adjectives, colors, animals } from 'unique-names-generator';
 // @ts-ignore
 import cardMetadata from '../cards/metadata.json' assert { type: 'json' };
 
@@ -19,4 +20,22 @@ export function shuffle(vector: Vector<any>): void {
 export function identifyLeaderCard(cardId: string) {
   const card = cardMetadata[cardId];
   return card['Category'] === 'LEADER';
+}
+
+// Name generation logic for guests 
+// TODO: swap the colour+animals for One Piece character names, and reduce length to 3
+const numberDictionary = NumberDictionary.generate({ length: 4 });
+const nameFormat: Config = {
+  dictionaries: [adjectives, colors, animals, numberDictionary],
+  length: 4,
+  separator: '',
+  style: 'capital',
+};
+
+/**
+ * This function generates a random name.
+ * @returns A string, containing a unique name, e.g. "FluffyWhiteCat6969"
+ */
+export function getRandomName(): string {
+  return uniqueNamesGenerator(nameFormat);
 }

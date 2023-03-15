@@ -27,7 +27,8 @@
     "mongoose": "^7.0.0",
     "nodemon": "^2.0.20",
     "shuffle-array": "^1.0.1",
-    "socket.io": "^4.5.4"
+    "socket.io": "^4.5.4",
+    "unique-names-generator": "^4.7.1"
   },
   "author": "BAA Studios",
   "license": "AGPL v3"

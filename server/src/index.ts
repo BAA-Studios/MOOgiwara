@@ -10,6 +10,7 @@ import * as db from './database/connection';
 import { verify } from './util/jwt';
 import { Vector } from 'js-sdsl';
 import { IPlayerData, PlayerData } from './database/player_data_model';
+import { getRandomName } from './util/utils';
 
 const app: Express = express();
 const server = createServer(app);
@@ -64,6 +65,31 @@ function findMatch(socketId: string): string {
   return openGame;
 }
 
+function startGame(lobbyId: string): void {
+  const game = games.get(lobbyId);
+  if (game?.isFull()) {
+    // Start the game
+    const playerWhoStartsFirst = Math.floor(Math.random() * 2) + 1;
+    game.whoseTurn = playerWhoStartsFirst;
+    game.playerOne?.client.emit('start', {
+      name: game.playerOne.username,
+      opponentName: game.playerTwo?.username,
+      lobbyId: lobbyId,
+      deckList: testDeck,
+      opponentDeckList: testDeck
+    });
+    game.playerTwo?.client.emit('start', {
+      username: game.playerTwo.username,
+      opponentName: game.playerOne?.username,
+      lobbyId: lobbyId,
+      deckList: testDeck,
+      opponentDeckList: testDeck
+    });
+    game.start();
+    console.log("[LOG] Game started: " + lobbyId);
+  }
+}
+
 function startQueuing(player: Player): void {
   console.log(`[LOG] User: ${player.playerId ? player.playerId : player.socketId} has started queuing`);
   const lobbyId = findMatch(player.socketId);
@@ -73,28 +99,11 @@ function startQueuing(player: Player): void {
   game?.push(player);
   player.game = game;
 
-  if (game?.isFull()) {
-    // Start the game
-    const playerWhoStartsFirst = Math.floor(Math.random() * 2) + 1;
-    game.whoseTurn = playerWhoStartsFirst;
-    game.playerOne?.client.emit('start', {
-      lobbyId: lobbyId,
-      deckList: testDeck,
-      opponentDeckList: testDeck
-    });
-    game.playerTwo?.client.emit('start', {
-      lobbyId: lobbyId,
-      deckList: testDeck,
-      opponentDeckList: testDeck
-    });
-    game.start();
-    console.log("[LOG] Game started: " + lobbyId);
-  }
-  
   if (!player.username) {  // guests' usernames are not initialised
-    // insert code to automatically generate names for guest:
-    player.username = `Guest ${player.socketId}`  // temporary until we set up name generation
+    player.setUsername(getRandomName());  // insert code to automatically generate names for guests
   }
+
+  startGame(lobbyId);
 }
 
 io.on('connection', (socket: Socket) => {
@@ -181,11 +190,11 @@ io.on('connection', (socket: Socket) => {
     );
     if (game?.bothPlayersMulliganed()) {
       game?.broadcastPacket("mulliganDone", {});
-      const personWhoGoesFirst = game?.getPlayer(game.whoseTurn)?.client.id;
+      const personWhoGoesFirst: Player | undefined = game?.getPlayer(game.whoseTurn);
       game?.broadcastChat(
-        "Server: Game started! \nPlayer " + personWhoGoesFirst + " goes first."
+        `Server: Game started! \nPlayer ${personWhoGoesFirst?.username ?? 'Unknown User'} goes first.`
       );
-      game?.sendChangeTurnPacket(personWhoGoesFirst);
+      game?.sendChangeTurnPacket(personWhoGoesFirst?.client.id);
     }
   });
 
