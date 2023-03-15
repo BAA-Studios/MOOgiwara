@@ -63,7 +63,7 @@ export default class Player {
   */
   initListeners() {
     this.client.on("drawCard", (amount: number, callback) => {
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to draw ${amount} card(s)`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to draw ${amount} card(s)`);
       this.drawCard(amount);
 
       callback({
@@ -79,7 +79,7 @@ export default class Player {
 
     this.client.on("drawDon", (data) => {
       let amount = data.amount;
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to draw ${amount} Don!!`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to draw ${amount} Don!!`);
       if (this.donDeck.size() === 0) { 
         return;
       }
@@ -90,34 +90,34 @@ export default class Player {
     });
 
     this.client.on("shuffleHandToDeck", () => {
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to shuffle hand to deck`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to shuffle hand to deck`);
       this.shuffleHandToDeck();
     });
 
     this.client.on('shuffleDeck', () => {
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to shuffle deck`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to shuffle deck`);
       this.deck.shuffle();
     });
 
     this.client.on('endTurn', () => {
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to end turn`);
-      this.game?.broadcastChat(`${this.playerId ? this.playerId : this.socketId} ended their turn.`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to end turn`);
+      this.game?.broadcastChat(`${this.username ?? this.socketId} ended their turn.`);
       this.game?.changeTurn();
     });
 
     this.client.on('playCard', (data) => {
       let cardPlayed = this.hand.get(data.index);
       if (cardPlayed === undefined) {
-        console.log(`[ERROR] Player ${this.playerId ? this.playerId : this.socketId} tried to play a card that doesn't exist`);
+        console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to play a card that doesn't exist`);
         return;
       }
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to play card ${cardPlayed.name}`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to play card ${cardPlayed.name}`);
       // send card to the card engine to determine how it should be played.
       playCard(this, cardPlayed);
       });
 
     this.client.on('refreshPhase', () => {
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to refresh their board (Refresh Phase))`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to refresh their board (Refresh Phase))`);
       // Check the game if it is the player's turn
       if (!this.game?.playersTurn(this)) {
         return;
@@ -162,7 +162,7 @@ export default class Player {
 
     this.client.on("deckCount", (_, callback: Function) => {
       let count = this.deck.size();
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to know the size of their deck`)
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to know the size of their deck`)
       callback(count);
     });
 
@@ -175,11 +175,11 @@ export default class Player {
       }
 
       if (!cardAttachedTo) {
-        console.log(`[ERROR] Player ${this.playerId ? this.playerId : this.socketId} tried to attach a don to a card that doesn't exist`);
+        console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to attach a don to a card that doesn't exist`);
         return;
       }
 
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to attach a Don!! to character ${cardAttachedTo?.name}`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to attach a Don!! to character ${cardAttachedTo?.name}`);
       // Remove the last unrested don from the don area
       for (let i = this.donArea.size() - 1; i >= 0; i--) {
         let don = this.donArea.get(i);
@@ -208,26 +208,26 @@ export default class Player {
       let cardInHand = this.hand.get(cardindexInContainer);
 
       if (this.characterArea.size() !== 5) {
-        console.log(`[ERROR] Player ${this.playerId ? this.playerId : this.socketId} tried to retire a card when they don't have 5 cards in play`);
+        console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to retire a card when they don't have 5 cards in play`);
         return;
       }
 
       if (!cardInHand) {
-        console.log(`[ERROR] Player ${this.playerId ? this.playerId : this.socketId} tried to replace a card with a card that doesn't exist`);
+        console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to replace a card with a card that doesn't exist`);
         return;
       }
 
       if (!cardRetired) {
-        console.log(`[ERROR] Player ${this.playerId ? this.playerId : this.socketId} tried to replace a card that doesn't exist`);
+        console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to replace a card that doesn't exist`);
         return;
       }
 
       if (cardInHand.isEventCard()) {
-        console.log(`[ERROR] Player ${this.playerId ? this.playerId : this.socketId} tried to replace a card with an event card`);
+        console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to replace a card with an event card`);
         return;
       }
 
-      console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to retire character: "${cardRetired?.name}" with character: "${cardInHand?.name}"`);
+      console.log(`[INFO] Player ${this.username ?? this.socketId} requested to retire character: "${cardRetired?.name}" with character: "${cardInHand?.name}"`);
       // Remove the card from player's hand
       this.hand.remove(cardInHand);
       // Insert this card into the character area
@@ -264,13 +264,13 @@ export default class Player {
       cardDefendingisLeader: boolean,
       cardDefendingIndex: number,
       sendBlockerIndex: Function) => {
-        console.log(`[INFO] Player ${this.playerId ? this.playerId : this.socketId} requested to initiate an attack on card ${cardDefendingIndex}`);
+        console.log(`[INFO] Player ${this.username ?? this.socketId} requested to initiate an attack on card ${cardDefendingIndex}`);
         let cardDefending = this.game?.getOpponent(this)?.leader;
         if (!cardDefendingisLeader) {
           cardDefending = this.game?.getOpponent(this)?.characterArea.get(cardDefendingIndex);
         }
         if (!cardDefending) {
-          console.log(`[ERROR] Player ${this.playerId ? this.playerId : this.socketId} tried to initiate an attack on a card that doesn't exist`);
+          console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to initiate an attack on a card that doesn't exist`);
           return;
         }
 
@@ -278,7 +278,7 @@ export default class Player {
         if (!cardAttackingisLeader) {
           let cardAttacking = this.characterArea.get(cardAttackingIndex);
           if (!cardAttacking) {
-            console.log(`[ERROR] Player ${this.playerId ? this.playerId : this.socketId} tried to initiate an attack with a card that doesn't exist`);
+            console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to initiate an attack with a card that doesn't exist`);
             return;
           }
           cardAttacking.isResting = true;
@@ -302,7 +302,7 @@ export default class Player {
           }
           let cardDefending = opponent?.characterArea.get(blockerIndex);
           if (!cardDefending) {
-            console.log(`[ERROR] Player ${opponent?.playerId ? opponent.playerId : opponent?.socketId} tried to block an attack with a card that doesn't exist`);
+            console.log(`[ERROR] Player ${opponent?.username ?? opponent?.socketId} tried to block an attack with a card that doesn't exist`);
             return;
           }
           cardDefending.isResting = true;

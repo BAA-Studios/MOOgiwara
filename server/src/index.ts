@@ -79,7 +79,7 @@ function startGame(lobbyId: string): void {
       opponentDeckList: testDeck
     });
     game.playerTwo?.client.emit('start', {
-      username: game.playerTwo.username,
+      name: game.playerTwo.username,
       opponentName: game.playerOne?.username,
       lobbyId: lobbyId,
       deckList: testDeck,
@@ -91,17 +91,17 @@ function startGame(lobbyId: string): void {
 }
 
 function startQueuing(player: Player): void {
-  console.log(`[LOG] User: ${player.playerId ? player.playerId : player.socketId} has started queuing`);
-  const lobbyId = findMatch(player.socketId);
-  player.setLobbyId(lobbyId);
-  const game = games.get(lobbyId);
-  console.log(`[LOG] USER: ${player.playerId ? player.playerId : player.socketId} joined game: ${lobbyId}`);
-  game?.push(player);
-  player.game = game;
-
   if (!player.username) {  // guests' usernames are not initialised
     player.setUsername(getRandomName());  // insert code to automatically generate names for guests
   }
+
+  console.log(`[LOG] User: ${player.username} has started queuing`);
+  const lobbyId = findMatch(player.socketId);
+  player.setLobbyId(lobbyId);
+  const game = games.get(lobbyId);
+  console.log(`[LOG] USER: ${player.username} joined game: ${lobbyId}`);
+  game?.push(player);
+  player.game = game;
 
   startGame(lobbyId);
 }
@@ -186,7 +186,7 @@ io.on('connection', (socket: Socket) => {
     player.mulligan = true;
     player.setLifeCards();
     console.log(
-      '[INFO] Player ' + player.client.id + ' mulliganed: ' + data.mulligan
+      `[INFO] Player ${player.username} mulliganed: ${data.mulligan}`
     );
     if (game?.bothPlayersMulliganed()) {
       game?.broadcastPacket("mulliganDone", {});
@@ -212,9 +212,6 @@ io.on('connection', (socket: Socket) => {
     // Find the lobby that the players are in
     const game = games.get(data.lobbyId);
     // Send both players the message
-    console.log(game?.playerOne?.client.id);
-    console.log(game?.playerTwo?.client.id);
-    console.log("Socket ID: " + socket.id);
     game?.broadcastChat(data.message);
   });
 

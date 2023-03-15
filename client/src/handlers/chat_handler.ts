@@ -98,6 +98,7 @@ export default class ChatHandler {
       message = lines.join('\n');
     }
 
+    console.debug(`Player: ${this.scene.player}; ${this.scene.player.username}`);
     this.scene.client.emit('chatMessage', {
       message: this.scene.player.username + ': ' + message,
       lobbyId: this.scene.lobbyId,
