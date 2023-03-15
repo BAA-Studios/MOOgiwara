@@ -32,6 +32,10 @@ const nameFormat: Config = {
   style: 'capital',
 };
 
+/**
+ * This function generates a random name.
+ * @returns A string, containing a unique name, e.g. "FluffyWhiteCat6969"
+ */
 export function getRandomName(): string {
   return uniqueNamesGenerator(nameFormat);
 }
