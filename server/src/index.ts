@@ -188,12 +188,11 @@ io.on('connection', (socket: Socket) => {
     );
     if (game?.bothPlayersMulliganed()) {
       game?.broadcastPacket("mulliganDone", {});
-      
-      const personWhoGoesFirst: string = game?.getPlayer(game.whoseTurn)?.username ?? 'Unknown User';
+      const personWhoGoesFirst: Player | undefined = game?.getPlayer(game.whoseTurn);
       game?.broadcastChat(
-        `Server: Game started! \nPlayer ${personWhoGoesFirst} goes first.`
+        `Server: Game started! \nPlayer ${personWhoGoesFirst?.username ?? 'Unknown User'} goes first.`
       );
-      game?.sendChangeTurnPacket(personWhoGoesFirst);
+      game?.sendChangeTurnPacket(personWhoGoesFirst?.client.id);
     }
   });
 
