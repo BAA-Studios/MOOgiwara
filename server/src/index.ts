@@ -14,7 +14,11 @@ import { getRandomName } from './util/utils';
 // import logger from './util/logger';
 
 const app: Express = express();
+
+app.use(express.static('../client/dist'));
+
 const server = createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -107,10 +111,15 @@ function startQueuing(player: Player): void {
   startGame(lobbyId);
 }
 
+app.get('/', (req, res) => {
+  console.log(req);
+  res.sendFile("../client/dist/index.html");
+});
+
 io.on('connection', (socket: Socket) => {
   const userId = socket.id; // temporary - to convert this to database PK if not guest
   console.log(`[LOG] User: ${userId} connected`);
-  users.pushBack(userId); // TODO: Remove on disconnect - might need to use Set instead of Array?
+  users.pushBack(userId);
   let player: Player = new Player(socket, socket.id, testDeck);
   let game: Game;
   let lobbyId: string;
