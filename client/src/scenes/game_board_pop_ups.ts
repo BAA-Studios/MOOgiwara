@@ -169,7 +169,7 @@ export function displayMulliganSelection(scene: GameBoard) {
         if (scene.player.playerState !== PlayerState.MULLIGAN) {
           return;
         }
-        scene.client.emit("onMulligan", {
+        scene.player.client.emit("onMulligan", {
           lobbyId: scene.lobbyId,
           mulligan: "keep",
         });
@@ -180,7 +180,7 @@ export function displayMulliganSelection(scene: GameBoard) {
         );
       })
     );
-    scene.client.on('mulliganDone', () => {
+    scene.player.client.on('mulliganDone', () => {
       rect.destroy();
       mulliganText.destroy();
       mulliganButton.destroy();

@@ -158,7 +158,7 @@ export default class GameHandler {
     });
 
     // CURRENTLY DOES NOTHING
-    this.client.on("drawDon", (data: any) => {
+    this.client.on("drawDon", () => {
       const donCard = new Card(this.player, this.scene, "donCardAltArt");
       donCard.setOrigin(0, 0);
       donCard.setScale(0.16);
@@ -173,9 +173,9 @@ export default class GameHandler {
       this.changeTurn(data);
     });
 
-    this.client.on('mulligan', (data: any) => {
+    this.client.on('mulligan', () => {
       this.player.requestDrawCard(this.scene, 5, () => {
-        this.mulligan(data);
+        this.mulligan();
       });
     });
 
@@ -448,7 +448,7 @@ export default class GameHandler {
       }).setOrigin(0.5, 0.5).setScale(0.01);
 
       let informativeText = this.scene.add.text(1920/2, 50, 
-      `Opponent is attacking your ${defendingCard.name}`, 
+      `Opponent is attacking your ${defendingCard.cardName}`, 
       {
         fontFamily: 'Merriweather',
         fontSize: "84px",
@@ -479,7 +479,7 @@ export default class GameHandler {
         this.player.characterArea.forEach((cardInField: Card) => {
           cardInField.unHighlightBounds();
         });
-        informativeText.setText(`Opponent is attacking your ${defendingCard?.name}`);
+        informativeText.setText(`Opponent is attacking your ${defendingCard?.cardName}`);
         informativeText.y = 50;
         skipBlockerButton.destroy();
       }));
@@ -513,7 +513,7 @@ export default class GameHandler {
               cardInField.unHighlightBounds();
             });
 
-            informativeText.setText(`Opponent is attacking your ${card.name}`);
+            informativeText.setText(`Opponent is attacking your ${card.cardName}`);
             informativeText.y = 50;
 
             this.player.setCounterPhase(this.scene);
@@ -580,7 +580,7 @@ export default class GameHandler {
     }
   }
 
-  mulligan(data: any) {
+  mulligan() {
     this.player.playerState = PlayerState.LOADING;
     displayMulliganSelection(this.scene);
   }
@@ -674,7 +674,7 @@ export default class GameHandler {
         if (Phaser.Geom.Rectangle.Contains(characterCard.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
           res = true;
           this.player.playerState = PlayerState.LOADING;
-          console.log("Don!! Attachment to card:", characterCard.name);
+          console.log("Don!! Attachment to card:", characterCard.cardName);
           this.player.attachDon(this.scene, card, characterCard);
         }
       });
@@ -682,7 +682,7 @@ export default class GameHandler {
         if (Phaser.Geom.Rectangle.Contains(this.player.leader.getBounds(), this.scene.input.mousePointer.x, this.scene.input.mousePointer.y)) {
           res = true;
           this.player.playerState = PlayerState.LOADING;
-          console.log("Don!! Attachment to card:", this.player.leader.name);
+          console.log("Don!! Attachment to card:", this.player.leader.cardName);
           this.player.attachDon(this.scene, card, this.player.leader);
         }
       }
@@ -839,7 +839,7 @@ export default class GameHandler {
           color: '#ff0000',
           backgroundColor: 'rgba(0,0,0,0.7)',
         });
-        informativeText.setText("Attacking " + cardToAttack.name + " for " + card.calculateTotalAttack() + " damage");
+        informativeText.setText("Attacking " + cardToAttack.cardName + " for " + card.calculateTotalAttack() + " damage");
         
         // Set the attacker to resting
         card.unHighlightBounds();
@@ -871,7 +871,7 @@ export default class GameHandler {
           blocker.rest();
 
           // Rewrite the informative text
-          informativeText.setText("Attacking " + blocker.name + " for " + card.calculateTotalAttack() + " damage");
+          informativeText.setText("Attacking " + blocker.cardName + " for " + card.calculateTotalAttack() + " damage");
         });
       }
     });

@@ -6,6 +6,8 @@
  */
 export function extractEmailFromToken(jwtToken): string {
     // TODO: find out the type for token
+    console.log(jwtToken);
+    return ""
 }
 
 /**
@@ -14,7 +16,8 @@ export function extractEmailFromToken(jwtToken): string {
  * @returns {boolean} True, if there is an existing account with this email address
  */
 export function isExistingAccount(email: string): boolean {
-
+    console.log(email);
+    return false;
 }
 
 /**
@@ -22,7 +25,7 @@ export function isExistingAccount(email: string): boolean {
  * @param email A gmail address, used as unique identifier
  */
 export function createNewAccount(email: string): void {
-
+    console.log(email);
 }
 
 /**
@@ -32,5 +35,5 @@ export function createNewAccount(email: string): void {
  * @param email A gmail address, used as unique identifier
  */
 export function login(email: string): void {
-
+    console.log(email);
 }

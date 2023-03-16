@@ -18,7 +18,7 @@ export default class UiHandler {
 
     backButton.setInteractive();
     backButton.on('pointerdown', () => {
-      this.scene.client.disconnect();
+      this.scene.player.client.disconnect();
       this.scene.scene.start('main-menu');
     });
 
@@ -51,7 +51,7 @@ export default class UiHandler {
       return;
     }
     this.scene.player.playerState = PlayerState.LOADING;
-    this.scene.client.emit("endTurn", { player: this.scene.player.getUniqueId() });
+    this.scene.player.client.emit("endTurn", { player: this.scene.player.getUniqueId() });
   };
 
   setEndButtonToAttack() {
