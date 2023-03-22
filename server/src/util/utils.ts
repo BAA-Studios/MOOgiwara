@@ -2,7 +2,6 @@ import { Vector } from 'js-sdsl';
 import { uniqueNamesGenerator, NumberDictionary, Config, adjectives, animals } from 'unique-names-generator';
 // @ts-ignore
 import cardMetadata from '../cards/metadata.json' assert { type: 'json' };
-import { Card } from '../game/card';
 
 /**
  * Shuffles a js-sdsl vector in-place, using Durstenfeld Shuffle
@@ -50,8 +49,8 @@ export function getRandomName(): string {
  * 
  * Colors are indicated by the following: r, blu, g, p, bla... SEE: card_color.ts
  */
-export function parseDeckString(deckString: string): Card[] {
-  return deckString.split(',').map((cardId) => new Card(cardId));
+export function parseDeckString(_: string): string[] {
+  return [];
 }
 
 /**
@@ -62,6 +61,6 @@ export function parseDeckString(deckString: string): Card[] {
  * Cards of a color not included on the Leader card cannot be added to your deck. 
  * Your deck can contain no more than 4 cards with the same card id. CardID = Set + "-" Card Number, e.g. "ST01-001"
  */
-export function isLegalDeck(deckString: string): boolean {
+export function isLegalDeck(_: string): boolean {
   return true;
 }
