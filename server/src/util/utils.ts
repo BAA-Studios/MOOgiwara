@@ -2,6 +2,7 @@ import { Vector } from 'js-sdsl';
 import { uniqueNamesGenerator, NumberDictionary, Config, adjectives, animals } from 'unique-names-generator';
 // @ts-ignore
 import cardMetadata from '../cards/metadata.json' assert { type: 'json' };
+import { Card } from '../game/card';
 
 /**
  * Shuffles a js-sdsl vector in-place, using Durstenfeld Shuffle
@@ -41,16 +42,42 @@ export function getRandomName(): string {
 
 /**
  * This function parses a deck_string into a list of Card Objects
- * Deck String format: `set`.`card_number`.`quantity`.`color`/
- * Cards that are alternate art are indicated by the following: `set_altNum`.`card_number`.`quantity`.`color`./
+ * Deck String format: `set`.`card_number`.`quantity`/
+ * Cards that are alternate art are indicated by the following: `set_altNum`.`card_number`.`quantity`./
  * 
  * A deck with a doflamingo leader and 4 perona alt arts would look like:
- * st03.009.1.blu/op01_1.077.4.blu/    
+ * st03.009.1/op01_1.077.4/
  * 
  * Colors are indicated by the following: r, blu, g, p, bla... SEE: card_color.ts
  */
-export function parseDeckString(_: string): string[] {
-  return [];
+export function parseDeckString(deckString: string): string[] {
+  let cards = deckString.split('/');
+  let result: string[] = [];
+  for (let card of cards) {
+    let cardInfo = card.split('.');
+
+    // the set identifier can look like: st03_1 where 1 is the altArtId
+    let setInfo = cardInfo[0].split('_');
+    let set = setInfo[0];
+    let altArtId = "";
+
+    if (setInfo.length > 1) {
+      altArtId = setInfo[1];
+    }
+
+    let cardNumber = cardInfo[1];
+    let cardId = set.toUpperCase() + '-' + cardNumber;
+    let quantity = cardInfo[2];
+
+    for (let i = 0; i < parseInt(quantity); i++) {
+      let cardToPush = cardId;
+      if (altArtId !== "") {
+        cardToPush += '_p' + altArtId;
+      }
+      result.push(cardToPush);
+    }
+  }
+  return result;
 }
 
 /**
@@ -63,4 +90,46 @@ export function parseDeckString(_: string): string[] {
  */
 export function isLegalDeck(_: string): boolean {
   return true;
+}
+
+/**
+* This function parses a list of Card Objects into a deck_string
+*/
+export function parseDeckToString(_: Card[]): string {
+  return ""
+}
+
+/**
+ * This function parses a list of cardIds into a deck_string
+ * Following the format: `set_altNum`.`card_number`.`quantity`.`color`/
+ * Example: st03_1.009.1/op01_1.077.4/
+ */
+export function parseCardListToString(deckList: string[]): string {
+  let result = "";
+  let visited: Set<string> = new Set();
+  for (let cardId of deckList) {
+    if (visited.has(cardId)) {
+      continue;
+    }
+    // cardID Example: ST01-001_p1, STO01-002
+    let cardInfo = cardId.split('-'); // ['ST01', '001_p1']
+    let set = cardInfo[0].toLowerCase();
+
+    let numbers = cardInfo[1].split('_'); // ['001', 'p1']
+    let cardNumber = numbers[0];
+    let altArtId = "";
+
+    if (numbers.length > 1) {
+      altArtId = numbers[1];
+    }
+    let quantity = deckList.filter((id) => id === cardId).length;
+
+    result += set;
+    if (altArtId !== "") {
+      result += '_' + altArtId;
+    }
+    result += '.' + cardNumber + '.' + quantity + '/';
+    visited.add(cardId);
+  }
+  return result
 }

@@ -80,15 +80,15 @@ function startGame(lobbyId: string): void {
       name: game.playerOne.username,
       opponentName: game.playerTwo?.username,
       lobbyId: lobbyId,
-      deckList: testDeck,
-      opponentDeckList: testDeck
+      deckList: testDeck["blue"],
+      opponentDeckList: testDeck["blue"]
     });
     game.playerTwo?.client.emit('start', {
       name: game.playerTwo.username,
       opponentName: game.playerOne?.username,
       lobbyId: lobbyId,
-      deckList: testDeck,
-      opponentDeckList: testDeck
+      deckList: testDeck["blue"],
+      opponentDeckList: testDeck["blue"]
     });
     game.start();
     console.log("[LOG] Game started: " + lobbyId);
@@ -120,7 +120,7 @@ io.on('connection', (socket: Socket) => {
   const userId = socket.id; // temporary - to convert this to database PK if not guest
   console.log(`[LOG] User: ${userId} connected`);
   users.pushBack(userId);
-  let player: Player = new Player(socket, socket.id, testDeck);
+  let player: Player = new Player(socket, socket.id, testDeck["blue"]);
   let game: Game;
   let lobbyId: string;
 
