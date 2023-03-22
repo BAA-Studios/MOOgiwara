@@ -9,7 +9,6 @@ export default class Card extends Phaser.GameObjects.Image {
   cardId: string;
   gameBoard: GameBoard;
   objectId: number = 0;
-  name: string;
   description: string;
   cost: number;
   attack: number;
@@ -47,7 +46,7 @@ export default class Card extends Phaser.GameObjects.Image {
     // TODO: Sanity checks as not all cards may have these attributes and may show up as undefined
     this.category = cardMetadata[cardId]['Category']; // All caps as per the API
     // Allocate the properties based off the cardID from the metadata
-    this.name = cardMetadata[cardId]['Name'];
+    this.cardName = cardMetadata[cardId]['Name'];
     this.description = cardMetadata[cardId]['Effect'];
     this.cost = cardMetadata[cardId]['Cost'];
     this.attack = parseInt(cardMetadata[cardId]['Power']);
@@ -65,7 +64,7 @@ export default class Card extends Phaser.GameObjects.Image {
     this.dragY = 0;
 
     this.isDragging = false;
-    this.isDonCard = this.name == "Don!!";
+    this.isDonCard = this.cardName == "Don!!";
     this.summoningSickness = false;
 
     this.textOnCard = this.scene.add.text(this.x, this.y, '').setVisible(false);
@@ -206,7 +205,7 @@ export default class Card extends Phaser.GameObjects.Image {
     if (draggable) {
       this.scene.input.setDraggable(this);
 
-      this.scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+      this.scene.input.on('drag', (_, gameObject, dragX, dragY) => {
         if (gameObject.owner.playerState != PlayerState.MAIN_PHASE) {
           return;
         }

@@ -17,15 +17,14 @@ export function waitForGame(scene: Phaser.Scene, io: Socket) {
   io.emit('queue');
   io.on('start', (data) => {
     // TODO: Initialise the player's and opponent's decks given from the server
-    const player = new Player(data.name, data.lobbyId);
-    const opponent = new Player(data.opponentName, data.lobbyId);
+    const player = new Player(data.name, data.lobbyId, io);
+    const opponent = new Player(data.opponentName, data.lobbyId, io); // Passing the client to the opponent even though it's not used
     console.debug(data);
 
     // TODO: Initialise the player's and opponent's decks given from the server
     scene.scene.start('game-board', {
       player: player,
       opponent: opponent,
-      client: io,
       deckList: data.deckList,
       opponentDeckList: data.opponentDeckList,
     });

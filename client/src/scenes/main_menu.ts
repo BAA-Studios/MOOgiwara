@@ -13,7 +13,7 @@ export default class MainMenu extends Phaser.Scene {
 
   // TODO: https://blog.ourcade.co/posts/2020/phaser-3-google-fonts-webfontloader/
   preload() {
-    this.load.html('signin', './src/login/signin.html');
+    this.load.html('signin', './html/signin.html');
     this.load.image('tallButton', './buttons/Tall Button.png');
     this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
     this.load.image('loading', './images/mugiwara_logo_temp.png');
@@ -28,7 +28,7 @@ export default class MainMenu extends Phaser.Scene {
     // Sign In With Google -------------------------------------------
     // Inject button div
     const signInButton: Phaser.GameObjects.DOMElement = this.add
-      .dom(1690, 80)
+      .dom(275, 950)
       .createFromCache('signin').setOrigin(0.5);
     
     // Handle Google's response
@@ -46,7 +46,7 @@ export default class MainMenu extends Phaser.Scene {
     socket.once('removeSignInButton', (response) => {
       signInButton.destroy();
       // TODO: Convert into button for profile management
-      this.add.text(1690, 80, response.name, {
+      this.add.text(210, 950, response.name, {
         fontFamily: 'Georgia',
         fontSize: '28px',
         color: '#222',

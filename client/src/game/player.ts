@@ -3,6 +3,7 @@ import Card from "./card";
 import { Vector } from "js-sdsl";
 import { displayTrash } from "../scenes/game_board_pop_ups";
 import CounterStack from "./counter_stack";
+import { Socket } from "socket.io-client";
 
 export enum PlayerState {
   LOADING,
@@ -19,7 +20,7 @@ export enum PlayerState {
 }
 
 export default class Player {
-  client: any;
+  client: Socket;
   username: string;
   lobbyId: number;
   playerState: PlayerState;
@@ -31,7 +32,7 @@ export default class Player {
   donArea: Vector<Card>;
   lifeCards: Vector<Card>; // These will be filled with blank cards, players only need to know the quantity of life cards left
 
-  constructor(username: string, lobbyId: number) {
+  constructor(username: string, lobbyId: number, client: Socket) {
     this.username = username;
     this.deck = new Vector<Card>();
     this.hand = new Vector<Card>();
@@ -41,6 +42,7 @@ export default class Player {
     this.lifeCards = new Vector<Card>();
     this.lobbyId = lobbyId;
     this.playerState = PlayerState.LOADING;
+    this.client = client;
   }
 
   addToFrontOfHand(card: Card) {
@@ -257,7 +259,7 @@ export default class Player {
     }
   }
 
-  setToRetireState(scene: GameBoard) {
+  setToRetireState() {
     this.playerState = PlayerState.RETIRE;
     // Give every card in the player's character area a red lined border
     for (let i = 0; i < this.characterArea.size(); i++) {
@@ -301,7 +303,7 @@ export default class Player {
   retireCard(card: Card) {
     // Move the card to where the leader area would be
     let scene = card.gameBoard
-    this.setToRetireState(scene);
+    this.setToRetireState();
     scene.uiHandler.setEndButtonToRetire();
     scene.tweens.add({
       targets: card,
