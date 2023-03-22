@@ -114,7 +114,7 @@ export default class Player {
       console.log(`[INFO] Player ${this.username ?? this.socketId} requested to play card ${cardPlayed.name}`);
       // send card to the card engine to determine how it should be played.
       playCard(this, cardPlayed);
-      });
+    });
 
     this.client.on('refreshPhase', () => {
       console.log(`[INFO] Player ${this.username ?? this.socketId} requested to refresh their board (Refresh Phase))`);

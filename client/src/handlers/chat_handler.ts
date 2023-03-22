@@ -7,6 +7,7 @@ export default class ChatHandler {
   textInput: Phaser.GameObjects.DOMElement;
   chat: Phaser.GameObjects.Text;
   chatIndex: number // This is the number the chat is rendered from and beyond
+  enterKey: Phaser.Input.Keyboard.Key;
 
   constructor(scene: GameBoard) {
     this.scene = scene;
@@ -16,14 +17,19 @@ export default class ChatHandler {
       lineSpacing: 15,
       backgroundColor: '#FFFFFF',
       color: '#000000',
-      padding: 10,
       fontStyle: 'bold',
     });
+    this.chat.padding.top = 10;
+    this.chat.padding.left = 10;
+    this.chat.padding.right = 10;
     this.chatIndex = 0;
     this.chat.setFixedSize(400, 750).setInteractive();
+    this.enterKey = this.scene.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ENTER
+    );
 
     // Make it so the chat is scrollable
-    this.chat.on('wheel', (pointer, gameObject, dx, dy, dz) => {
+    this.chat.on('wheel', (_, __, dx: number, ___: number, ____: number) => {
       if (this.messages.length <= 24) { // Max number of messages that can be rendered
         return;
       }
@@ -42,7 +48,7 @@ export default class ChatHandler {
       this.chat.setText(this.returnTextToRender());
     });
 
-    this.scene.client.on('chatMessage', (data: any) => {
+    this.scene.player.client.on('chatMessage', (data: any) => {
       console.log(data.message);
       let messageArray = data.message.split('\n');
       for (let i = 0; i < messageArray.length; i++) {
@@ -56,11 +62,7 @@ export default class ChatHandler {
   }
 
   initChat = () => {
-    this.enterKey = this.scene.input.keyboard.addKey(
-      Phaser.Input.Keyboard.KeyCodes.ENTER
-    );
-
-    this.enterKey.on('down', (event) => {
+    this.enterKey.on('down', () => {
       this.onEnterMessage();
     });
 
@@ -74,7 +76,7 @@ export default class ChatHandler {
   };
 
   onEnterMessage = () => {
-    const chatbox = this.textInput.getChildByName("chat");
+    const chatbox = (<HTMLInputElement>this.textInput.getChildByName("chat"));
     if (chatbox === null) {
       return;
     }
@@ -85,7 +87,7 @@ export default class ChatHandler {
     const copyMessage = message;
     chatbox.value = '';
 
-    const maxLength = 34;
+    const maxLength = 33;
     const lines: string[] = [];
 
     while (message.length >= maxLength) {
@@ -99,7 +101,7 @@ export default class ChatHandler {
     }
 
     console.debug(`Player: ${this.scene.player}; ${this.scene.player.username}`);
-    this.scene.client.emit('chatMessage', {
+    this.scene.player.client.emit('chatMessage', {
       message: this.scene.player.username + ': ' + message,
       lobbyId: this.scene.lobbyId,
     });

@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
-import Player, { PlayerState } from '../game/player';
+import Player from '../game/player';
 import GameHandler from '../handlers/game_handler';
 import UiHandler from '../handlers/ui_handler';
 import ChatHandler from '../handlers/chat_handler';
-import { Socket } from 'socket.io-client';
 import Card from '../game/card';
 import { displayCardInHigherRes } from './game_board_pop_ups';
 import { identifyLeaderCard } from '../utility/util';
@@ -14,28 +13,32 @@ export default class GameBoard extends Phaser.Scene {
   player: Player;
   opponent: Player;
   chatHandler: ChatHandler;
-  client: Socket;
-  lobbyId: number;
-  deckList: string[];
-  opponentDeckList: string[];
+  lobbyId: number = -1;
+  deckList: string[] = [];
+  opponentDeckList: string[] = [];
 
   constructor() {
     super('game-board');
+    this.gameHandler = null;
+    this.uiHandler = null;
+    this.chatHandler = null;
+
+    this.player = null;
+    this.opponent = null;
+
   }
 
   init(data: any) {
     this.player = data.player;
     this.opponent = data.opponent;
-    this.client = data.client;
     this.lobbyId = this.player.lobbyId;
     this.deckList = data.deckList;
     this.opponentDeckList = data.opponentDeckList;
-    this.player.client = this.client;
   }
 
   preload() {
     this.load.image('background', './images/game_board.png');
-    this.load.html('chatbox', './src/game/chat/chat.html');
+    this.load.html('chatbox', './html/chat.html');
     this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
     this.load.image('standardButton', './buttons/Standard Button.png');
     this.load.image('loading', './images/mugiwara_logo_temp.png');
@@ -122,10 +125,10 @@ export default class GameBoard extends Phaser.Scene {
       this,
       this.player,
       this.opponent,
-      this.client
+      this.player.client
     );
 
-    this.client.emit("boardFullyLoaded", { lobbyId: this.lobbyId });
+    this.player.client.emit("boardFullyLoaded", { lobbyId: this.lobbyId });
 
     this.gameHandler.initListeners();
   }
