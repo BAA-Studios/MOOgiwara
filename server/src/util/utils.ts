@@ -2,6 +2,7 @@ import { Vector } from 'js-sdsl';
 import { uniqueNamesGenerator, NumberDictionary, Config, adjectives, animals } from 'unique-names-generator';
 // @ts-ignore
 import cardMetadata from '../cards/metadata.json' assert { type: 'json' };
+import { Card } from '../game/card';
 
 /**
  * Shuffles a js-sdsl vector in-place, using Durstenfeld Shuffle
@@ -37,4 +38,30 @@ const nameFormat: Config = {
  */
 export function getRandomName(): string {
   return uniqueNamesGenerator(nameFormat);
+}
+
+/**
+ * This function parses a deck_string into a list of Card Objects
+ * Deck String format: `set`.`card_number`.`quantity`.`color`/
+ * Cards that are alternate art are indicated by the following: `set_altNum`.`card_number`.`quantity`.`color`./
+ * 
+ * A deck with a doflamingo leader and 4 perona alt arts would look like:
+ * st03.009.1.blu/op01_1.077.4.blu/    
+ * 
+ * Colors are indicated by the following: r, blu, g, p, bla... SEE: card_color.ts
+ */
+export function parseDeckString(deckString: string): Card[] {
+  return deckString.split(',').map((cardId) => new Card(cardId));
+}
+
+/**
+ * Official Deck Ruling from Manual: 
+ * 
+ * A deck with a total of 50 cards, made up of Character cards, Event cards, and Stage cards. 
+ * Your deck can only contain cards of a color included on the Leader card. 
+ * Cards of a color not included on the Leader card cannot be added to your deck. 
+ * Your deck can contain no more than 4 cards with the same card id. CardID = Set + "-" Card Number, e.g. "ST01-001"
+ */
+export function isLegalDeck(deckString: string): boolean {
+  return true;
 }
