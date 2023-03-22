@@ -120,7 +120,7 @@ export function parseCardListToString(deckList: string[]): string {
     let altArtId = "";
 
     if (numbers.length > 1) {
-      altArtId = numbers[1];
+      altArtId = numbers[1][1];
     }
     let quantity = deckList.filter((id) => id === cardId).length;
 
