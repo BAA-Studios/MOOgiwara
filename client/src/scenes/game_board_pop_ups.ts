@@ -61,19 +61,25 @@ export function displayCardInHigherRes(scene: Phaser.Scene, card: Card) {
       ease: 'Power1',
   });
 
+  // Don cards can't have don attached to them
+  if(card.isDonCard) {
+    donAttachedBox.setVisible(false);
+    donAttachedText.setVisible(false);
+  }
+
   let donRendered: Phaser.GameObjects.Image[] = [];
   // Render the Don!! card under the donAttachedBox
 
   for (let i = 0; i < card.donAttached.size(); i++) {
-    let don = scene.add.image(1190 + (i * 60), 380, 'donCardAltArt').setScale(0.01).setOrigin(0, 0);
-    donRendered.push(don);
-    scene.add.tween({
-      targets: don,
-      scaleX: 0.16,
-      scaleY: 0.16,
-      duration: 250,
-      ease: 'Power1',
-  });
+      let don = scene.add.image(1190 + (i * 60), 380, 'donCardAltArt').setScale(0.01).setOrigin(0, 0);
+      donRendered.push(don);
+      scene.add.tween({
+        targets: don,
+        scaleX: 0.16,
+        scaleY: 0.16,
+        duration: 250,
+        ease: 'Power1',
+    });
   }
 
   // Set the text in the middle of the donAttachedBox
@@ -88,6 +94,22 @@ export function displayCardInHigherRes(scene: Phaser.Scene, card: Card) {
       donRendered[i].destroy();
     }
   });
+}
+
+export function displayHoveredCard(scene: Phaser.Scene, card: Card) {
+  const cardImg = scene.add
+    .image(256, 825, card.cardId)
+    .setScale(0.01)
+    .setOrigin(0.5, 0.5)
+    .setInteractive();
+  scene.add.tween({
+      targets: cardImg,
+      scaleX: 0.55,
+      scaleY: 0.55,
+      duration: 150,
+      ease: 'Power1',
+  });
+  return [cardImg];
 }
 
 // This will display a screen that asks the user if they want to mulligan given their hand

@@ -4,6 +4,7 @@ import cardMetadata from '../cards/metadata.json';
 import { displayCardInHigherRes } from "../scenes/game_board_pop_ups";
 import { PlayerState } from "./player";
 import { Vector } from "js-sdsl";
+import CardHoverEvent from "../cards/card_hover_event";
 
 export default class Card extends Phaser.GameObjects.Image {
   cardId: string;
@@ -31,6 +32,7 @@ export default class Card extends Phaser.GameObjects.Image {
   donAttached: Vector<Card> = new Vector<Card>; // Cards that are attached to this card
   isInHand: boolean;
   isBlocker: boolean;
+  hoverEvent: CardHoverEvent = new CardHoverEvent(this);
 
   constructor(
     owner: Player,
@@ -227,6 +229,7 @@ export default class Card extends Phaser.GameObjects.Image {
         if (!this.isDraggable()) {
           return;
         }
+        this.hoverEvent.cleanUp();
         // Unhighlight any zones
         this.gameBoard.gameHandler.unHighlightValidZones(this);
 
@@ -255,10 +258,13 @@ export default class Card extends Phaser.GameObjects.Image {
     // Adding/Removing a highlight when players hover over a card in their hand
     this.on('pointerover', () => {
       this.setTint(0xbebebe);
+      // When hovering over a certain amount of time, display the card in a higher resolution
+      this.hoverEvent.startHoverEvent();
     });
 
     this.on('pointerout', () => {
       this.clearTint();
+      this.hoverEvent.cleanUp();
     });
 
     // Setting the location of where the card should return if its not played or released
