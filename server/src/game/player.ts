@@ -179,6 +179,12 @@ export default class Player {
         return;
       }
 
+      // Check if player has enough don in the don area to attach
+      if (this.donArea.size() === 0) {
+        console.log(`[ERROR] Player ${this.username ?? this.socketId} tried to attach a don to a card but they don't have any don in their don area`);
+        return;
+      }
+
       console.log(`[INFO] Player ${this.username ?? this.socketId} requested to attach a Don!! to character ${cardAttachedTo?.name}`);
       // Remove the last unrested don from the don area
       for (let i = this.donArea.size() - 1; i >= 0; i--) {
@@ -307,9 +313,9 @@ export default class Player {
           }
           cardDefending.isResting = true;
           this.game?.broadcastChat(`${opponent?.username} blocked the attack\nwith card "${cardDefending.name}"`);
+          console.log(`[INFO] Player ${opponent?.username ?? opponent?.socketId} blocked the attack with card ${cardDefending.name}`);
           sendBlockerIndex(blockerIndex);
         });
-
     });
   }
 
