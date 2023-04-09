@@ -4,6 +4,7 @@ export default class DeckManager extends Phaser.Scene {
     }
 
     preload() {
+        document.body.style.backgroundImage = '';
     }
 
     create() {

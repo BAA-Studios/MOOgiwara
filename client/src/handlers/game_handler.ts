@@ -49,7 +49,7 @@ export default class GameHandler {
     // Each container represents an area on the board, we can use to render cards and other game objects
     // TODO: separate all coordinates to a constant file
     this.playerCharacterArea = this.scene.add.container(720, 555);
-    this.opponentCharacterArea = this.scene.add.container(720, 392);
+    this.opponentCharacterArea = this.scene.add.container(720, 394);
 
     this.playerHandArea = this.scene.add.container(515, 996).setInteractive();
     this.opponentHandArea = this.scene.add.container(515, -123);

@@ -37,7 +37,7 @@ export default class GameBoard extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('background', './images/game_board.png');
+    this.load.image('background', './images/moogiwara_board.png');
     this.load.html('chatbox', './html/chat.html');
     this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
     this.load.image('standardButton', './buttons/Standard Button.png');
@@ -46,6 +46,9 @@ export default class GameBoard extends Phaser.Scene {
     this.load.image('donCardAltArt', './cards/donCardAltArt.png');
     this.load.image('moogiwara', './images/MOOgiwara.png');
     this.load.image('whiteMoreRoundedButton', './buttons/White More Rounded Square.png');
+
+    document.body.style.backgroundImage = 'url(./images/woodtexture.png)';
+    
 
     const cardsToRender = new Set(this.deckList);
     const opponentCardsToRender = new Set(this.opponentDeckList);

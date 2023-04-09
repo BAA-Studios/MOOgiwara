@@ -17,6 +17,8 @@ export default class MainMenu extends Phaser.Scene {
     this.load.image('tallButton', './buttons/Tall Button.png');
     this.load.image('hollowShortButton', './buttons/Hollow Short Button.png');
     this.load.image('loading', './images/mugiwara_logo_temp.png');
+
+    document.body.style.backgroundImage = '';
   }
 
   // TODO: Groupings + dynamic relative coordinate resolution
